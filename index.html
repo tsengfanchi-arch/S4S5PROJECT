@@ -7,353 +7,131 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-/* ─── 設計語彙：工業精密感 ─────────────────────── */
 :root {
-  --cyan:       #23c1d7;
-  --cyan-dark:  #1a9eb0;
-  --cyan-dim:   rgba(35,193,215,0.12);
-  --navy:       #003087;
-  --navy-light: #0a3d9f;
-  --bg:         #f4f6f9;
-  --surface:    #ffffff;
-  --border:     rgba(0,48,135,0.12);
-  --border-em:  rgba(35,193,215,0.4);
-  --text:       #1a2233;
-  --text-muted: #556080;
-  --text-hint:  #8a96b0;
-  --accent-r:   #e05c3a;
-  --accent-g:   #27ae7a;
-  --tag-h:      36px;
-  --radius:     6px;
-  --radius-lg:  10px;
-  --shadow-sm:  0 1px 4px rgba(0,48,135,0.08);
-  --shadow-md:  0 4px 16px rgba(0,48,135,0.12);
-  --font:       "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-  --mono:       "IBM Plex Mono", monospace;
+  --navy:      #003087;
+  --navy2:     #004aad;
+  --cyan:      #1ab3cc;
+  --cyan-light:#e6f7fa;
+  --cyan-mid:  #b3e6f0;
+  --white:     #ffffff;
+  --bg:        #eef4fb;
+  --border:    #c2d6ee;
+  --text:      #0a1f44;
+  --text-sub:  #3a5a8a;
+  --text-hint: #7a98bf;
+  --red:       #d94f2b;
+  --green:     #1e8c5a;
+  --radius:    4px;
+  --radius-lg: 8px;
+  --font:      "Noto Sans TC","Microsoft JhengHei",sans-serif;
+  --mono:      "IBM Plex Mono",monospace;
+  --shadow:    0 2px 10px rgba(0,48,135,0.10);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);font-family:var(--font);color:var(--text);font-size:15px;line-height:1.6;letter-spacing:0.4px;min-height:100vh;}
+a{color:inherit;text-decoration:none;}
 
-/* ─── Reset ─────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  font-family: var(--font);
-  color: var(--text);
-  font-size: 15px;
-  line-height: 1.6;
-  letter-spacing: 0.5px;
-  min-height: 100vh;
-}
+/* ── Header ── */
+header{background:var(--navy);position:relative;overflow:hidden;z-index:10;}
 
-a { color: inherit; text-decoration: none; }
+/* 六角形裝飾 */
+.hex-deco{position:absolute;right:0;top:0;height:100%;display:flex;align-items:center;gap:-10px;padding-right:20px;opacity:0.18;}
+.hex{width:60px;height:69px;background:var(--cyan);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);margin:0 -8px;}
+.hex.sm{width:40px;height:46px;background:#fff;}
+.hex.lg{width:80px;height:92px;}
 
-/* ─── 背景紋理（工程格線感） ─────────────────── */
-body::before {
-  content: "";
-  position: fixed; inset: 0;
-  background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-  z-index: 0;
-}
+.header-inner{max-width:1280px;margin:0 auto;padding:26px 40px 22px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:relative;z-index:1;}
 
-/* ─── Header ─────────────────────────────────────── */
-header {
-  position: relative;
-  background: var(--navy);
-  z-index: 10;
-  overflow: hidden;
-}
-header::after {
-  content: "";
-  position: absolute; bottom: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--cyan), var(--navy-light), var(--cyan));
-}
-.header-inner {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 28px 40px 24px;
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.header-badge {
-  background: var(--cyan);
-  color: #fff;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  padding: 4px 10px;
-  border-radius: 3px;
-  text-transform: uppercase;
-  align-self: flex-start;
-  margin-top: 4px;
-}
-.header-titles { flex: 1; min-width: 280px; }
-.header-titles h1 {
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 500;
-  letter-spacing: 1px;
-  opacity: 0.85;
-  margin-bottom: 6px;
-}
-.header-titles h2 {
-  color: var(--cyan);
-  font-size: 1.65rem;
-  font-weight: 700;
-  letter-spacing: 6px;
-}
-.header-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-end;
-}
-.meta-item {
-  display: flex; align-items: center; gap: 6px;
-  color: rgba(255,255,255,0.55);
-  font-size: 12px;
-  font-family: var(--mono);
-}
-.meta-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent-g);
-  animation: pulse 2.5s infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity:1; } 50% { opacity: 0.3; }
-}
+/* 左側色塊標題 */
+.header-title-block{flex:1;min-width:280px;}
+.header-tag{display:inline-block;background:var(--cyan);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:3px 12px;margin-bottom:10px;}
+.header-title-block h1{color:rgba(255,255,255,0.75);font-size:0.95rem;font-weight:400;letter-spacing:1px;margin-bottom:5px;}
+.header-title-block h2{color:#fff;font-size:1.6rem;font-weight:700;letter-spacing:5px;border-left:4px solid var(--cyan);padding-left:14px;}
 
-/* ─── 搜尋列 ─────────────────────────────────────── */
-.search-bar-wrap {
-  position: sticky; top: 0; z-index: 50;
-  background: rgba(244,246,249,0.95);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 40px;
-}
-.search-bar-inner {
-  max-width: 1280px; margin: 0 auto;
-  display: flex; align-items: center; gap: 12px;
-  flex-wrap: wrap;
-}
-.search-input-wrap {
-  position: relative; flex: 1; min-width: 200px;
-}
-.search-icon {
-  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-  color: var(--text-hint); font-size: 15px; pointer-events: none;
-}
-#searchInput {
-  width: 100%;
-  height: 40px;
-  padding: 0 12px 0 38px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  font-family: var(--font);
-  font-size: 14px;
-  color: var(--text);
-  outline: none;
-  transition: border-color .2s;
-}
-#searchInput:focus { border-color: var(--cyan); }
-#searchInput::placeholder { color: var(--text-hint); }
+.header-meta{display:flex;flex-direction:column;gap:5px;align-items:flex-end;}
+.meta-row{display:flex;align-items:center;gap:7px;color:rgba(255,255,255,0.5);font-size:12px;font-family:var(--mono);}
+.dot-live{width:7px;height:7px;border-radius:50%;background:#3ddc84;animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.25;}}
 
-.filter-tags {
-  display: flex; gap: 6px; flex-wrap: wrap;
-}
-.filter-tag {
-  height: var(--tag-h);
-  padding: 0 14px;
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  font-size: 13px; font-family: var(--font);
-  color: var(--text-muted);
-  cursor: pointer; transition: all .2s;
-  white-space: nowrap;
-}
-.filter-tag:hover, .filter-tag.active {
-  border-color: var(--cyan);
-  background: var(--cyan-dim);
-  color: var(--navy);
-}
-.search-count {
-  font-family: var(--mono); font-size: 12px;
-  color: var(--text-hint); white-space: nowrap;
-  margin-left: auto;
-}
+/* 底部青色線 */
+header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--cyan),var(--navy2),var(--cyan));}
 
-/* ─── 主容器 ─────────────────────────────────────── */
-.main {
-  position: relative; z-index: 1;
-  max-width: 1280px; margin: 0 auto;
-  padding: 32px 40px 100px;
-  display: flex; flex-direction: column; gap: 36px;
-}
+/* ── 搜尋列 ── */
+.search-wrap{position:sticky;top:0;z-index:50;background:rgba(238,244,251,0.97);backdrop-filter:blur(6px);border-bottom:2px solid var(--border);padding:10px 40px;}
+.search-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.s-box{position:relative;flex:1;min-width:180px;}
+.s-box span{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text-hint);pointer-events:none;}
+#searchInput{width:100%;height:38px;padding:0 12px 0 36px;border:2px solid var(--border);border-radius:var(--radius);background:#fff;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+#searchInput:focus{border-color:var(--cyan);}
+#searchInput::placeholder{color:var(--text-hint);}
+.ftags{display:flex;gap:6px;flex-wrap:wrap;}
+.ftag{height:34px;padding:0 14px;border:2px solid var(--border);border-radius:var(--radius);background:#fff;font-size:13px;font-family:var(--font);color:var(--text-sub);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.ftag:hover,.ftag.active{border-color:var(--navy);background:var(--navy);color:#fff;}
+.s-count{font-family:var(--mono);font-size:12px;color:var(--text-hint);white-space:nowrap;margin-left:auto;}
 
-/* ─── 區塊標題 ────────────────────────────────────── */
-.section-header {
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 16px;
-}
-.section-num {
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  color: var(--cyan); letter-spacing: 1px;
-  background: var(--cyan-dim);
-  padding: 3px 8px; border-radius: 3px;
-}
-.section-title {
-  font-size: 1.05rem; font-weight: 700;
-  color: var(--navy); letter-spacing: 2px;
-}
+/* ── 主容器 ── */
+.main{max-width:1280px;margin:0 auto;padding:28px 40px 100px;display:flex;flex-direction:column;gap:32px;}
 
-/* ─── 卡片格線 ────────────────────────────────────── */
-.cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 14px;
-}
+/* ── 區塊標題 ── */
+.section-header{display:flex;align-items:stretch;gap:0;margin-bottom:14px;}
+.sec-bar{width:6px;background:var(--cyan);border-radius:3px;flex-shrink:0;}
+.sec-label{background:var(--navy);color:#fff;font-size:0.9rem;font-weight:700;letter-spacing:3px;padding:8px 20px;display:flex;align-items:center;gap:10px;}
+.sec-num{font-family:var(--mono);font-size:11px;background:var(--cyan);padding:2px 8px;border-radius:2px;letter-spacing:1px;}
+.sec-line{flex:1;border-bottom:2px solid var(--border);align-self:flex-end;margin-bottom:9px;}
 
-/* ─── 主卡片（一層） ─────────────────────────────── */
-.card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all .25s ease;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  cursor: pointer;
-}
-.card:hover {
-  border-color: var(--cyan);
-  box-shadow: var(--shadow-md), inset 3px 0 0 var(--cyan);
-  transform: translateY(-2px);
-}
-.card.external-link:hover { cursor: pointer; }
-.card-body {
-  padding: 18px 20px;
-  flex: 1;
-  display: flex; align-items: center; gap: 14px;
-}
-.card-icon {
-  width: 38px; height: 38px;
-  border-radius: 8px;
-  background: var(--cyan-dim);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  flex-shrink: 0;
-}
-.card-info { flex: 1; min-width: 0; }
-.card-name {
-  font-size: 0.95rem; font-weight: 700;
-  color: var(--navy); letter-spacing: 1px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.card-desc {
-  font-size: 12px; color: var(--text-hint);
-  margin-top: 2px;
-}
-.card-arrow {
-  color: var(--border-em); font-size: 14px; flex-shrink: 0;
-  transition: transform .2s;
-}
-.card:hover .card-arrow { transform: translateX(3px); color: var(--cyan); }
+/* ── 卡片格線 ── */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
 
-/* ─── 展開式卡片 ─────────────────────────────────── */
-.card-expandable .card-body { cursor: pointer; }
-.card-expand-icon {
-  font-size: 14px; color: var(--text-hint);
-  transition: transform .25s;
-}
-.card.open .card-expand-icon { transform: rotate(180deg); }
-.card-sub {
-  display: none;
-  border-top: 1px solid var(--border);
-  padding: 12px 16px;
-  background: var(--bg);
-  display: none;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.card.open .card-sub { display: flex; }
-.sub-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px;
-  border-radius: var(--radius);
-  border: 1.5px solid var(--border);
-  background: var(--surface);
-  font-size: 13px; font-weight: 500; color: var(--navy);
-  cursor: pointer; transition: all .2s;
-  white-space: nowrap;
-}
-.sub-chip:hover {
-  border-color: var(--cyan); background: var(--cyan-dim);
-}
-.sub-chip.missing {
-  border-style: dashed; color: var(--text-hint);
-  cursor: default; pointer-events: none;
-}
-.sub-chip .chip-icon { font-size: 12px; }
+/* ── 卡片 ── */
+.card{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);transition:all .22s ease;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;}
+.card:hover{border-color:var(--navy);box-shadow:0 4px 20px rgba(0,48,135,0.18);transform:translateY(-2px);}
+.card-body{padding:16px 18px;flex:1;display:flex;align-items:center;gap:12px;}
+.card-icon{width:40px;height:40px;border-radius:var(--radius);background:var(--cyan-light);border:1.5px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-size:0.93rem;font-weight:700;color:var(--navy);letter-spacing:0.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-desc{font-size:11.5px;color:var(--text-hint);margin-top:2px;}
+.card-arrow{color:var(--border);font-size:13px;flex-shrink:0;transition:transform .2s,color .2s;}
+.card:hover .card-arrow{transform:translateX(4px);color:var(--navy);}
 
-/* ─── 缺失連結提示 ─────────────────────────────── */
-.missing-banner {
-  background: rgba(224, 92, 58, 0.06);
-  border: 1.5px dashed rgba(224, 92, 58, 0.35);
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  font-size: 13px; color: var(--text-muted);
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 4px;
-}
+/* 頂部藍色條 */
+.card::before{content:"";display:block;height:3px;background:var(--navy);opacity:0;transition:opacity .22s;}
+.card:hover::before{opacity:1;}
 
-/* ─── 狀態角標 ──────────────────────────────────── */
-.status-badge {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  padding: 2px 7px; border-radius: 3px; letter-spacing: 0.5px;
-}
-.badge-ok   { background: rgba(39,174,122,0.12); color: #1a7a55; }
-.badge-miss { background: rgba(224,92,58,0.12); color: #b04828; }
+/* ── 展開式 ── */
+.card-expand-icon{font-size:13px;color:var(--text-hint);transition:transform .25s;}
+.card.open .card-expand-icon{transform:rotate(180deg);}
+.card-sub{display:none;border-top:2px solid var(--border);padding:12px 14px;background:var(--bg);flex-wrap:wrap;gap:8px;}
+.card.open .card-sub{display:flex;}
+.sub-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:var(--radius);border:2px solid var(--border);background:#fff;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer;transition:all .18s;white-space:nowrap;}
+.sub-chip:hover{border-color:var(--navy);background:var(--navy);color:#fff;}
+.sub-chip.missing{border-style:dashed;color:var(--text-hint);cursor:default;pointer-events:none;}
+.sub-chip .chip-icon{font-size:12px;}
 
-/* ─── 搜尋無結果 ─────────────────────────────────── */
-.no-results {
-  display: none; text-align: center;
-  padding: 60px 20px;
-  color: var(--text-hint); font-size: 14px;
-}
+/* ── 배너 ── */
+.missing-banner{background:rgba(26,179,204,0.06);border:2px dashed var(--cyan-mid);border-radius:var(--radius);padding:9px 15px;font-size:13px;color:var(--text-sub);display:flex;align-items:center;gap:8px;margin-top:4px;}
 
-/* ─── 頁尾 ─────────────────────────────────────── */
-footer {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--cyan), var(--navy), var(--cyan));
-  z-index: 100;
-}
-.footer-bar-text {
-  position: fixed; bottom: 10px; right: 24px;
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text-hint); letter-spacing: 1px;
-}
+/* ── 뱃지 ── */
+.status-badge{font-family:var(--mono);font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:0.5px;white-space:nowrap;}
+.badge-ok{background:#e0f5ec;color:var(--green);border:1px solid #a8dfc4;}
+.badge-miss{background:#fef0ec;color:var(--red);border:1px solid #f5bfb0;}
 
-/* ─── 隱藏搜尋不符合的項目 ────────────────────── */
-.card.hidden { display: none; }
-section.hidden-section { display: none; }
+/* ── 無結果 ── */
+.no-results{display:none;text-align:center;padding:60px 20px;color:var(--text-hint);font-size:14px;}
 
-/* ─── 響應式 ─────────────────────────────────────── */
-@media (max-width: 768px) {
-  .header-inner { padding: 20px 20px 18px; }
-  .search-bar-wrap, .main { padding-left: 16px; padding-right: 16px; }
-  .header-meta { display: none; }
-  .header-titles h2 { font-size: 1.2rem; letter-spacing: 3px; }
+/* ── 頁尾 ── */
+footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradient(90deg,var(--cyan),var(--navy),var(--cyan));z-index:100;}
+.footer-bar-text{position:fixed;bottom:12px;right:24px;font-family:var(--mono);font-size:11px;color:var(--text-hint);}
+
+/* ── hidden ── */
+.card.hidden{display:none;}
+
+/* ── RWD ── */
+@media(max-width:768px){
+  .header-inner,.search-wrap,.main{padding-left:16px;padding-right:16px;}
+  .header-meta,.hex-deco{display:none;}
+  .header-title-block h2{font-size:1.1rem;letter-spacing:2px;}
+  .sec-label{font-size:0.8rem;padding:7px 14px;}
 }
 </style>
 </head>
@@ -361,35 +139,44 @@ section.hidden-section { display: none; }
 
 <!-- ══ Header ══════════════════════════════════════════ -->
 <header>
+  <div class="hex-deco">
+    <div class="hex sm"></div>
+    <div class="hex lg"></div>
+    <div class="hex"></div>
+    <div class="hex sm"></div>
+    <div class="hex lg"></div>
+    <div class="hex"></div>
+    <div class="hex sm"></div>
+  </div>
   <div class="header-inner">
-    <div class="header-badge">DMS v2.0</div>
-    <div class="header-titles">
+    <div class="header-title-block">
+      <div class="header-tag">文件管理系統 DMS</div>
       <h1>臺北港南碼頭C填區公共設施及永久護岸暨</h1>
-      <h2>S04–S05 碼頭工程文件管理系統</h2>
+      <h2>S04–S05 碼頭工程（含南一碼頭）</h2>
     </div>
     <div class="header-meta">
-      <div class="meta-item"><span class="meta-dot"></span>系統運作中</div>
-      <div class="meta-item" id="clock">──</div>
-      <div class="meta-item">含南一碼頭</div>
+      <div class="meta-row"><span class="dot-live"></span>系統運作中</div>
+      <div class="meta-row" id="clock">──</div>
+      <div class="meta-row">宇泰顧問 監造</div>
     </div>
   </div>
 </header>
 
 <!-- ══ 搜尋列 ════════════════════════════════════════════ -->
-<div class="search-bar-wrap">
-  <div class="search-bar-inner">
-    <div class="search-input-wrap">
-      <span class="search-icon">🔍</span>
+<div class="search-wrap">
+  <div class="search-inner">
+    <div class="s-box">
+      <span>🔍</span>
       <input type="text" id="searchInput" placeholder="搜尋文件類別…" autocomplete="off">
     </div>
-    <div class="filter-tags">
-      <button class="filter-tag active" data-filter="all">全部</button>
-      <button class="filter-tag" data-filter="admin">行政計畫</button>
-      <button class="filter-tag" data-filter="quality">施工品質</button>
-      <button class="filter-tag" data-filter="defect">缺失追蹤</button>
-      <button class="filter-tag" data-filter="safety">安衛環保</button>
+    <div class="ftags">
+      <button class="ftag active" data-filter="all">全部</button>
+      <button class="ftag" data-filter="admin">行政計畫</button>
+      <button class="ftag" data-filter="quality">施工品質</button>
+      <button class="ftag" data-filter="defect">缺失追蹤</button>
+      <button class="ftag" data-filter="safety">安衛環保</button>
     </div>
-    <span class="search-count" id="resultCount"></span>
+    <span class="s-count" id="resultCount"></span>
   </div>
 </div>
 
@@ -399,8 +186,9 @@ section.hidden-section { display: none; }
   <!-- 1. 行政與計畫管理 -->
   <section data-category="admin" id="sec-admin">
     <div class="section-header">
-      <span class="section-num">01</span>
-      <span class="section-title">行政與計畫管理</span>
+      <div class="sec-bar"></div>
+      <div class="sec-label"><span class="sec-num">01</span>行政與計畫管理</div>
+      <div class="sec-line"></div>
     </div>
     <div class="cards-grid">
 
@@ -491,8 +279,9 @@ section.hidden-section { display: none; }
   <!-- 2. 施工與材料品質控制 -->
   <section data-category="quality" id="sec-quality">
     <div class="section-header">
-      <span class="section-num">02</span>
-      <span class="section-title">施工與材料品質控制</span>
+      <div class="sec-bar"></div>
+      <div class="sec-label"><span class="sec-num">02</span>施工與材料品質控制</div>
+      <div class="sec-line"></div>
     </div>
     <div class="cards-grid">
 
@@ -528,8 +317,9 @@ section.hidden-section { display: none; }
   <!-- 3. 缺失與追蹤 -->
   <section data-category="defect" id="sec-defect">
     <div class="section-header">
-      <span class="section-num">03</span>
-      <span class="section-title">缺失與追蹤</span>
+      <div class="sec-bar"></div>
+      <div class="sec-label"><span class="sec-num">03</span>缺失與追蹤</div>
+      <div class="sec-line"></div>
     </div>
     <div class="cards-grid">
 
@@ -565,8 +355,9 @@ section.hidden-section { display: none; }
   <!-- 4. 安衛環保執行紀錄 -->
   <section data-category="safety" id="sec-safety">
     <div class="section-header">
-      <span class="section-num">04</span>
-      <span class="section-title">安衛環保執行紀錄</span>
+      <div class="sec-bar"></div>
+      <div class="sec-label"><span class="sec-num">04</span>安衛環保執行紀錄</div>
+      <div class="sec-line"></div>
     </div>
 
     <div class="missing-banner">
@@ -786,9 +577,9 @@ function applySearch() {
 
 document.getElementById('searchInput').addEventListener('input', applySearch);
 
-document.querySelectorAll('.filter-tag').forEach(function(btn) {
+document.querySelectorAll('.ftag').forEach(function(btn) {
   btn.addEventListener('click', function() {
-    document.querySelectorAll('.filter-tag').forEach(function(b){ b.classList.remove('active'); });
+    document.querySelectorAll('.ftag').forEach(function(b){ b.classList.remove('active'); });
     btn.classList.add('active');
     activeFilter = btn.dataset.filter;
     applySearch();
