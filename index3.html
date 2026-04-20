@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S04~S05 碼頭工程 · 文件管理系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ─── 設計語彙：工業精密感 ─────────────────────── */
+:root {
+  --cyan:       #23c1d7;
+  --cyan-dark:  #1a9eb0;
+  --cyan-dim:   rgba(35,193,215,0.12);
+  --navy:       #003087;
+  --navy-light: #0a3d9f;
+  --bg:         #f4f6f9;
+  --surface:    #ffffff;
+  --border:     rgba(0,48,135,0.12);
+  --border-em:  rgba(35,193,215,0.4);
+  --text:       #1a2233;
+  --text-muted: #556080;
+  --text-hint:  #8a96b0;
+  --accent-r:   #e05c3a;
+  --accent-g:   #27ae7a;
+  --tag-h:      36px;
+  --radius:     6px;
+  --radius-lg:  10px;
+  --shadow-sm:  0 1px 4px rgba(0,48,135,0.08);
+  --shadow-md:  0 4px 16px rgba(0,48,135,0.12);
+  --font:       "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --mono:       "IBM Plex Mono", monospace;
+}
+
+/* ─── Reset ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  font-family: var(--font);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+
+/* ─── 背景紋理（工程格線感） ─────────────────── */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Header ─────────────────────────────────────── */
+header {
+  position: relative;
+  background: var(--navy);
+  z-index: 10;
+  overflow: hidden;
+}
+header::after {
+  content: "";
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--cyan), var(--navy-light), var(--cyan));
+}
+.header-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 40px 24px;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+.header-badge {
+  background: var(--cyan);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.header-titles { flex: 1; min-width: 280px; }
+.header-titles h1 {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+.header-titles h2 {
+  color: var(--cyan);
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: 6px;
+}
+.header-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+.meta-item {
+  display: flex; align-items: center; gap: 6px;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-family: var(--mono);
+}
+.meta-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-g);
+  animation: pulse 2.5s infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity:1; } 50% { opacity: 0.3; }
+}
+
+/* ─── 搜尋列 ─────────────────────────────────────── */
+.search-bar-wrap {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(244,246,249,0.95);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 40px;
+}
+.search-bar-inner {
+  max-width: 1280px; margin: 0 auto;
+  display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap;
+}
+.search-input-wrap {
+  position: relative; flex: 1; min-width: 200px;
+}
+.search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--text-hint); font-size: 15px; pointer-events: none;
+}
+#searchInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px 0 38px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s;
+}
+#searchInput:focus { border-color: var(--cyan); }
+#searchInput::placeholder { color: var(--text-hint); }
+
+.filter-tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+}
+.filter-tag {
+  height: var(--tag-h);
+  padding: 0 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 13px; font-family: var(--font);
+  color: var(--text-muted);
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+}
+.filter-tag:hover, .filter-tag.active {
+  border-color: var(--cyan);
+  background: var(--cyan-dim);
+  color: var(--navy);
+}
+.search-count {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text-hint); white-space: nowrap;
+  margin-left: auto;
+}
+
+/* ─── 主容器 ─────────────────────────────────────── */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1280px; margin: 0 auto;
+  padding: 32px 40px 100px;
+  display: flex; flex-direction: column; gap: 36px;
+}
+
+/* ─── 區塊標題 ────────────────────────────────────── */
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.section-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  color: var(--cyan); letter-spacing: 1px;
+  background: var(--cyan-dim);
+  padding: 3px 8px; border-radius: 3px;
+}
+.section-title {
+  font-size: 1.05rem; font-weight: 700;
+  color: var(--navy); letter-spacing: 2px;
+}
+
+/* ─── 卡片格線 ────────────────────────────────────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 14px;
+}
+
+/* ─── 主卡片（一層） ─────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all .25s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+.card:hover {
+  border-color: var(--cyan);
+  box-shadow: var(--shadow-md), inset 3px 0 0 var(--cyan);
+  transform: translateY(-2px);
+}
+.card.external-link:hover { cursor: pointer; }
+.card-body {
+  padding: 18px 20px;
+  flex: 1;
+  display: flex; align-items: center; gap: 14px;
+}
+.card-icon {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  background: var(--cyan-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.card-info { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--navy); letter-spacing: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.card-desc {
+  font-size: 12px; color: var(--text-hint);
+  margin-top: 2px;
+}
+.card-arrow {
+  color: var(--border-em); font-size: 14px; flex-shrink: 0;
+  transition: transform .2s;
+}
+.card:hover .card-arrow { transform: translateX(3px); color: var(--cyan); }
+
+/* ─── 展開式卡片 ─────────────────────────────────── */
+.card-expandable .card-body { cursor: pointer; }
+.card-expand-icon {
+  font-size: 14px; color: var(--text-hint);
+  transition: transform .25s;
+}
+.card.open .card-expand-icon { transform: rotate(180deg); }
+.card-sub {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  background: var(--bg);
+  display: none;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.card.open .card-sub { display: flex; }
+.sub-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 13px; font-weight: 500; color: var(--navy);
+  cursor: pointer; transition: all .2s;
+  white-space: nowrap;
+}
+.sub-chip:hover {
+  border-color: var(--cyan); background: var(--cyan-dim);
+}
+.sub-chip.missing {
+  border-style: dashed; color: var(--text-hint);
+  cursor: default; pointer-events: none;
+}
+.sub-chip .chip-icon { font-size: 12px; }
+
+/* ─── 缺失連結提示 ─────────────────────────────── */
+.missing-banner {
+  background: rgba(224, 92, 58, 0.06);
+  border: 1.5px dashed rgba(224, 92, 58, 0.35);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 13px; color: var(--text-muted);
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 4px;
+}
+
+/* ─── 狀態角標 ──────────────────────────────────── */
+.status-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 3px; letter-spacing: 0.5px;
+}
+.badge-ok   { background: rgba(39,174,122,0.12); color: #1a7a55; }
+.badge-miss { background: rgba(224,92,58,0.12); color: #b04828; }
+
+/* ─── 搜尋無結果 ─────────────────────────────────── */
+.no-results {
+  display: none; text-align: center;
+  padding: 60px 20px;
+  color: var(--text-hint); font-size: 14px;
+}
+
+/* ─── 頁尾 ─────────────────────────────────────── */
+footer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--cyan), var(--navy), var(--cyan));
+  z-index: 100;
+}
+.footer-bar-text {
+  position: fixed; bottom: 10px; right: 24px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text-hint); letter-spacing: 1px;
+}
+
+/* ─── 隱藏搜尋不符合的項目 ────────────────────── */
+.card.hidden { display: none; }
+section.hidden-section { display: none; }
+
+/* ─── 響應式 ─────────────────────────────────────── */
+@media (max-width: 768px) {
+  .header-inner { padding: 20px 20px 18px; }
+  .search-bar-wrap, .main { padding-left: 16px; padding-right: 16px; }
+  .header-meta { display: none; }
+  .header-titles h2 { font-size: 1.2rem; letter-spacing: 3px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ Header ══════════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">DMS v2.0</div>
+    <div class="header-titles">
+      <h1>臺北港南碼頭C填區公共設施及永久護岸暨</h1>
+      <h2>S04–S05 碼頭工程文件管理系統</h2>
+    </div>
+    <div class="header-meta">
+      <div class="meta-item"><span class="meta-dot"></span>系統運作中</div>
+      <div class="meta-item" id="clock">──</div>
+      <div class="meta-item">含南一碼頭</div>
+    </div>
+  </div>
+</header>
+
+<!-- ══ 搜尋列 ════════════════════════════════════════════ -->
+<div class="search-bar-wrap">
+  <div class="search-bar-inner">
+    <div class="search-input-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="搜尋文件類別…" autocomplete="off">
+    </div>
+    <div class="filter-tags">
+      <button class="filter-tag active" data-filter="all">全部</button>
+      <button class="filter-tag" data-filter="admin">行政計畫</button>
+      <button class="filter-tag" data-filter="quality">施工品質</button>
+      <button class="filter-tag" data-filter="defect">缺失追蹤</button>
+      <button class="filter-tag" data-filter="safety">安衛環保</button>
+    </div>
+    <span class="search-count" id="resultCount"></span>
+  </div>
+</div>
+
+<!-- ══ 主內容 ════════════════════════════════════════════ -->
+<main class="main" id="mainContent">
+
+  <!-- 1. 行政與計畫管理 -->
+  <section data-category="admin" id="sec-admin">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">行政與計畫管理</span>
+    </div>
+    <div class="cards-grid">
+
+      <!-- 合約文件 -->
+      <a href="https://drive.google.com/drive/u/1/folders/1RdmqyDhBStbvtedcn1CCf8fKfuVHBFmr" target="_blank"
+         class="card external-link" data-name="合約文件" data-category="admin">
+        <div class="card-body">
+          <div class="card-icon">📋</div>
+          <div class="card-info">
+            <div class="card-name">合約文件</div>
+            <div class="card-desc">契約、附件、變更合約</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- 日月報表（展開） -->
+      <div class="card card-expandable" data-name="日月報表" data-category="admin" onclick="toggleCard(this)">
+        <div class="card-body">
+          <div class="card-icon">📅</div>
+          <div class="card-info">
+            <div class="card-name">日月報表</div>
+            <div class="card-desc">111年 ─ 116年各年度報表</div>
+          </div>
+          <span class="card-expand-icon">▾</span>
+        </div>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/1kWji4hX1YndMKJj4A_MU12DgPYs7VEFW" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>111年報表</a>
+          <a href="https://drive.google.com/drive/u/1/folders/15QccUvz4yIYLd2W9gLMLxIisUoU5CWg5" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>112年報表</a>
+          <a href="https://drive.google.com/drive/u/1/folders/16HrV8c1SqtP_xCcDCbswKnEU6vd3uAtl" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>113年報表</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1xibs3Bl1dMmf35msdS72-20Z4i8SGOeM" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>114年報表</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1rjDJdmc12pCIZVIP8NUAR9OzbzEpvm8w" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>115年報表</a>
+          <span class="sub-chip missing" title="連結待補齊"><span class="chip-icon">🔗</span>116年報表（待補連結）</span>
+        </div>
+      </div>
+
+      <!-- 往來文件 -->
+      <a href="https://drive.google.com/drive/u/1/folders/1dc8dCFmkgtJFnpIH-Tcmu6dyiFO0Y4fd" target="_blank"
+         class="card external-link" data-name="往來文件" data-category="admin">
+        <div class="card-body">
+          <div class="card-icon">✉️</div>
+          <div class="card-info">
+            <div class="card-name">往來文件</div>
+            <div class="card-desc">函文、公文、簽呈記錄</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <!-- 設計圖（展開） -->
+      <div class="card card-expandable" data-name="設計圖" data-category="admin" onclick="toggleCard(this)">
+        <div class="card-body">
+          <div class="card-icon">📐</div>
+          <div class="card-info">
+            <div class="card-name">設計圖</div>
+            <div class="card-desc">原始設計圖、變更設計</div>
+          </div>
+          <span class="card-expand-icon">▾</span>
+        </div>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/127pUqW9-Uemy9fMR69hCf1YuZnpd-BdO" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>原始設計圖</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1CwAEseTgNoQZ7Gk-IGefbs_wAfE6cikc" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>變更設計</a>
+        </div>
+      </div>
+
+      <!-- 各項計畫書（展開） -->
+      <div class="card card-expandable" data-name="各項計畫書 監造計畫 施工圖 施工計畫書" data-category="admin" onclick="toggleCard(this)">
+        <div class="card-body">
+          <div class="card-icon">📂</div>
+          <div class="card-info">
+            <div class="card-name">各項計畫書</div>
+            <div class="card-desc">監造、施工圖、施工計畫</div>
+          </div>
+          <span class="card-expand-icon">▾</span>
+        </div>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/1-9rW1E68gU5VsiVOZJurJrHnSJmVwC5g" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>監造計畫</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1UCWS09h_XelONttHYV63W3LCOBD2vIRr" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>施工圖</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1XSgELUOLQ39pWWp2ptAZbIMzitkzpCdZ" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>施工計畫書</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 2. 施工與材料品質控制 -->
+  <section data-category="quality" id="sec-quality">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">施工與材料品質控制</span>
+    </div>
+    <div class="cards-grid">
+
+      <a href="https://drive.google.com/drive/u/1/folders/16iNqTERt_CRSUBBOPTVpsIrLKZ1m_ziC" target="_blank"
+         class="card external-link" data-name="施工抽查" data-category="quality">
+        <div class="card-body">
+          <div class="card-icon">🔎</div>
+          <div class="card-info">
+            <div class="card-name">施工抽查</div>
+            <div class="card-desc">現場查驗、工序確認記錄</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="https://drive.google.com/drive/u/1/folders/1UC0UTYqZ7Ph2RsuEVxa8LAwun5QafVks" target="_blank"
+         class="card external-link" data-name="材料抽檢" data-category="quality">
+        <div class="card-body">
+          <div class="card-icon">🧪</div>
+          <div class="card-info">
+            <div class="card-name">材料抽檢</div>
+            <div class="card-desc">材料試驗、進場抽樣報告</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- 3. 缺失與追蹤 -->
+  <section data-category="defect" id="sec-defect">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">缺失與追蹤</span>
+    </div>
+    <div class="cards-grid">
+
+      <a href="https://drive.google.com/drive/u/1/folders/15lEoSFo4KacD17vgY34ozOy5ilX3Ub6s" target="_blank"
+         class="card external-link" data-name="品管缺失" data-category="defect">
+        <div class="card-body">
+          <div class="card-icon">⚠️</div>
+          <div class="card-info">
+            <div class="card-name">品管缺失</div>
+            <div class="card-desc">品質缺失通知、改善追蹤</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="https://drive.google.com/drive/u/1/folders/1dcUhjPuOTvYGjIN386-TeYScnjogbc-L" target="_blank"
+         class="card external-link" data-name="安衛缺失" data-category="defect">
+        <div class="card-body">
+          <div class="card-icon">🦺</div>
+          <div class="card-info">
+            <div class="card-name">安衛缺失</div>
+            <div class="card-desc">安全衛生缺失通知、扣款單</div>
+          </div>
+          <span class="status-badge badge-ok">已連結</span>
+          <span class="card-arrow">→</span>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- 4. 安衛環保執行紀錄 -->
+  <section data-category="safety" id="sec-safety">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">安衛環保執行紀錄</span>
+    </div>
+
+    <div class="missing-banner">
+      ✏️ 點擊任一「待補連結」項目可輸入 Google Drive 網址，儲存後即生效
+    </div>
+
+    <div class="cards-grid" style="margin-top:12px;">
+
+      <!-- 職安抽查表 -->
+      <div class="card" data-name="職安抽查表" data-category="safety" onclick="promptLink(this,'職安抽查表')">
+        <div class="card-body">
+          <div class="card-icon">🦺</div>
+          <div class="card-info"><div class="card-name">職安抽查表</div><div class="card-desc">職業安全衛生現場抽查記錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-01 -->
+      <div class="card" data-name="S-11-01 安衛環保定期查核紀錄表" data-category="safety" onclick="promptLink(this,'S-11-01安衛環保定期查核紀錄表')">
+        <div class="card-body">
+          <div class="card-icon">📋</div>
+          <div class="card-info"><div class="card-name">S-11-01 安衛環保定期查核紀錄表</div><div class="card-desc">定期查核表單存放位置</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-02 -->
+      <div class="card" data-name="S-11-02 安衛環保缺失改善通知單及改善紀錄" data-category="safety" onclick="promptLink(this,'S-11-02安衛環保缺失改善通知單及改善紀錄')">
+        <div class="card-body">
+          <div class="card-icon">📝</div>
+          <div class="card-info"><div class="card-name">S-11-02 安衛環保缺失改善通知單</div><div class="card-desc">缺失改善通知單及改善紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-03 -->
+      <div class="card" data-name="S-11-03 安衛環保扣款通知單" data-category="safety" onclick="promptLink(this,'S-11-03安衛環保扣款通知單')">
+        <div class="card-body">
+          <div class="card-icon">💸</div>
+          <div class="card-info"><div class="card-name">S-11-03 安衛環保扣款通知單</div><div class="card-desc">違規扣款紀錄及通知單</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-04 -->
+      <div class="card" data-name="S-11-04 工具箱會議紀錄" data-category="safety" onclick="promptLink(this,'S-11-04工具箱會議紀錄')">
+        <div class="card-body">
+          <div class="card-icon">🔧</div>
+          <div class="card-info"><div class="card-name">S-11-04 工具箱會議紀錄</div><div class="card-desc">施工前工具箱安全會議</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-05 -->
+      <div class="card" data-name="S-11-05 協議組織會議紀錄" data-category="safety" onclick="promptLink(this,'S-11-05協議組織會議紀錄')">
+        <div class="card-body">
+          <div class="card-icon">🏛️</div>
+          <div class="card-info"><div class="card-name">S-11-05 協議組織會議紀錄</div><div class="card-desc">承商協議組織定期會議</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-08 -->
+      <div class="card" data-name="S-11-08 其他 教育訓練及健康檢查" data-category="safety" onclick="promptLink(this,'S-11-08其他(教育訓練及健康檢查)')">
+        <div class="card-body">
+          <div class="card-icon">🎓</div>
+          <div class="card-info"><div class="card-name">S-11-08 教育訓練及健康檢查</div><div class="card-desc">人員訓練課程、健康檢查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-13 -->
+      <div class="card" data-name="S-11-13 勞安 環保 防汛 缺改目錄" data-category="safety" onclick="promptLink(this,'S-11-13勞安、環保、防汛、缺改目錄')">
+        <div class="card-body">
+          <div class="card-icon">🗂️</div>
+          <div class="card-info"><div class="card-name">S-11-13 勞安・環保・防汛・缺改目錄</div><div class="card-desc">綜合管理目錄索引</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-14 -->
+      <div class="card" data-name="S-11-14 颱風防汛資料" data-category="safety" onclick="promptLink(this,'S-11-14颱風防汛資料')">
+        <div class="card-body">
+          <div class="card-icon">🌀</div>
+          <div class="card-info"><div class="card-name">S-11-14 颱風防汛資料</div><div class="card-desc">颱風應變計畫、防汛紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-15 -->
+      <div class="card" data-name="S-11-15 公共工程生態檢核" data-category="safety" onclick="promptLink(this,'S-11-15公共工程生態檢核')">
+        <div class="card-body">
+          <div class="card-icon">🌿</div>
+          <div class="card-info"><div class="card-name">S-11-15 公共工程生態檢核</div><div class="card-desc">生態衝擊評估及改善記錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-16 -->
+      <div class="card" data-name="S-11-16 每月10日前登載 監造單位執行紀錄及施工安全資料表" data-category="safety" onclick="promptLink(this,'S-11-16每月10日前登載')">
+        <div class="card-body">
+          <div class="card-icon">📤</div>
+          <div class="card-info"><div class="card-name">S-11-16 每月10日前登載</div><div class="card-desc">監造單位執行紀錄及施工安全資料表</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-17 -->
+      <div class="card" data-name="S-11-17 2022年金安獎得獎簡報" data-category="safety" onclick="promptLink(this,'S-11-17 2022年金安獎得獎簡報')">
+        <div class="card-body">
+          <div class="card-icon">🏆</div>
+          <div class="card-info"><div class="card-name">S-11-17 2022年金安獎得獎簡報</div><div class="card-desc">金安獎得獎資料彙整</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-18 -->
+      <div class="card" data-name="S-11-18 施工品質及職安抽查缺失改善 主辦機關及上級" data-category="safety" onclick="promptLink(this,'S-11-18施工品質及職安抽查缺失改善(主辦機關及上級)')">
+        <div class="card-body">
+          <div class="card-icon">🔍</div>
+          <div class="card-info"><div class="card-name">S-11-18 施工品質及職安缺失改善</div><div class="card-desc">主辦機關及上級抽查缺失改善</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+      <!-- S-11-19 -->
+      <div class="card" data-name="S-11-19 承商每日施工前檢查表" data-category="safety" onclick="promptLink(this,'S-11-19承商每日施工前檢查表')">
+        <div class="card-body">
+          <div class="card-icon">✅</div>
+          <div class="card-info"><div class="card-name">S-11-19 承商每日施工前檢查表</div><div class="card-desc">每日開工前安全確認表單</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="no-results" id="noResults">
+    找不到符合「<span id="searchKeyword"></span>」的文件類別
+  </div>
+
+</main>
+
+<!-- 連結輸入對話框 -->
+<div id="linkModal" style="display:none; position:fixed; inset:0; background:rgba(0,48,135,0.35); z-index:200; align-items:center; justify-content:center;">
+  <div style="background:#fff; border-radius:12px; padding:28px 32px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+    <h3 id="modalTitle" style="font-size:1rem; color:#003087; margin-bottom:6px;"></h3>
+    <p style="font-size:13px; color:#556080; margin-bottom:16px;">請貼上 Google Drive 資料夾網址，按「儲存」後連結即生效（本次工作階段）。</p>
+    <input type="url" id="linkInput" placeholder="https://drive.google.com/drive/…"
+      style="width:100%; padding:10px 14px; border:1.5px solid #d0d8ea; border-radius:6px; font-size:14px; margin-bottom:16px; outline:none;">
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button onclick="closeModal()" style="padding:8px 20px; border:1.5px solid #d0d8ea; border-radius:6px; background:#fff; font-size:14px; cursor:pointer;">取消</button>
+      <button onclick="saveLink()" style="padding:8px 20px; border:none; border-radius:6px; background:#23c1d7; color:#fff; font-size:14px; font-weight:600; cursor:pointer;">儲存連結</button>
+    </div>
+  </div>
+</div>
+
+<footer></footer>
+<div class="footer-bar-text">S04–S05 DMS · 2025</div>
+
+<script>
+/* ─── 時鐘 ─────────────────────────────────── */
+function tick() {
+  var d = new Date();
+  document.getElementById('clock').textContent =
+    d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0') + ' ' +
+    String(d.getHours()).padStart(2,'0') + ':' +
+    String(d.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick, 30000);
+
+/* ─── 展開卡片 ─────────────────────────────── */
+function toggleCard(el) {
+  var allOpen = document.querySelectorAll('.card.open');
+  allOpen.forEach(function(c) { if (c !== el) c.classList.remove('open'); });
+  el.classList.toggle('open');
+}
+
+/* ─── 搜尋 & 篩選 ──────────────────────────── */
+var activeFilter = 'all';
+
+function updateCount() {
+  var visible = document.querySelectorAll('.card:not(.hidden)').length;
+  var total = document.querySelectorAll('.card').length;
+  document.getElementById('resultCount').textContent = visible + ' / ' + total + ' 項';
+}
+
+function applySearch() {
+  var q = document.getElementById('searchInput').value.trim().toLowerCase();
+  document.getElementById('searchKeyword').textContent = q;
+  var cards = document.querySelectorAll('.card');
+  var anyVisible = false;
+
+  cards.forEach(function(c) {
+    var name = (c.dataset.name || '').toLowerCase();
+    var cat  = c.dataset.category || '';
+    var matchQ = !q || name.includes(q);
+    var matchF = (activeFilter === 'all') || (cat === activeFilter);
+    if (matchQ && matchF) {
+      c.classList.remove('hidden'); anyVisible = true;
+    } else {
+      c.classList.add('hidden');
+    }
+  });
+
+  /* 若整個 section 下沒有可見卡片，隱藏 section */
+  document.querySelectorAll('main > section').forEach(function(sec) {
+    var vis = sec.querySelectorAll('.card:not(.hidden)').length;
+    sec.style.display = vis ? '' : 'none';
+  });
+
+  document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+  updateCount();
+}
+
+document.getElementById('searchInput').addEventListener('input', applySearch);
+
+document.querySelectorAll('.filter-tag').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-tag').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applySearch();
+  });
+});
+
+/* 點連結卡片（非展開式），攔截以避免 toggleCard 觸發 */
+document.querySelectorAll('a.card').forEach(function(a) {
+  a.addEventListener('click', function(e){ e.stopPropagation(); });
+});
+
+/* ─── 補連結功能 ────────────────────────────── */
+var _currentCard = null;
+var _cardLinks = {};
+
+function promptLink(el, name) {
+  _currentCard = el;
+  document.getElementById('modalTitle').textContent = '補齊連結：' + name;
+  document.getElementById('linkInput').value = _cardLinks[name] || '';
+  document.getElementById('linkModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('linkModal').style.display = 'none';
+  _currentCard = null;
+}
+
+function saveLink() {
+  var url = document.getElementById('linkInput').value.trim();
+  if (!url) { alert('請輸入有效網址'); return; }
+  if (_currentCard) {
+    var name = _currentCard.dataset.name;
+    _cardLinks[name] = url;
+    /* 將卡片轉為可點擊連結 */
+    _currentCard.onclick = function() { window.open(url, '_blank'); };
+    _currentCard.querySelector('.status-badge').textContent = '已連結';
+    _currentCard.querySelector('.status-badge').className = 'status-badge badge-ok';
+    _currentCard.querySelector('.card-arrow').textContent = '→';
+    _currentCard.querySelector('.card-arrow').style.color = '';
+  }
+  closeModal();
+}
+
+document.getElementById('linkModal').addEventListener('click', function(e){
+  if (e.target === this) closeModal();
+});
+
+/* 初始化計數 */
+updateCount();
+</script>
+</body>
+</html>
