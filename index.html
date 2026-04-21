@@ -139,7 +139,29 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
 </head>
 <body>
 
-<!-- ══ Header ══════════════════════════════════════════ -->
+<!-- ══ 登入畫面 ══════════════════════════════════════════ -->
+<div id="loginOverlay" style="position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:40px 44px;max-width:480px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;">
+    <div style="background:var(--cyan);color:#fff;font-size:11px;font-weight:700;letter-spacing:2px;padding:4px 14px;display:inline-block;margin-bottom:20px;">文件管理系統 DMS</div>
+    <h2 style="font-size:1.05rem;font-weight:700;color:var(--navy);line-height:1.6;letter-spacing:1px;margin-bottom:24px;">
+      臺北港南碼頭C填區公共設施及永久護岸暨<br>
+      S04–S05 碼頭工程（含南一碼頭）<br>
+      文件管理系統
+    </h2>
+    <div style="border-top:2px solid var(--border);padding-top:24px;">
+      <label style="display:block;font-size:13px;color:var(--text-sub);margin-bottom:8px;text-align:left;font-weight:600;">請輸入存取密碼</label>
+      <input type="password" id="pwdInput" placeholder="••••••••"
+        style="width:100%;height:44px;padding:0 16px;border:2px solid var(--border);border-radius:var(--radius);font-size:16px;font-family:var(--font);outline:none;margin-bottom:10px;letter-spacing:4px;"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <div id="pwdError" style="display:none;color:var(--red);font-size:13px;margin-bottom:10px;">密碼錯誤，請再試一次</div>
+      <button onclick="doLogin()"
+        style="width:100%;height:44px;background:var(--navy);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:700;font-family:var(--font);cursor:pointer;letter-spacing:2px;">
+        進入系統
+      </button>
+    </div>
+    <div style="margin-top:16px;font-size:11px;color:var(--text-hint);font-family:var(--mono);">宇泰顧問 監造 · S04–S05 DMS</div>
+  </div>
+</div>
 <header>
   <div class="hex-deco">
     <div class="hex sm"></div>
@@ -539,6 +561,20 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
 <div class="footer-bar-text">S04–S05 DMS · 2025</div>
 
 <script>
+/* ─── 登入驗證 ──────────────────────────────── */
+function doLogin() {
+  var pwd = document.getElementById('pwdInput').value;
+  if (pwd === '22428605') {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('pwdError').style.display = 'none';
+  } else {
+    document.getElementById('pwdError').style.display = 'block';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+document.getElementById('pwdInput').focus();
+
 /* ─── 時鐘 ─────────────────────────────────── */
 function tick() {
   var d = new Date();
