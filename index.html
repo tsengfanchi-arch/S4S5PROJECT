@@ -175,6 +175,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
       <button class="ftag" data-filter="quality">施工品質</button>
       <button class="ftag" data-filter="defect">缺失追蹤</button>
       <button class="ftag" data-filter="safety">安衛環保</button>
+      <button class="ftag" data-filter="highrisk" style="border-color:#f5bfb0;color:#d94f2b;">⚠ 高風險作業</button>
     </div>
     <span class="s-count" id="resultCount"></span>
   </div>
@@ -367,20 +368,20 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
     <div class="cards-grid" style="margin-top:12px;">
 
       <!-- 職安抽查表 -->
-      <div class="card" data-name="職安抽查表" data-category="safety" onclick="promptLink(this,'職安抽查表')">
+      <div class="card" data-name="監造單位抽查紀錄" data-category="safety" onclick="promptLink(this,'監造單位抽查紀錄')">
         <div class="card-body">
           <div class="card-icon">🦺</div>
-          <div class="card-info"><div class="card-name">職安抽查表</div><div class="card-desc">職業安全衛生現場抽查記錄</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-info"><div class="card-name">監造單位抽查紀錄</div><div class="card-desc">監造單位現場安全衛生抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
       <!-- S-11-01 -->
-      <div class="card" data-name="S-11-01 安衛環保定期查核紀錄表" data-category="safety" onclick="promptLink(this,'S-11-01安衛環保定期查核紀錄表')">
+      <div class="card" data-name="上級機關查核改善紀錄" data-category="safety" onclick="promptLink(this,'上級機關查核改善紀錄')">
         <div class="card-body">
           <div class="card-icon">📋</div>
-          <div class="card-info"><div class="card-name">S-11-01 安衛環保定期查核紀錄表</div><div class="card-desc">定期查核表單存放位置</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-info"><div class="card-name">上級機關查核改善紀錄</div><div class="card-desc">上級機關查核缺失及改善追蹤</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
@@ -429,21 +430,12 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </div>
 
-      <!-- S-11-13 -->
-      <div class="card" data-name="S-11-13 勞安 環保 防汛 缺改目錄" data-category="safety" onclick="promptLink(this,'S-11-13勞安、環保、防汛、缺改目錄')">
-        <div class="card-body">
-          <div class="card-icon">🗂️</div>
-          <div class="card-info"><div class="card-name">S-11-13 勞安・環保・防汛・缺改目錄</div><div class="card-desc">綜合管理目錄索引</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
-        </div>
-      </div>
-
       <!-- S-11-14 -->
       <div class="card" data-name="S-11-14 颱風防汛資料" data-category="safety" onclick="promptLink(this,'S-11-14颱風防汛資料')">
         <div class="card-body">
           <div class="card-icon">🌀</div>
           <div class="card-info"><div class="card-name">S-11-14 颱風防汛資料</div><div class="card-desc">颱風應變計畫、防汛紀錄</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
@@ -452,43 +444,84 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         <div class="card-body">
           <div class="card-icon">🌿</div>
           <div class="card-info"><div class="card-name">S-11-15 公共工程生態檢核</div><div class="card-desc">生態衝擊評估及改善記錄</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
-      <!-- S-11-16 -->
-      <div class="card" data-name="S-11-16 每月10日前登載 監造單位執行紀錄及施工安全資料表" data-category="safety" onclick="promptLink(this,'S-11-16每月10日前登載')">
+    </div>
+  </section>
+
+  <!-- 5. 高風險作業文件 -->
+  <section data-category="highrisk" id="sec-highrisk">
+    <div class="section-header">
+      <div class="sec-bar" style="background:#d94f2b;"></div>
+      <div class="sec-label" style="background:#d94f2b;"><span class="sec-num" style="background:rgba(255,255,255,0.25);color:#fff;">05</span>高風險作業文件</div>
+      <div class="sec-line"></div>
+    </div>
+
+    <div class="cards-grid">
+
+      <div class="card" data-name="高風險作業 施工計畫" data-category="highrisk" onclick="promptLink(this,'高風險作業施工計畫')">
         <div class="card-body">
-          <div class="card-icon">📤</div>
-          <div class="card-info"><div class="card-name">S-11-16 每月10日前登載</div><div class="card-desc">監造單位執行紀錄及施工安全資料表</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">📄</div>
+          <div class="card-info"><div class="card-name">高風險作業施工計畫</div><div class="card-desc">各項高風險作業專項施工計畫書</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
-      <!-- S-11-17 -->
-      <div class="card" data-name="S-11-17 2022年金安獎得獎簡報" data-category="safety" onclick="promptLink(this,'S-11-17 2022年金安獎得獎簡報')">
+      <div class="card" data-name="高風險作業 自主檢查表" data-category="highrisk" onclick="promptLink(this,'高風險作業自主檢查表')">
         <div class="card-body">
-          <div class="card-icon">🏆</div>
-          <div class="card-info"><div class="card-name">S-11-17 2022年金安獎得獎簡報</div><div class="card-desc">金安獎得獎資料彙整</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">✅</div>
+          <div class="card-info"><div class="card-name">高風險作業自主檢查表</div><div class="card-desc">作業前自主安全確認紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
-      <!-- S-11-18 -->
-      <div class="card" data-name="S-11-18 施工品質及職安抽查缺失改善 主辦機關及上級" data-category="safety" onclick="promptLink(this,'S-11-18施工品質及職安抽查缺失改善(主辦機關及上級)')">
+      <div class="card" data-name="型塊吊排抽查" data-category="highrisk" onclick="promptLink(this,'型塊吊排抽查')">
         <div class="card-body">
-          <div class="card-icon">🔍</div>
-          <div class="card-info"><div class="card-name">S-11-18 施工品質及職安缺失改善</div><div class="card-desc">主辦機關及上級抽查缺失改善</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🧱</div>
+          <div class="card-info"><div class="card-name">型塊吊排抽查</div><div class="card-desc">型塊吊排作業現場抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
-      <!-- S-11-19 -->
-      <div class="card" data-name="S-11-19 承商每日施工前檢查表" data-category="safety" onclick="promptLink(this,'S-11-19承商每日施工前檢查表')">
+      <div class="card" data-name="潛水作業抽查" data-category="highrisk" onclick="promptLink(this,'潛水作業抽查')">
         <div class="card-body">
-          <div class="card-icon">✅</div>
-          <div class="card-info"><div class="card-name">S-11-19 承商每日施工前檢查表</div><div class="card-desc">每日開工前安全確認表單</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--accent-r)">✏️</span>
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🤿</div>
+          <div class="card-info"><div class="card-name">潛水作業抽查</div><div class="card-desc">潛水作業現場安全抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
+        </div>
+      </div>
+
+      <div class="card" data-name="起重機 吊掛 作業抽查" data-category="highrisk" onclick="promptLink(this,'起重機（吊掛）作業抽查')">
+        <div class="card-body">
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🏗️</div>
+          <div class="card-info"><div class="card-name">起重機（吊掛）作業抽查</div><div class="card-desc">起重吊掛作業現場安全抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
+        </div>
+      </div>
+
+      <div class="card" data-name="鋼板樁打樁作業抽查" data-category="highrisk" onclick="promptLink(this,'鋼板樁打樁作業抽查')">
+        <div class="card-body">
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🔩</div>
+          <div class="card-info"><div class="card-name">鋼板樁打樁作業抽查</div><div class="card-desc">鋼板樁打設作業現場抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
+        </div>
+      </div>
+
+      <div class="card" data-name="沉箱拖放作業抽查" data-category="highrisk" onclick="promptLink(this,'沉箱拖放作業抽查')">
+        <div class="card-body">
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">⚓</div>
+          <div class="card-info"><div class="card-name">沉箱拖放作業抽查</div><div class="card-desc">沉箱拖運定位作業抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
+        </div>
+      </div>
+
+      <div class="card" data-name="浚挖 填 作業抽查" data-category="highrisk" onclick="promptLink(this,'浚挖(填)作業抽查')">
+        <div class="card-body">
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">⛏️</div>
+          <div class="card-info"><div class="card-name">浚挖（填）作業抽查</div><div class="card-desc">水下浚挖及回填作業抽查紀錄</div></div>
+          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
         </div>
       </div>
 
