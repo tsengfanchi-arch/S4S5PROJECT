@@ -83,16 +83,16 @@ header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;ba
 .sec-line{flex:1;border-bottom:2px solid var(--border);align-self:flex-end;margin-bottom:9px;}
 
 /* ── 卡片格線 ── */
-.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
 
 /* ── 卡片 ── */
 .card{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);transition:all .22s ease;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;}
 .card:hover{border-color:var(--navy);box-shadow:0 4px 20px rgba(0,48,135,0.18);transform:translateY(-2px);}
-.card-body{padding:16px 18px;flex:1;display:flex;align-items:center;gap:12px;}
-.card-icon{width:40px;height:40px;border-radius:var(--radius);background:var(--cyan-light);border:1.5px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.card-body{padding:20px 22px;flex:1;display:flex;align-items:center;gap:14px;}
+.card-icon{width:46px;height:46px;border-radius:var(--radius);background:var(--cyan-light);border:1.5px solid var(--cyan-mid);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
 .card-info{flex:1;min-width:0;}
-.card-name{font-size:0.93rem;font-weight:700;color:var(--navy);letter-spacing:0.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.card-desc{font-size:11.5px;color:var(--text-hint);margin-top:2px;}
+.card-name{font-size:0.97rem;font-weight:700;color:var(--navy);letter-spacing:0.8px;white-space:normal;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-desc{font-size:12px;color:var(--text-hint);margin-top:3px;}
 .card-arrow{color:var(--border);font-size:13px;flex-shrink:0;transition:transform .2s,color .2s;}
 .card:hover .card-arrow{transform:translateX(4px);color:var(--navy);}
 
@@ -196,18 +196,20 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
     <div class="cards-grid">
 
       <!-- 合約文件 -->
-      <a href="https://drive.google.com/drive/u/1/folders/1RdmqyDhBStbvtedcn1CCf8fKfuVHBFmr" target="_blank"
-         class="card external-link" data-name="合約文件" data-category="admin">
+      <div class="card card-expandable" data-name="合約文件 南一碼頭 S4S5碼頭" data-category="admin" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-icon">📋</div>
           <div class="card-info">
             <div class="card-name">合約文件</div>
             <div class="card-desc">契約、附件、變更合約</div>
           </div>
-          <span class="status-badge badge-ok">已連結</span>
-          <span class="card-arrow">→</span>
+          <span class="card-expand-icon">▾</span>
         </div>
-      </a>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/1RdmqyDhBStbvtedcn1CCf8fKfuVHBFmr" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>S4S5碼頭合約文件</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1-CzdMZdzA1DfvdY7GkZnfbEAyzRIEJYM" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>南一碼頭合約文件</a>
+        </div>
+      </div>
 
       <!-- 日月報表（展開） -->
       <div class="card card-expandable" data-name="日月報表" data-category="admin" onclick="toggleCard(this)">
@@ -244,7 +246,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
       </a>
 
       <!-- 設計圖（展開） -->
-      <div class="card card-expandable" data-name="設計圖" data-category="admin" onclick="toggleCard(this)">
+      <div class="card card-expandable" data-name="設計圖 南一碼頭 原始設計圖 變更設計" data-category="admin" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-icon">📐</div>
           <div class="card-info">
@@ -256,6 +258,8 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         <div class="card-sub">
           <a href="https://drive.google.com/drive/u/1/folders/127pUqW9-Uemy9fMR69hCf1YuZnpd-BdO" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>原始設計圖</a>
           <a href="https://drive.google.com/drive/u/1/folders/1CwAEseTgNoQZ7Gk-IGefbs_wAfE6cikc" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>變更設計</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1CixY8fpnUYTHyFni7wmHBQbEfOHCQE1N" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>南一碼頭原始設計圖</a>
+          <span class="sub-chip missing"><span class="chip-icon">🔗</span>南一碼頭變更設計（待補連結）</span>
         </div>
       </div>
 
@@ -343,7 +347,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1dcUhjPuOTvYGjIN386-TeYScnjogbc-L" target="_blank"
+      <a href="https://drive.google.com/drive/u/1/folders/12tPuIT0aRCjcTC44rhykskx3lbm1phpk" target="_blank"
          class="card external-link" data-name="安衛缺失" data-category="defect">
         <div class="card-body">
           <div class="card-icon">🦺</div>
@@ -373,12 +377,16 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
 
     <div class="cards-grid" style="margin-top:12px;">
 
-      <!-- 職安抽查表 -->
-      <div class="card" data-name="監造單位抽查紀錄" data-category="safety" onclick="promptLink(this,'監造單位抽查紀錄')">
+      <!-- 監造單位抽查紀錄 -->
+      <div class="card card-expandable" data-name="監造單位抽查紀錄 施工安全衛生抽查 每日安衛抽查" data-category="safety" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-icon">🦺</div>
-          <div class="card-info"><div class="card-name">監造單位抽查紀錄</div><div class="card-desc">監造單位現場安全衛生抽查紀錄</div></div>
-          <span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span>
+          <div class="card-info"><div class="card-name">監造單位抽查紀錄</div><div class="card-desc">施工安全衛生 / 每日安衛抽查</div></div>
+          <span class="card-expand-icon">▾</span>
+        </div>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/1WfEb5EhNioEtBUgdTS5Mj6U_5YWrGR0J" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>施工安全衛生抽查紀錄</a>
+          <a href="https://drive.google.com/drive/u/1/folders/1TbAIB2bNQurlYMafH7GCO1T4_f98eZ_W" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>每日安衛抽查紀錄</a>
         </div>
       </div>
 
@@ -387,15 +395,6 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         <div class="card-body">
           <div class="card-icon">📋</div>
           <div class="card-info"><div class="card-name">上級機關查核改善紀錄</div><div class="card-desc">上級機關查核缺失及改善追蹤</div></div>
-          <span class="status-badge badge-ok">已連結</span><span class="card-arrow">→</span>
-        </div>
-      </a>
-
-      <!-- S-11-02 -->
-      <a href="https://drive.google.com/drive/u/1/folders/12tPuIT0aRCjcTC44rhykskx3lbm1phpk" target="_blank" class="card external-link" data-name="S-11-02 安衛環保缺失改善通知單及改善紀錄" data-category="safety">
-        <div class="card-body">
-          <div class="card-icon">📝</div>
-          <div class="card-info"><div class="card-name">S-11-02 安衛環保缺失改善通知單</div><div class="card-desc">缺失改善通知單及改善紀錄</div></div>
           <span class="status-badge badge-ok">已連結</span><span class="card-arrow">→</span>
         </div>
       </a>
@@ -457,7 +456,15 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="型塊吊排抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/14xDw7G-RMzMAi5SSd9-L6cUSfWm2_StZ" target="_blank" class="card external-link" data-name="平台船抽查" data-category="highrisk">
+        <div class="card-body">
+          <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🚢</div>
+          <div class="card-info"><div class="card-name">平台船抽查</div><div class="card-desc">平台船作業現場安全抽查紀錄</div></div>
+          <span class="status-badge badge-ok">已連結</span><span class="card-arrow">→</span>
+        </div>
+      </a>
+
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="型塊吊排抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🧱</div>
           <div class="card-info"><div class="card-name">型塊吊排抽查</div><div class="card-desc">型塊吊排作業現場抽查紀錄</div></div>
@@ -465,7 +472,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="潛水作業抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="潛水作業抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🤿</div>
           <div class="card-info"><div class="card-name">潛水作業抽查</div><div class="card-desc">潛水作業現場安全抽查紀錄</div></div>
@@ -473,7 +480,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="起重機 吊掛 作業抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="起重機 吊掛 作業抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🏗️</div>
           <div class="card-info"><div class="card-name">起重機（吊掛）作業抽查</div><div class="card-desc">起重吊掛作業現場安全抽查紀錄</div></div>
@@ -481,7 +488,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="鋼板樁打樁作業抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="鋼板樁打樁作業抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">🔩</div>
           <div class="card-info"><div class="card-name">鋼板樁打樁作業抽查</div><div class="card-desc">鋼板樁打設作業現場抽查紀錄</div></div>
@@ -489,7 +496,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="沉箱拖放作業抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="沉箱拖放作業抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">⚓</div>
           <div class="card-info"><div class="card-name">沉箱拖放作業抽查</div><div class="card-desc">沉箱拖運定位作業抽查紀錄</div></div>
@@ -497,7 +504,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
         </div>
       </a>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1OAnPFQ8VNzfy9ejfAc9IUep2Bu34ckDv" target="_blank" class="card external-link" data-name="浚挖 填 作業抽查" data-category="highrisk">
+      <a href="https://drive.google.com/drive/u/1/folders/1Ip5ZTHxi755bK3o22SdZWw-k4PuRu0T8" target="_blank" class="card external-link" data-name="浚挖 填 作業抽查" data-category="highrisk">
         <div class="card-body">
           <div class="card-icon" style="background:#fef0ec;border-color:#f5bfb0;">⛏️</div>
           <div class="card-info"><div class="card-name">浚挖（填）作業抽查</div><div class="card-desc">水下浚挖及回填作業抽查紀錄</div></div>
