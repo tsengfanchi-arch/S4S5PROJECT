@@ -288,31 +288,35 @@ footer{position:fixed;bottom:0;left:0;right:0;height:5px;background:linear-gradi
     </div>
     <div class="cards-grid">
 
-      <a href="https://drive.google.com/drive/u/1/folders/16iNqTERt_CRSUBBOPTVpsIrLKZ1m_ziC" target="_blank"
-         class="card external-link" data-name="施工抽查" data-category="quality">
+      <div class="card card-expandable" data-name="施工抽查" data-category="quality" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-icon">🔎</div>
           <div class="card-info">
             <div class="card-name">施工抽查</div>
             <div class="card-desc">現場查驗、工序確認記錄</div>
           </div>
-          <span class="status-badge badge-ok">已連結</span>
-          <span class="card-arrow">→</span>
+          <span class="card-expand-icon">▾</span>
         </div>
-      </a>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/16iNqTERt_CRSUBBOPTVpsIrLKZ1m_ziC" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>抽查資料夾</a>
+          <a href="https://docs.google.com/spreadsheets/d/1dDg4u7fg9nurd3YJ7LnPi37IUGnxTPZc/edit?usp=drive_link" target="_blank" class="sub-chip"><span class="chip-icon">📊</span>施工抽查目錄（Excel）</a>
+        </div>
+      </div>
 
-      <a href="https://drive.google.com/drive/u/1/folders/1UC0UTYqZ7Ph2RsuEVxa8LAwun5QafVks" target="_blank"
-         class="card external-link" data-name="材料抽檢" data-category="quality">
+      <div class="card card-expandable" data-name="材料抽檢 材料設備目錄" data-category="quality" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-icon">🧪</div>
           <div class="card-info">
             <div class="card-name">材料抽檢</div>
             <div class="card-desc">材料試驗、進場抽樣報告</div>
           </div>
-          <span class="status-badge badge-ok">已連結</span>
-          <span class="card-arrow">→</span>
+          <span class="card-expand-icon">▾</span>
         </div>
-      </a>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/u/1/folders/1UC0UTYqZ7Ph2RsuEVxa8LAwun5QafVks" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>抽檢資料夾</a>
+          <a href="https://docs.google.com/spreadsheets/d/1-kPeQvuO99L98xaCpKSqP-kB8nQqLch6/edit?usp=drive_link" target="_blank" class="sub-chip"><span class="chip-icon">📊</span>材料設備目錄（Excel）</a>
+        </div>
+      </div>
 
     </div>
   </section>
