@@ -73,17 +73,18 @@ header::after{content:"";position:absolute;bottom:0;left:0;right:0;height:4px;ba
 .s-count{font-family:var(--mono);font-size:12px;color:var(--text-hint);white-space:nowrap;margin-left:auto;}
 
 /* ── 主容器 ── */
-.main{max-width:1280px;margin:0 auto;padding:40px 40px 100px;display:flex;flex-direction:column;gap:48px;position:relative;z-index:1;}
-.main > section{width:100%;}
+.main{max-width:1280px;margin:0 auto;padding:40px 40px 100px;display:block;position:relative;z-index:1;}
+.main > section{width:100%;display:block;margin-bottom:48px;}
+.main > section:last-of-type{margin-bottom:0;}
 
 /* ── 區塊標題 新風格 ── */
 .section-header{display:flex;align-items:flex-end;gap:0;margin-bottom:24px;position:relative;}
-.sec-big-num{font-size:100px;font-weight:900;color:rgba(0,48,135,0.06);line-height:0.85;font-family:var(--mono);margin-right:16px;flex-shrink:0;user-select:none;}
+.sec-big-num{font-size:100px;font-weight:900;color:rgba(0,48,135,0.22);line-height:0.85;font-family:var(--mono);margin-right:16px;flex-shrink:0;user-select:none;}
 .sec-title-block{border-left:3px solid var(--cyan);padding-left:16px;padding-bottom:6px;}
 .sec-sub{font-size:10px;font-weight:700;letter-spacing:4px;color:var(--cyan);margin-bottom:5px;text-transform:uppercase;}
 .sec-name{font-size:1.3rem;font-weight:800;color:var(--navy);letter-spacing:1px;}
 .sec-rule{flex:1;height:1px;background:var(--border);margin-left:20px;margin-bottom:10px;}
-.sec-big-num.risk{color:rgba(217,79,43,0.06);}
+.sec-big-num.risk{color:rgba(217,79,43,0.22);}
 .sec-title-block.risk{border-color:var(--red);}
 .sec-title-block.risk .sec-sub{color:var(--red);}
 
@@ -223,7 +224,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
 <main class="main" id="mainContent">
 
   <!-- 1. 行政與計畫管理 -->
-  <section data-category="admin" id="sec-admin">
+  <section data-category="admin" id="sec-admin" style="width:100%;display:block;">
     <div class="section-header">
       <div class="sec-big-num">01</div>
       <div class="sec-title-block">
@@ -331,7 +332,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
   </section>
 
   <!-- 2. 施工與材料品質控制 -->
-  <section data-category="quality" id="sec-quality">
+  <section data-category="quality" id="sec-quality" style="width:100%;display:block;">
     <div class="section-header">
       <div class="sec-big-num">02</div>
       <div class="sec-title-block">
@@ -378,7 +379,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
         </div>
       </div>
 
-      <div class="card" data-name="二級品管" data-category="quality" onclick="promptLink(this,'二級品管')">
+      <div class="card card-expandable" data-name="二級品管" data-category="quality" onclick="toggleCard(this)">
         <div class="card-body">
           <div class="card-code">QC — 03</div>
           <div class="card-row">
@@ -387,11 +388,19 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
               <div class="card-name">二級品管</div>
               <div class="card-desc">二級品質管理執行紀錄</div>
             </div>
+            <span class="card-expand-icon">▾</span>
           </div>
-          <div class="card-footer"><span class="status-badge badge-miss">待補連結</span><span class="card-arrow" style="color:var(--red)">✏️</span></div>
+        </div>
+        <div class="card-sub">
+          <a href="https://drive.google.com/drive/folders/12Ef52JGeApUb5UPfWrHD4bgBdfashXlv?usp=drive_link" target="_blank" class="sub-chip"><span class="chip-icon">📁</span>二級品管資料夾</a>
+          <a href="https://docs.google.com/spreadsheets/d/1GmeGArNdkIrsJYbYqMPOclW4S482Tf1k/edit?usp=drive_link" target="_blank" class="sub-chip"><span class="chip-icon">📊</span>二級品管目錄（Excel）</a>
         </div>
       </div>
-  <section data-category="defect" id="sec-defect">
+    </div>
+  </section>
+
+  <!-- 3. 缺失與追蹤 -->
+  <section data-category="defect" id="sec-defect" style="width:100%;display:block;">
     <div class="section-header">
       <div class="sec-big-num">03</div>
       <div class="sec-title-block">
@@ -434,7 +443,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
   </section>
 
   <!-- 4. 安衛環保執行紀錄 -->
-  <section data-category="safety" id="sec-safety">
+  <section data-category="safety" id="sec-safety" style="width:100%;display:block;">
     <div class="section-header">
       <div class="sec-big-num">04</div>
       <div class="sec-title-block">
@@ -566,7 +575,7 @@ footer{position:fixed;bottom:0;left:0;right:0;height:4px;background:linear-gradi
   </section>
 
   <!-- 5. 高風險作業文件 -->
-  <section data-category="highrisk" id="sec-highrisk">
+  <section data-category="highrisk" id="sec-highrisk" style="width:100%;display:block;">
     <div class="section-header">
       <div class="sec-big-num risk">05</div>
       <div class="sec-title-block risk">
