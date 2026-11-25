@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>S04–S05 碼頭完工示意</title>
+<title>網頁維護</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -27,6 +27,18 @@ html,body{margin:0;height:100%;background:#0b1622;color:var(--ink);font:15px/1.5
 #spec table{width:100%;border-collapse:collapse}
 #spec td{padding:3px 0;border-top:1px solid var(--line);vertical-align:top}
 #spec td:first-child{opacity:.75;padding-right:10px;white-space:nowrap}
+#spec tr.cs{cursor:pointer}#spec tr.cs td{color:#ffb15c}#spec tr.cs:hover td,#spec tr.cs:focus-visible td{background:rgba(255,138,31,.16)}
+#spec tr.cs td:last-child::after{content:"  ▸ 沉箱 3D";font-size:12px;opacity:.85}#spec tr.cs[data-cs=RV] td:last-child::after{content:"  ▸ 護岸 3D"}
+#cs{position:fixed;inset:0;z-index:10;background:rgba(5,12,20,.92);display:none;grid-template-rows:auto 1fr auto}
+#cs.open{display:grid}
+#cs header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+#cs h2{margin:0;font-size:18px}#cs header p{margin:2px 0 0;font-size:13px;opacity:.8}
+#csWrap{position:relative;min-height:0}#csC{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#csL{position:absolute;inset:0;pointer-events:none}#csL .lb{font-size:12px}
+#csInfo{position:absolute;left:14px;top:14px;width:min(320px,calc(100% - 28px));font-size:13px;padding:10px 12px}
+#csInfo table{width:100%;border-collapse:collapse}#csInfo td{padding:3px 0;border-top:1px solid var(--line);vertical-align:top}#csInfo td:first-child{opacity:.75;padding-right:8px;white-space:nowrap}
+#cs footer{display:flex;gap:6px;justify-content:center;padding:8px;flex-wrap:wrap}
+@media(max-width:700px){#csInfo{display:none}}
 #spec .note{margin:8px 0 0;font-size:12px;opacity:.7}
 #bar{left:50%;transform:translateX(-50%);bottom:14px;padding:6px;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 28px)}
 button{font:inherit;font-size:14px;color:var(--ink);background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:7px;min-height:40px;padding:0 14px;cursor:pointer}
@@ -59,8 +71,8 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 <aside id="spec" class="hud">
   <h2>主要工程內容</h2>
   <table>
-    <tr><td>S04 碼頭</td><td>沉箱式，長 310 m</td></tr>
-    <tr><td>S05 碼頭</td><td>沉箱式，長 300 m</td></tr>
+    <tr class="cs" data-cs="S04" tabindex="0" role="button"><td>S04 碼頭</td><td>沉箱式，長 310 m</td></tr>
+    <tr class="cs" data-cs="S05" tabindex="0" role="button"><td>S05 碼頭</td><td>沉箱式，長 300 m</td></tr>
     <tr><td>S06 碼頭</td><td>部分段 16.45 m（A0k+610～626.45，SA01 #15 沉箱，第三部分 CB-01）</td></tr>
     <tr><td>沉箱尺寸</td><td>24.9 × 18.0 × 20.0 m</td></tr>
     <tr><td>計畫水深</td><td>EL. −16.0 m</td></tr>
@@ -70,12 +82,12 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
     <tr><td>碼頭面</td><td>RC 鋪面寬 30 m，伸縮縫 10 m 方格（CF-01）</td></tr>
     <tr><td>岸電</td><td>S04、S05 碼頭後線無變電站；岸電預留孔、高壓電力人孔（CB-01、CG-08、BH7-08）</td></tr>
     <tr><td>變電站</td><td>C填區高壓總變電站 13.2×5.2×3.1 m（BH6-01、BH7-01）</td></tr>
-    <tr><td>南一碼頭</td><td>沉箱式 SC03 9 座（25.1 m），長 271.4 m，計畫水深 EL.−9.0 m，碼頭面 EL+4.5 m（EB-01）</td></tr>
+    <tr class="cs" data-cs="N1" tabindex="0" role="button"><td>南一碼頭</td><td>沉箱式 SC03 9 座（15.12×25.0×12.0 m），長 271.4 m，計畫水深 EL.−9.0 m，碼頭面 EL+4.5 m（EB-01）</td></tr>
     <tr><td>南一附屬</td><td>70T 雙曲柱 @約 10 m、A 型 600H×3500L 防舷材 @6.3 m（ED-12、ED-13）</td></tr>
     <tr><td>南一圍籬</td><td>臨時圍籬（法線後 30 m，預鑄護欄＋菱形鐵絲網）、不銹鋼雙扇大門 6 m（EE-12～EE-14）</td></tr>
     <tr><td>南一岸電</td><td>岸電供應站 3 處（#2、#5、#8 沉箱）、岸電變電站及 P11～P13 盤（EG-06、EG-07、EG-12）</td></tr>
     <tr><td>永久護岸</td><td>方塊式，新建 840 m（C區 789 m＋S01段 51 m）</td></tr>
-    <tr><td>護岸構造</td><td>五層預鑄方塊 EL−6.5～+1.5 m＋冠牆，頂高 EL+4.0 m，計畫水深 EL−6.0 m</td></tr>
+    <tr class="cs" data-cs="RV" tabindex="0" role="button"><td>護岸構造</td><td>五層預鑄方塊 EL−6.5～+1.5 m＋冠牆，頂高 EL+4.0 m，計畫水深 EL−6.0 m</td></tr>
     <tr><td>護岸附屬</td><td>35T 曲柱 @7 m、SX500H×1750L 防舷材、階梯 17 處；末端 F0k+756～840 為 SX600H×3000L 防舷材 @約 13 m（EB-01）</td></tr>
     <tr><td>護岸岸電</td><td>S6-2、S5-2、S4-2 岸電變電站 3 處（貨櫃式 13.2×5.2×3.1 m），水電供應站 P1～P10 @約 84 m（BH4-01、AJ-02、BH8-01）</td></tr>
     <tr><td>護岸照明</td><td>8 m 雙臂燈桿 150W LED×2 @42 m、50T 直柱 @42 m（AJ-02）</td></tr>
@@ -99,6 +111,12 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
   <button id="lbBtn" aria-pressed="true">標示</button>
   <button id="shotBtn">截圖</button>
 </nav>
+<section id="cs" role="dialog" aria-modal="true" aria-labelledby="csT">
+  <header><div><h2 id="csT">沉箱 3D</h2><p id="csSub"></p></div><button id="csClose">關閉</button></header>
+  <div id="csWrap"><canvas id="csC"></canvas><div id="csL"></div>
+    <aside id="csInfo" class="hud"><table id="csTab"></table><p id="csNote" style="margin:8px 0 0;font-size:12px;opacity:.7">沉箱依 CC-36 SA01 沉箱透視圖建模；高程、回填及上部結構依 CB-05 碼頭斷面圖（A0k+201.55～601.45）。</p></aside></div>
+  <footer><button id="csCut" aria-pressed="false">剖切顯示艙格</button><button id="csSea" aria-pressed="false">海水及拋石基礎</button><button id="csTop" aria-pressed="true">上部結構</button><button id="csEx" aria-pressed="true">上部／沉箱分開</button><button id="csFill" aria-pressed="false">艙內回填</button><button id="csSec">斷面視角</button><button id="csFit">重設視角</button></footer>
+</section>
 <div id="shot" role="dialog" aria-label="截圖"><img alt="完工示意截圖"><p>右鍵或長按圖片另存</p><button id="shotClose">關閉</button></div>
 
 <script type="importmap">
@@ -467,7 +485,6 @@ const blockTex = tex(256, 336, (g, w, h) => {
 }
 // 冠牆頂、輪擋、後線 AC 鋪面（AG-02）
 box(1560, .05, 2.4, mConc, -780, CREST + .02, 798.8, false);
-box(789, .3, .35, mYellow, -445.5, CREST + .17, 799.4);
 plane(810, 27.6, M({map: tex(128, 128, (g, w, h) => noise(g, w, h, '#45464a', .14, 4000)), roughness: .92}), -435, CREST + .03, 783.8, 100, 4);
 // 35T 曲柱 @7 m、500H 防舷材（每 21 m 一組 3 座 @4 m）、階梯 17 處 @42 m
 {
@@ -483,11 +500,20 @@ plane(810, 27.6, M({map: tex(128, 128, (g, w, h) => noise(g, w, h, '#45464a', .1
   const fm = new THREE.InstancedMesh(sx5, mRub, fen.length);
   fen.forEach((x, i) => { o.position.set(x, EL(1.875), 800); o.updateMatrix(); fm.setMatrixAt(i, o.matrix); });
   bm.castShadow = fm.castShadow = true; scene.add(bm, fm);
-  const recess = M({color: 0x6f6c66, roughness: 1});
+  // 階梯（依現場照片）：凹入冠牆前緣 1.00 m、沿護岸方向長 3.60 m，底部踏台 1.92 m＋踏階 0.24 m×7 階（EL+1.50～+4.00）
+  const recess = M({color: 0x4a4844, roughness: 1});
   for(const x of st){
-    box(1.2, CREST - EL(-.5), .9, recess, x, (CREST + EL(-.5)) / 2, 799.6, false);
-    for(let k = 0; k < 8; k++) box(1.2, .12, .3, mConc, x, CREST - .3 - k * .3, 799.2 + k * .1, false);
+    const xs = x - 1.8;
+    box(3.6, CREST - EL(1.5), 1.05, recess, x, (CREST + EL(1.5)) / 2, 799.525, false);
+    box(3.6, .03, 1.0, M({color: 0x3c3b38}), x, CREST + .04, 799.5, false);
+    box(3.6, .06, 1.08, M({color: 0xbdb9b1}), x, EL(1.5) + .03, 799.54, false);
+    for(let k = 0; k < 7; k++){ const h = (k + 1) * .3125; box(.24, h, 1.08, mConc, xs + 1.92 + k * .24 + .12, EL(1.5) + h / 2, 799.54, false); }
   }
+  // 輪擋（黃黑斜紋，避開階梯）
+  const stripe = tex(256, 32, (g, w, h) => { g.fillStyle = '#f2c21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#151515'; for(let x = -32; x < w + 32; x += 32){ g.beginPath(); g.moveTo(x, h); g.lineTo(x + 16, h); g.lineTo(x + 32, 0); g.lineTo(x + 16, 0); g.fill(); } });
+  { const cuts = st.map(x => [x - 2.0, x + 2.0]).sort((p, q) => p[0] - q[0]); let x0 = -840;
+    const seg = (a, b) => { if(b - a < .3) return; const mm = M({map: stripe.clone(), roughness: .6}); mm.map.wrapS = THREE.RepeatWrapping; mm.map.repeat.set((b - a) / 2, 1); mm.map.needsUpdate = true; box(b - a, .3, .35, mm, (a + b) / 2, CREST + .17, 799.4); };
+    for(const [a, b] of cuts){ seg(x0, a); x0 = b; } seg(x0, -51); }
 }
 // 親水護岸段（既設，280 m）
 rubble(270, [0, 1], s => [-1560 - s, 800], CREST - .2, EL(-4), 2.5, 2.2, 1.0);
@@ -774,6 +800,18 @@ function regionalTerrain(hAt){
   for(const [x, z] of tanks){ const t = new THREE.Mesh(new THREE.CylinderGeometry(15, 15, 18, 24), M({color: rnd() < .2 ? 0x8cc0d8 : 0xf0efe9, roughness: .5})); t.position.set(x, DECK + 9, z); t.castShadow = true; scene.add(t); }
   for(const [x, z, w, d, h] of [[1450, 300, 160, 60, 14], [1700, 300, 120, 70, 18], [1950, 380, 90, 140, 12], [1420, 600, 90, 180, 10], [1950, 700, 120, 80, 14], [1250, 780, 200, 50, 10]])
     building(x - w / 2, x + w / 2, z - d / 2, z + d / 2, h, M({color: 0xeceae5, roughness: .6}), 'pv');
+  // 臺北港行政大樓（2026/08 空拍照圈示位置：舊港區陸側根部、台 61 線旁、白色圓頂倉西側）
+  const glass = tex(256, 256, (g, w, h) => { g.fillStyle = '#5d7387'; g.fillRect(0, 0, w, h);
+    for(let r = 0; r < 16; r++) for(let c = 0; c < 12; c++){ g.fillStyle = `rgba(${150 + (r * 7 + c * 13) % 60},${185 + (c * 11) % 40},${210 + (r * 5) % 30},.55)`; g.fillRect(c * 21 + 2, r * 16 + 3, 17, 10); }
+    g.fillStyle = '#e9ebec'; for(let r = 0; r <= 16; r++) g.fillRect(0, r * 16, w, 3); });
+  const gm = (rx, ry) => { const m = M({map: glass.clone(), roughness: .25, metalness: .35}); m.map.wrapS = m.map.wrapT = THREE.RepeatWrapping; m.map.repeat.set(rx, ry); m.map.needsUpdate = true; return m; };
+  const capM = M({color: 0xdedcd6, roughness: .7});
+  { const t = new THREE.Mesh(new THREE.BoxGeometry(56, 38, 26), [gm(2.2, 2.4), gm(2.2, 2.4), capM, capM, gm(4.6, 2.4), gm(4.6, 2.4)]); t.position.set(948, DECK + 19, 884); t.castShadow = t.receiveShadow = true; scene.add(t); }
+  { const p = new THREE.Mesh(new THREE.BoxGeometry(84, 9, 44), [gm(3.5, .55), gm(3.5, .55), capM, capM, gm(7, .55), gm(7, .55)]); p.position.set(955, DECK + 4.5, 886); p.castShadow = p.receiveShadow = true; scene.add(p); }
+  box(30, 4, 14, capM, 944, DECK + 40, 884);                                   // 屋頂機房
+  { const r = new THREE.Mesh(new THREE.CylinderGeometry(.6, .6, 14, 8), M({color: 0xd0d3d6, metalness: .6})); r.position.set(960, DECK + 49, 880); scene.add(r); }
+  // 白色圓頂倉（空拍照所見，行政大樓東側）
+  { const dg = new THREE.CylinderGeometry(16, 16, 70, 32, 1, false, 0, Math.PI); dg.rotateZ(Math.PI / 2); const d = new THREE.Mesh(dg, M({color: 0xf6f6f2, roughness: .5})); d.position.set(1035, DECK, 880); d.castShadow = d.receiveShadow = true; scene.add(d); }
 }
 
 /* ---------- 隔離渠道南岸：地形（依正射影像植被及海岸線推估高差）、台 61 線高架道路 ---------- */
@@ -976,7 +1014,7 @@ const LABELS = [
   ['新建永久護岸 840 m', -230, 12, 805, 1],
   ['RS20-3 道路 20 m', -260, 22, 40, 1], ['RD20-12／13 道路 20 m', -40, 14, 560, 1], ['RD20-1 道路 20 m', -540, 14, 760, 1],
   
-  ['S02–S03 碼頭（他標）', 0, 14, 280, 0], ['南一碼頭 271.4 m', 0, 30, 740, 1], ['臨時圍籬大門', -30, 4, 760.85, 1, 1], ['臨時圍籬（法線後 30 m）', -30, 4, 640, 1, 1], ['S06 碼頭（部分）16.45 m', -618, 10, 0, 1], ['岸電供應站', -3.6, 5, 742.3, 1, 1], ['岸電變電站', -24, 5, 666.9, 1, 1], ['70T 雙曲柱 ＋ 600H 防舷材', 0, 3, 620, 1, 1], ['新竹艦', 10, 38, 664, 1, 1], ['150T 雙曲柱 @25 m', -239, 4, 1, 1, 1], ['車輛物流中心（他標）', -402, 32, 231, 0], ['倉儲中心（他標）', -375, 18, 572, 0], ['C填區高壓總變電站', -579, 6, 460, 1, 1], ['S6-2 岸電變電站', -747.0, 6, 777, 1, 1], ['S5-2 岸電變電站', -488.6, 6, 777, 1, 1], ['S4-2 岸電變電站', -136.9, 6, 777, 1, 1], ['水電供應站 P1～P10', -486.9, 4, 797, 1, 1], ['護岸照明＋50T 直柱 @42 m', -280, 10, 790, 1, 1], ['離岸風電水下基礎廠區（他標）', -1400, 70, 300, 0], ['北碼頭貨櫃中心（他標）', 500, 50, -700, 0], ['東碼頭（他標）', 700, 30, 300, 0], ['台 61 線', -500, 20, 1035, 0], ['觀音山', 3600, 640, 3900, 0], ['淡水河', 5300, 6, 300, 0], ['八里', 2900, 70, 1700, 0], ['淡水', 6800, 80, -700, 0], ['林口電廠', -8900, 220, 1250, 0], ['物流倉儲區三、四期（圍堤中）', -3300, 10, -1850, 0], ['物流倉儲區一、二期', -100, 12, -1700, 0], ['舊港區（他標）', 1700, 20, 550, 0], 
+  ['S02–S03 碼頭（他標）', 0, 14, 280, 0], ['南一碼頭 271.4 m', 0, 30, 740, 1], ['臨時圍籬大門', -30, 4, 760.85, 1, 1], ['臨時圍籬（法線後 30 m）', -30, 4, 640, 1, 1], ['S06 碼頭（部分）16.45 m', -618, 10, 0, 1], ['岸電供應站', -3.6, 5, 742.3, 1, 1], ['岸電變電站', -24, 5, 666.9, 1, 1], ['70T 雙曲柱 ＋ 600H 防舷材', 0, 3, 620, 1, 1], ['新竹艦', 10, 38, 664, 1, 1], ['150T 雙曲柱 @25 m', -239, 4, 1, 1, 1], ['車輛物流中心（他標）', -402, 32, 231, 0], ['倉儲中心（他標）', -375, 18, 572, 0], ['C填區高壓總變電站', -579, 6, 460, 1, 1], ['S6-2 岸電變電站', -747.0, 6, 777, 1, 1], ['S5-2 岸電變電站', -488.6, 6, 777, 1, 1], ['S4-2 岸電變電站', -136.9, 6, 777, 1, 1], ['水電供應站 P1～P10', -486.9, 4, 797, 1, 1], ['護岸照明＋50T 直柱 @42 m', -280, 10, 790, 1, 1], ['離岸風電水下基礎廠區（他標）', -1400, 70, 300, 0], ['北碼頭貨櫃中心（他標）', 500, 50, -700, 0], ['東碼頭（他標）', 700, 30, 300, 0], ['台 61 線', -500, 20, 1035, 0], ['觀音山', 3600, 640, 3900, 0], ['淡水河', 5300, 6, 300, 0], ['八里', 2900, 70, 1700, 0], ['淡水', 6800, 80, -700, 0], ['林口電廠', -8900, 220, 1250, 0], ['物流倉儲區三、四期（圍堤中）', -3300, 10, -1850, 0], ['物流倉儲區一、二期', -100, 12, -1700, 0], ['舊港區（他標）', 1700, 20, 550, 0], ['臺北港行政大樓', 948, 48, 884, 0], 
   ['隔離渠道', -1000, 6, 880, 0],
   ['內航道 EL.−16.0 m', -420, 4, -320, 0]
 ];
@@ -1041,6 +1079,288 @@ renderer.setAnimationLoop(() => {
   controls.update(); renderer.render(scene, camera); placeLabels();
 });
 document.getElementById('load').remove();
+
+/* ---------- 沉箱 3D 檢視（CB-05 S04～S05 沉箱碼頭斷面圖：SA01 24.9×18.0×20.0 m） ---------- */
+{
+  const dlg = document.getElementById('cs'), cv = document.getElementById('csC'), lbBox = document.getElementById('csL');
+  let R = null, S, C, CT, grp = null, mode = 'CS', labels = [];
+  const stCS = {cut: false, sea: false, top: true, ex: true, fill: false}, stRV = {cut: false, sea: true, top: true, ex: false, fill: true}, stN1 = {cut: false, sea: false, top: true, ex: true, fill: false}; let state = stCS;
+  const INFO = {
+    S04: {name: 'S04 碼頭', sub: 'A0k+000～A0k+310（長 310 m）· SA01 沉箱 #1～#4 位於 A0k+201.55～310 段', note: 'A0k+000～201.55 段為第四部分 S04 減壓式沉箱碼頭（另案圖說），未納入本模型'},
+    S05: {name: 'S05 碼頭', sub: 'A0k+310～A0k+610（長 300 m）· SA01 沉箱 #5～#16', note: '#16（A0k+576.45～601.45）後方銜接 SB01、SB02 沉箱（CB-05 A0k+601.45 斷面）'}
+  };
+  const rows = [['沉箱型式', 'SA01 消波式沉箱'], ['尺寸', '24.9（長）×18.0（寬）×20.0（高）m'], ['沉箱底／頂', 'EL−17.50 m／EL+2.50 m（底版 1.00 m、壁高 19.00 m）'], ['碼頭面', 'EL+5.00 m（胸牆 +5.30 m）'],
+    ['橫向艙格', '前艙 3.90 m（消波室）＋3×4.00 m'], ['縱向艙格', '5 艙：4.435＋3×4.51＋4.435 m（前艙列 5×4.36 m，隔牆 0.40 m）'], ['壁厚', '外壁 0.60、前艙隔牆 0.40、內隔牆 0.25 m'], ['消波室', 'EL−5.00～+1.80 m；前牆消波孔 0.80×3.30 m，每艙 2 孔共 10 孔'], ['艙內回填', '回填砂；封頂 210 kgf/cm² 混凝土'],
+    ['基礎', '10～100 kg 卵塊石 EL−17.50～−18.50（頂寬 21.0 m，坡 1:2）；前趾 100～300 kg 塊石頂 EL−16.50'], ['後線', 'F2、F1 濾料各 1.0 m（頂寬 3.50 m，坡 1:2）、粗砂至 EL−13.50、濾布；回填砂（地質改良）；開挖坡 1:1.5、1:3 至現有海床 EL−9.00～−10.00'], ['上部結構', '前方 280 kgf/cm² 場鑄混凝土寬 5.40 m；後方回填砂（EL+3.00～+4.00）＋50 cm 碎石級配基層＋25 cm 碎石級配底層＋25 cm RC 面層'], ['附屬', '150T 雙曲柱、CSS1150H 防舷材、輪擋、4U 型排水溝、15 cmψ PVC 透氣管'], ['計畫水深', 'EL−16.00 m']];
+  const mat = (c, o = {}) => new THREE.MeshStandardMaterial(Object.assign({color: c, roughness: .85}, o));
+  const mC = mat(0xc9c5bc), mCin = mat(0xb3aea4), mSand = mat(0xd8c48e, {roughness: 1}), mCap = mat(0x9d9a93), mTop = mat(0xd6d3cc), mRk = mat(0x8a8780, {roughness: 1}), mW = new THREE.MeshPhysicalMaterial({color: 0x2f7f8f, transparent: true, opacity: .32, roughness: .1, side: THREE.DoubleSide, depthWrite: false});
+  function B(g, w, h, d, m, x, y, z){ const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); b.castShadow = b.receiveShadow = true; g.add(b); return b; }
+  // 座標：x 由碼頭法線（0）往陸側，y 為高程 EL，z 沿碼頭向（±12.45）
+  // 依 CC-36 SA01 沉箱透視圖：寬 18.00（60＋390＋40＋400＋25＋400＋25＋400＋60）、長 24.90（含兩端榫 15）、壁高 19.00＋底版 1.00
+  const XW = [[0, .6], [4.5, 4.9], [8.9, 9.15], [13.15, 13.4], [17.4, 18]];
+  const CELLX = [[.6, 4.5], [4.9, 8.9], [9.15, 13.15], [13.4, 17.4]];
+  const ZB = 12.3;                                                         // 本體半長（不含榫）
+  const seq = (a, arr) => { const out = []; let z = a; for(const [len, isCell] of arr){ out.push([z, z + len, isCell]); z += len; } return out; };
+  const FR = seq(-11.7, [[4.36, 1], [.4, 0], [4.36, 1], [.4, 0], [4.36, 1], [.4, 0], [4.36, 1], [.4, 0], [4.36, 1]]);        // 前艙（消波室）列
+  const RR = seq(-11.7, [[4.435, 1], [.25, 0], [4.51, 1], [.25, 0], [4.51, 1], [.25, 0], [4.51, 1], [.25, 0], [4.435, 1]]); // 其餘 3 列
+  function build(){
+    if(grp){ S.remove(grp); grp.traverse(o => o.geometry && o.geometry.dispose()); }
+    grp = new THREE.Group(); S.add(grp); labels = [];
+    if(mode === 'RV'){ buildRV(); return; }
+    if(mode === 'N1'){ buildN1(); return; }
+    const z0 = -12.45, z1 = state.cut ? 0 : 12.45, zF = state.cut ? 0 : -12.45, zc = (z0 + z1) / 2, zl = z1 - z0, zb0 = Math.max(z0, -ZB), zbl = ZB - zb0, zbc = (zb0 + ZB) / 2;
+    const clipZ = (a, b) => [Math.max(a, z0), Math.min(b, z1)];
+    const Bz = (w, h, a, b, m, x, y) => { const [qa, qb] = clipZ(a, b); if(qb - qa > .001) B(grp, w, h, qb - qa, m, x, y, (qa + qb) / 2); };
+    const WB = -16.5, WT = 2.5;                                              // 壁底、壁頂
+    // 底版 EL−17.50～−16.50（前後各外伸 0.50）
+    Bz(19, 1.0, -ZB, ZB, mC, 9, -17.0);
+    // 前牆：EL+1.80～+2.50 實心、EL−1.50～+1.80 消波孔（寬 0.80，每艙 2 孔，共 10 孔）、以下實心
+    Bz(.6, -1.5 - WB, -ZB, ZB, mC, .3, (-1.5 + WB) / 2);
+    Bz(.6, .7, -ZB, ZB, mC, .3, 2.15);
+    { let zz = -ZB; for(const [ca, cb, c] of FR){ if(!c) continue; const m = (ca + cb) / 2; for(const [ha, hb] of [[m - 1.49, m - .69], [m + .69, m + 1.49]]){ Bz(.6, 3.3, zz, ha, mC, .3, .15); zz = hb; } } Bz(.6, 3.3, zz, ZB, mC, .3, .15); }
+    // 縱向牆（前艙後牆 0.40、內隔牆 0.25、後牆 0.60）
+    XW.slice(1).forEach(([a, b], i) => Bz(b - a, WT - WB, -ZB, ZB, i === 0 || i === 3 ? mC : mCin, (a + b) / 2, (WT + WB) / 2));
+    // 端牆 0.60 及兩端榫（15 cm，垂直肋）
+    for(const sz of [-1, 1]){ Bz(18, WT - WB, sz * (ZB - .3) - .3, sz * (ZB - .3) + .3, mC, 9, (WT + WB) / 2);
+      for(const x of [1.2, 3.0, 6.7, 11.0, 15.4, 16.9]) Bz(.5, WT - WB, sz > 0 ? ZB : -ZB - .15, sz > 0 ? ZB + .15 : -ZB, mCin, x, (WT + WB) / 2); }
+    // 橫隔牆：前艙列 0.40、其餘列 0.25
+    for(const [ca, cb, c] of FR) if(!c) Bz(3.9, WT - WB, ca, cb, mC, 2.55, (WT + WB) / 2);
+    for(const [ca, cb, c] of RR) if(!c) Bz(17.4 - 4.9, WT - WB, ca, cb, mCin, (4.9 + 17.4) / 2, (WT + WB) / 2);
+    if(state.cut) B(grp, 18, .02, .02, mCin, 9, 2.5, 0);
+    // 艙內回填（依 CB-05）：前艙下部回填砂至 EL−6.50、水中混凝土封頂至 −5.00；其餘艙回填砂至 +2.00、封頂至 +2.50
+    if(state.fill){
+      for(const [ca, cb, c] of FR) if(c){ Bz(3.9, -6.5 - WB, ca, cb, mSand, 2.55, (-6.5 + WB) / 2); Bz(3.9, 1.5, ca, cb, mCap, 2.55, -5.75); }
+      for(const [ca, cb, c] of RR) if(c) for(const [xa, xb] of CELLX.slice(1)){ Bz(xb - xa, 2.0 - WB, ca, cb, mSand, (xa + xb) / 2, (2.0 + WB) / 2); Bz(xb - xa, .5, ca, cb, mCap, (xa + xb) / 2, 2.25); }
+    }
+    // 210 kgf/cm² 封頂及堤面混凝土：沉箱頂 EL+2.50～+3.00（前艙以外）
+    if(state.fill) Bz(18 - 4.9, .5, -ZB, ZB, mCap, (4.9 + 18) / 2, 2.75);
+    // 拖索環（A 型：角隅；B 型：側牆頂）
+    for(const [x, z] of [[.3, -ZB + .3], [.3, ZB - .3], [17.7, -ZB + .3], [17.7, ZB - .3], [4.7, ZB + .05], [4.7, -ZB - .05]]) if(z >= z0 && z <= z1){ const t = new THREE.Mesh(new THREE.TorusGeometry(.22, .05, 8, 16), mat(0x5d6166, {metalness: .7})); t.position.set(x, WT + .2, z); grp.add(t); }
+    // 上部結構：消波室頂版 EL+3.00～+3.70、胸牆前樑、碼頭面版至 EL+5.00
+    if(state.top){
+      const top = new THREE.Group(); top.position.y = state.ex ? 10 : 0; grp.add(top); const g0 = grp; { const grp = top;
+      // CB-05：前方 280 kgf/cm² 場鑄混凝土（法線後 5.40 m，EL+3.70～+5.00，前緣下垂至 EL+1.55 承防舷材；輪擋至 +5.30）
+      const mCast = mat(0xc3bfb6), mRC = mat(0xdcd9d2), mSub = mat(0x8e8a84, {roughness: 1}), mBase = mat(0x6f6b66, {roughness: 1}), mBf = mat(0xd9c48c, {roughness: 1});
+      B(grp, 5.4, 1.3, zl, mCast, 2.7, 4.35, zc);
+      B(grp, .6, 3.70 - 1.55, zl, mCast, .3, (3.70 + 1.55) / 2, zc);
+      B(grp, .9, 3.70 - 3.0, zl, mCast, 4.95, 3.35, zc);
+      // 法線後 5.40～18.50 m：回填砂 EL+3.00～+4.00、50 cm 碎石級配基層、25 cm 碎石級配底層、25 cm RC 面層（頂 EL+5.00）
+      const X0 = 5.4, X1 = 18.5, XW2 = X1 - X0, XC = (X0 + X1) / 2;
+      const LG = state.ex ? 1.6 : 0;                     // 分開展示時各層間距
+      B(grp, XW2, 1.0, zl, mBf, XC, 3.5, zc);
+      B(grp, XW2, .5, zl, mBase, XC, 4.25 + LG, zc);
+      B(grp, XW2, .25, zl, mSub, XC, 4.625 + LG * 2, zc);
+      B(grp, XW2, .25, zl, mRC, XC, 4.875 + LG * 3, zc);
+      // 4U 型排水溝（緊鄰場鑄混凝土後緣）、15 cmψ PVC 透氣管
+      B(grp, .6, .55, zl, mat(0x55585b), 5.75, 4.73, zc);
+      for(const z of [-9.52, -4.76, 0, 4.76, 9.52].filter(z => z >= z0 && z <= z1)){ const pp = new THREE.Mesh(new THREE.CylinderGeometry(.075, .075, 1.6, 12), mat(0xe8e8e2)); pp.position.set(4.2, 4.0, z); top.add(pp); }
+      const st = new THREE.Mesh(new THREE.BoxGeometry(.4, .3, zl), mat(0xefc21a)); st.position.set(.3, 5.45, zc); top.add(st);
+      // 150T 雙曲柱、CSS1150H 防舷材
+      for(const z of [-12.45 + 6.25, 6.25].filter(z => z >= z0 && z <= z1)){ const b = new THREE.Mesh(new THREE.CylinderGeometry(.42, .52, .75, 20), mat(0x1c1c1d, {metalness: .5})); b.position.set(1.1, 5.4, z); top.add(b);
+        for(const sd of [-1, 1]){ const h = new THREE.Mesh(new THREE.CylinderGeometry(.22, .3, .8, 12), b.material); h.position.set(1.1, 5.95, z + sd * .33); h.rotation.x = sd * .62; top.add(h); } }
+      for(const z of [-12.45 + 12.5, 12.45].map(v => v - 6.25).filter(z => z >= z0 && z <= z1)){
+        const cy = new THREE.Mesh(new THREE.CylinderGeometry(.65, .65, 1.15, 28), mat(0x111111)); cy.rotation.z = Math.PI / 2; cy.position.set(-.575, 3.0, z); top.add(cy);
+        B(grp, .2, 3.4, 2.0, mat(0xf3f3ee), -1.25, 3.0, z); }
+      }
+    }
+    // 基礎及後線（依 CB-05 碼頭斷面圖 A0k+201.55～601.45）
+    if(state.sea){
+      const poly = (pts, m, op) => { const sh = new THREE.Shape(pts.map(([a, b]) => new THREE.Vector2(a, b))); const g = new THREE.ExtrudeGeometry(sh, {depth: zl, bevelEnabled: false}); g.translate(0, 0, z0);
+        const mm = op ? m.clone() : m; if(op){ mm.transparent = true; mm.opacity = op; mm.depthWrite = false; } const ms = new THREE.Mesh(g, mm); ms.receiveShadow = true; grp.add(ms); return ms; };
+      // 原地盤／浚挖線：前方計畫水深 EL−16.00、基槽 EL−18.50（前坡 1:1.5）；後方開挖 1:1.5 至 EL−13.50、再 1:3 至現有海床 EL−9.50
+      poly([[-32, -16], [-10.75, -16], [-7, -18.5], [31.5, -18.5], [39, -13.5], [51, -9.5], [62, -9.5], [62, -22], [-32, -22]], mat(0x8f8169, {roughness: 1}));
+      // 10～100 kg 卵塊石基礎：頂 EL−17.50、厚 1.0 m，頂寬 21.0 m（前後各 1.5 m），坡 1:2
+      poly([[-1.5, -17.5], [19.5, -17.5], [21.5, -18.5], [-3.5, -18.5]], mRk);
+      // 前趾 100～300 kg 塊石：頂 EL−16.50、平台寬 1.5 m，坡 1:2 至 EL−18.50
+      poly([[0, -17.5], [0, -16.5], [-1.5, -16.5], [-5.5, -18.5], [-3.5, -18.5], [-1.5, -17.5]], mat(0x6d6a64, {roughness: 1}));
+      // 後線濾層：F2 濾料（至 EL−15.50）、F1 濾料（至 EL−14.50），各厚 1.0 m、坡 1:2，頂寬 3.50 m
+      poly([[18.5, -17.5], [19.5, -17.5], [21.5, -18.5], [27.5, -18.5], [21.5, -15.5], [18, -15.5], [18, -16.5]], mat(0x5f6670, {roughness: 1}));
+      poly([[18, -15.5], [21.5, -15.5], [27.5, -18.5], [29.5, -18.5], [22.5, -14.5], [18, -14.5]], mat(0x8a929b, {roughness: 1}));
+      // 粗砂：EL−14.50 至沉箱背 EL−13.50，向後約 1:5 收至開挖坡
+      poly([[18, -14.5], [22.5, -14.5], [29.5, -18.5], [31.5, -18.5], [34.15, -16.73], [18, -13.5]], mat(0xb9a57a, {roughness: 1}));
+      // 濾布（沿開挖坡及濾層頂）
+      for(const [[ax, ay], [bx, by]] of [[[29.5, -18.45], [34.15, -16.68]], [[18, -14.45], [22.5, -14.45]], [[22.5, -14.45], [29.5, -18.45]]]){
+        const L = Math.hypot(bx - ax, by - ay), f = new THREE.Mesh(new THREE.BoxGeometry(L, .06, zl), mat(0x2a2c2e)); f.position.set((ax + bx) / 2, (ay + by) / 2, zc); f.rotation.z = Math.atan2(by - ay, bx - ax); grp.add(f); }
+      // 回填砂（地質改良）至 EL+2.50
+      poly([[18, -13.5], [34.15, -16.73], [39, -13.5], [51, -9.5], [62, -9.5], [62, 2.5], [18, 2.5]], mat(0xd9c48c, {roughness: 1}), .45);
+      const w = new THREE.Mesh(new THREE.BoxGeometry(32, 2.48 + 18.5, zl), mW); w.position.set(-16, (2.48 - 18.5) / 2, zc); grp.add(w);
+    }
+    labels = [['280 kgf/cm² 場鑄混凝土（5.40 m）', 2.7, 5.4 + (state.ex ? 10 : 0), zF], ['25 cm RC 面層（頂 EL+5.00）', 18.5, 5.0 + (state.ex ? 1.6 : 0) * 3 + (state.ex ? 10 : 0), zF], ['25 cm 碎石級配底層', 18.5, 4.75 + (state.ex ? 1.6 : 0) * 2 + (state.ex ? 10 : 0), zF], ['50 cm 碎石級配基層', 18.5, 4.5 + (state.ex ? 1.6 : 0) + (state.ex ? 10 : 0), zF], ['回填砂 EL+3.00～+4.00', 18.5, 4.0 + (state.ex ? 10 : 0), zF], ['SA01 沉箱 24.9×18.0×20.0 m', 9, 2.6, -12.45], ['EL+2.50 沉箱頂', 15, 2.6, zF], ['消波室', 2.55, -1.5, zF], ['消波孔', -.2, 0, zF - 2], ...(state.fill ? [['回填砂', 11, -7, zF]] : [['空艙（未回填）', 11, -7, zF]]), ...(state.fill ? [['水中混凝土封頂', 2.55, -5.6, zF]] : []), ['EL−17.50 沉箱底', 9, -17.6, zF],
+      ['M.H.W.L.+2.48', -16, 2.6, zF], ['計畫水深 EL−16.00', -16, -15.9, zF], ['150T 雙曲柱', 1.1, 6.6 + (state.ex ? 10 : 0), -6.2], ['CSS1150H 防舷材', -1.3, 4.9 + (state.ex ? 10 : 0), -6.25], ['10～100 kg 卵塊石（底寬 21.0 m）', 9, -18.6, zF], ['100～300 kg 塊石', -3, -17.3, zF], ['F2 濾料', 21, -16.6, zF], ['F1 濾料', 22.5, -15.2, zF], ['粗砂', 25, -14.6, zF], ['濾布', 31.8, -17.3, zF], ['回填砂（地質改良）', 34, -4, zF], ['開挖線 1:1.5／1:3', 44, -12, zF], ['現有海床 EL−9.00～−10.00', 56, -9.3, zF], ['EL−18.50', -6.5, -18.4, zF]];
+    if(state.top && !state.ex){ labels = labels.filter(l => !/^(280|25 cm|50 cm|回填砂 EL)/.test(l[0])); labels.push(['上部結構：場鑄混凝土＋RC 25／底層 25／基層 50 cm＋回填砂', 11, 5.2, zF]); }
+    if(!state.top) labels = labels.filter(l => !/場鑄|RC|級配|回填砂 EL|排水溝|雙曲柱|防舷材/.test(l[0]));
+    if(!state.sea) labels = labels.filter(l => !/M\.H\.W\.L|計畫水深|塊石|濾料|粗砂|濾布|地質改良|開挖|海床|EL−18/.test(l[0]));
+    lbBox.innerHTML = labels.map(([t]) => `<div class="lb">${t}</div>`).join('');
+  }
+
+  /* ---- 永久護岸（方塊式）：依 AE-07 永久護岸立面圖、AF-01 方塊排列平面圖、契約及第一次變更數量計算 ---- */
+  const RVL = 10.5;                                                         // 冠牆一單元 21.0 m（冠牆伸縮縫 B）
+  const BLK = [['A', -6.5, 1.5, 7.5, 0x9aa3ad], ['B', -5.0, 1.5, 7.0, 0xa9b1b9], ['C', -3.5, 1.5, 6.0, 0xb7bdc3], ['D', -2.0, 1.5, 5.0, 0xc4c9cd], ['E', -0.5, 2.0, 3.2, 0xd2d5d7]];
+  const BF = .2;                                                            // 方塊前緣退法線 0.20 m（AF-01）
+  const rowsRV = [['構造型式', '五層預鑄混凝土方塊重力式護岸＋場鑄冠牆'], ['頂高／水深', '冠牆頂 EL+4.00 m；計畫水深 EL−6.00 m；M.H.W.L.+2.48、M.L.W.L.+0.55 m'],
+    ['第一層 E 型', '寬 3.20 m，EL+1.50～−0.50（高 2.00 m）'], ['第二層 D 型', '寬 5.00 m，EL−0.50～−2.00'], ['第三層 C 型', '寬 6.00 m，EL−2.00～−3.50'], ['第四層 B 型', '寬 7.00 m，EL−3.50～−5.00（起點 B1 型長 1.50 m×2 塊）'], ['第五層 A 型', '寬 7.50 m，EL−5.00～−6.50'],
+    ['方塊長度', '每塊沿法線 2.00 m，上下層錯縫；排水箱涵處以 280 kgf/cm² 水中不分離混凝土填築（寬 6.00 m）'], ['契約數量', 'A 381、B 387、B1 2、C 388、D 388、E 382 塊（第一次變更 E 379 塊）'],
+    ['冠牆', '280 kgf/cm² 場鑄混凝土 EL+1.50～+4.00，斷面 ½(1.2＋2.4)×2.5 m（數量計算書）；每 21.0 m 設冠牆伸縮縫 B；前緣護角'], ['基礎', '5～100 kg 卵塊石 EL−7.70～−6.50，頂面 5～30 kg 卵塊石整平；開挖至現有硬層'],
+    ['背填', '背填 5～100 kg 卵塊石、10～20 cmψ 卵石、2～5 cmψ 濾料、濾布，後方回填砂；鋪面 60 cm 級配基層＋25 cm 底層＋15 cm AC'], ['附屬', '35T 曲柱 @7.0 m、500H×1750L 防舷材（階梯旁 500H×2500L）、階梯 17@42.0 m、輪擋'],
+    ['備註', '依 AE-07、AF-01 及契約／變更數量繪製；冠牆、背填與基礎斷面細部尺寸為示意，待 AE-08～AE-10、AF-04、AF-05 核對（專案資料未含此 5 張圖）']];
+  function buildRV(){
+    const z0 = -RVL, z1 = state.cut ? 0 : RVL, zF = state.cut ? 0 : -RVL, zc = (z0 + z1) / 2, zl = z1 - z0, LG = state.ex ? 1.5 : 0;
+    const poly = (pts, m, op, g = grp) => { const sh = new THREE.Shape(pts.map(([a, b]) => new THREE.Vector2(a, b))); const ge = new THREE.ExtrudeGeometry(sh, {depth: zl, bevelEnabled: false}); ge.translate(0, 0, z0);
+      const mm = op ? m.clone() : m; if(op){ mm.transparent = true; mm.opacity = op; mm.depthWrite = false; } const ms = new THREE.Mesh(ge, mm); ms.castShadow = !op; ms.receiveShadow = true; g.add(ms); return ms; };
+    // 方塊：每塊長 2.00 m，上下層錯縫 1.00 m
+    BLK.forEach(([t, y0, h, w, col], i) => { const m = mat(col), yy = y0 + h / 2 + i * LG;
+      for(let z = -RVL - (i % 2 ? 1 : 0); z < RVL; z += 2){ const a = Math.max(z, z0), b = Math.min(z + 2, z1); if(b - a < .05) continue; B(grp, w, h - .03, b - a - .03, m, BF + w / 2, yy, (a + b) / 2); } });
+    // 冠牆（含階梯、曲柱、防舷材、輪擋）
+    if(state.top){
+      const top = new THREE.Group(); top.position.y = state.ex ? 5 * LG + 1.5 : 0; grp.add(top);
+      const mCw = mat(0xcfccc5), SZ = [1.7, 5.3];                                   // 階梯沿法線方向設於冠牆前緣（z 1.7～5.3，深 1.00 m）
+      const ext = (pts, a, b) => { a = Math.max(a, z0); b = Math.min(b, z1); if(b - a < .01) return; const sh = new THREE.Shape(pts.map(([p, q]) => new THREE.Vector2(p, q)));
+        const ge = new THREE.ExtrudeGeometry(sh, {depth: b - a, bevelEnabled: false}); ge.translate(0, 0, a); const ms = new THREE.Mesh(ge, mCw); ms.castShadow = ms.receiveShadow = true; top.add(ms); };
+      const CW = [[0, 1.5], [2.4, 1.5], [1.2, 4.0], [0, 4.0]];
+      ext(CW, -RVL, SZ[0]); ext(CW, SZ[1], RVL); ext([[1.0, 1.5], [2.4, 1.5], [1.2, 4.0], [1.0, 4.0]], SZ[0], SZ[1]);
+      // 階梯（依現場照片：凹入冠牆前緣、沿護岸方向上下；數量計算書：底部踏台 1.92 m、踏階 0.24 m×7 階、寬 1.00 m）
+      for(let k = 0; k < 7; k++){ const a = SZ[0] + 1.92 + k * .24, b = a + .24, h = (k + 1) * .3125; const [qa, qb] = [Math.max(a, z0), Math.min(b, z1)]; if(qb - qa > .01) B(top, 1.0, h, qb - qa, mCw, .5, 1.5 + h / 2, (qa + qb) / 2); }
+      // 前緣護角、輪擋（黃黑斜紋，0.30～0.40×0.30）
+      B(top, .12, .12, zl, mat(0x4b4f54, {metalness: .6}), .06, 3.94, zc);
+      const stripe = tex(256, 32, (g, w, h) => { g.fillStyle = '#f2c21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#151515'; for(let x = -32; x < w + 32; x += 32){ g.beginPath(); g.moveTo(x, h); g.lineTo(x + 16, h); g.lineTo(x + 32, 0); g.lineTo(x + 16, 0); g.fill(); } });
+      for(const [a, b] of [[-RVL + .3, -7.9], [-6.1, -.9], [.9, 1.6], [5.4, 6.1], [7.9, RVL - .3]]){ const qa = Math.max(a, z0), qb = Math.min(b, z1); if(qb - qa > .1){ const mm = mat(0xffffff, {map: stripe.clone()}); mm.map.wrapS = THREE.RepeatWrapping; mm.map.repeat.set((qb - qa) / 2, 1); mm.map.needsUpdate = true; B(top, .35, .3, qb - qa, mm, .45, 4.15, (qa + qb) / 2); } }
+      // 35T 曲柱 @7.0 m（基座 1.4×1.2）
+      for(const z of [-7, 0, 7].filter(z => z >= z0 && z <= z1)){ B(top, 1.2, .3, 1.4, mCw, .8, 4.15, z); const b = new THREE.Mesh(new THREE.CylinderGeometry(.2, .26, .55, 16), mat(0x1c1c1d, {metalness: .5})); b.position.set(.8, 4.57, z); top.add(b);
+        const hd = new THREE.Mesh(new THREE.SphereGeometry(.27, 16, 8, 0, 6.3, 0, 1.6), b.material); hd.scale.y = .5; hd.position.set(.8, 4.84, z); hd.rotation.z = -.35; top.add(hd); }
+      // 500H 防舷材（V 型，1750L；階梯兩側 2500L）
+      const fsh = new THREE.Shape([[0, -.55], [-.5, -.28], [-.5, .28], [0, .55]].map(([p, q]) => new THREE.Vector2(p, q))), mF = mat(0x141414, {roughness: .9});
+      for(const [z, L] of [[-8.4, 1.75], [-4.2, 1.75], [1.05, 2.5], [5.95, 2.5], [8.4, 1.75]]){ if(z - .55 < z0 || z + .55 > z1) continue; const ge = new THREE.ExtrudeGeometry(fsh, {depth: L, bevelEnabled: false}); ge.rotateX(-Math.PI / 2); const f = new THREE.Mesh(ge, mF); f.position.set(0, 3.9 - L, z); f.castShadow = true; top.add(f); }
+    }
+    // 基礎、背填及開挖（依 AE-07 立面高程；斷面寬度依契約數量推估）
+    if(state.sea){
+      poly([[-30, -6.0], [-6.5, -6.0], [-3.1, -7.7], [16, -7.7], [27.1, -4.0], [40, -4.0], [40, -11], [-30, -11]], mat(0x8f8169, {roughness: 1}));
+      poly([[-1.3, -6.5], [8.7, -6.5], [10.5, -7.7], [-3.1, -7.7]], mRk);
+      poly([[0, -6.8], [8.2, -6.8], [8.2, -6.5], [0, -6.5]].map(([a, b], i) => [a, b + (i > 1 ? 0 : 0)]), mat(0xa29f97, {roughness: 1}));
+      poly([[3.4, 1.5], [3.4, -.5], [5.2, -.5], [5.2, -2.0], [6.2, -2.0], [6.2, -3.5], [7.2, -3.5], [7.2, -5.0], [7.7, -5.0], [7.7, -6.5], [8.7, -6.5], [10.5, -7.7], [13.6, -7.7], [4.4, 1.5]], mat(0x7c7973, {roughness: 1}));
+      poly([[4.4, 1.5], [13.6, -7.7], [15.0, -7.7], [5.8, 1.5]], mat(0x9a948a, {roughness: 1}));
+      poly([[5.8, 1.5], [15.0, -7.7], [16.0, -7.7], [16.4, -7.57], [7.2, 1.5]], mat(0x6f7780, {roughness: 1}));
+      { const L = Math.hypot(9.2, 9.2), f = new THREE.Mesh(new THREE.BoxGeometry(L, .06, zl), mat(0x2a2c2e)); f.position.set(11.8, -3.1, zc); f.rotation.z = -Math.PI / 4; grp.add(f); }
+      const w = new THREE.Mesh(new THREE.BoxGeometry(30, 2.48 + 7.7, zl), mW); w.position.set(-15, (2.48 - 7.7) / 2, zc); grp.add(w);
+    }
+    if(state.fill){
+      poly([[1.68 + 0.05, 3.0], [2.4, 1.5], [7.2, 1.5], [16.4, -7.57], [27.1, -4.0], [40, -4.0], [40, 3.0]], mat(0xd9c48c, {roughness: 1}), .5);
+      poly([[1.68, 3.0], [40, 3.0], [40, 3.6], [1.39, 3.6]], mat(0x6f6b66, {roughness: 1}));
+      poly([[1.39, 3.6], [40, 3.6], [40, 3.85], [1.27, 3.85]], mat(0x8e8a84, {roughness: 1}));
+      poly([[1.27, 3.85], [40, 3.85], [40, 4.0], [1.2, 4.0]], mat(0x2f3134, {roughness: .9}));
+    }
+    const eT = state.ex ? 5 * LG + 1.5 : 0;
+    labels = [...BLK.map(([t, y0, h, w], i) => [`${t} 型方塊 寬 ${w.toFixed(2)} m（EL${(y0 + h) >= 0 ? '+' : '−'}${Math.abs(y0 + h).toFixed(2)}～${y0 >= 0 ? '+' : '−'}${Math.abs(y0).toFixed(2)}）`, BF + w / 2, y0 + h / 2 + i * LG, zF]),
+      ['冠牆 280 kgf/cm²（EL+1.50～+4.00）', 1.0, 4.2 + eT, zF], ['35T 曲柱 @7.0 m', .8, 5.3 + eT, -7], ['500H×1750L 防舷材', -.5, 3.2 + eT, -8.4], ['階梯 @42 m（凹入冠牆、順護岸方向）', .5, 4.4 + eT, 3.5],
+      ['M.H.W.L.+2.48', -15, 2.6, zF], ['計畫水深 EL−6.00', -15, -5.9, zF], ['5～100 kg 卵塊石基礎', 4, -7.5, zF], ['5～30 kg 整平', -.6, -6.9, zF], ['背填 5～100 kg 卵塊石', 9.5, -4.3, zF], ['10～20 cmψ 卵石', 10.6, -1.2, zF], ['2～5 cmψ 濾料＋濾布', 13.8, -2.6, zF], ['開挖線（現有硬層）', 22, -6.3, zF], ['EL−7.70', -4.5, -7.6, zF],
+      ['回填砂', 26, 0, zF], ['AC 15＋底層 25＋基層 60 cm', 20, 4.1, zF]];
+    if(!state.top) labels = labels.filter(l => !/冠牆|曲柱|防舷材|階梯/.test(l[0]));
+    if(!state.sea) labels = labels.filter(l => !/W\.L|水深|卵塊石|整平|卵石|濾料|開挖|EL−7/.test(l[0]));
+    if(!state.fill) labels = labels.filter(l => !/回填砂|AC/.test(l[0]));
+    lbBox.innerHTML = labels.map(([t]) => `<div class="lb">${t}</div>`).join('');
+  }
+
+  /* ---- 南一碼頭 SC03 沉箱：依 EB-03 S01 碼頭斷面圖(一) A-A 斷面、EC-01 SC03 沉箱平、立及斷面圖 ---- */
+  const rowsN1 = [['沉箱型式', 'SC03 沉箱（#1～#9，共 9 座）'], ['尺寸', '15.12（寬）×25.00（長，含兩端榫 15 cm）×12.00（高）m'], ['沉箱底／頂', 'EL−9.50 m／EL+2.50 m（底版 0.60 m）'], ['艙格', '3（橫）×5（縱）共 15 艙，每艙 4.54×4.54 m；外壁 0.50、隔牆 0.25 m'],
+    ['進水孔', '25/30 cmψ 進水孔（底版上 3.00 m）、10 cmψ 通水孔'], ['艙內回填', '回填砂；鋪碎石 30 cm、210 kgf/cm² 封頂混凝土 50 cm、210 kgf/cm² 堤面混凝土 50 cm'],
+    ['上部結構', '280 kgf/cm² 場鑄混凝土：法線後 0～3.00 m 頂 EL+4.50、3.00～5.50 m 頂 EL+3.50；前緣 280 kgf/cm² 非分離混凝土至 EL±0.00（厚約 0.45 m）'], ['鋪面', '25 cm RC 鋪面＋25 cm 碎石級配底層＋50 cm 碎石級配基層；5U 型排水溝（法線後 15.57 m）、6U 型排水溝（法線後 30.0 m）'],
+    ['附屬', '70T 雙曲柱、600H×3500L 防舷材（中心 EL+2.25 m、基座 EL±0.00）、輪擋'], ['基礎', '10～100 kg 卵塊石 EL−9.50～−11.00，前趾 5～100 kg 卵塊石（坡 1:2），開挖坡 1:1.5；前方海床 EL−9.00'],
+    ['後線', 'F2、F1 濾料、粗砂至 EL−6.50（各 1.00 m，頂寬 3.00 m，坡 1:2、1:5）、濾布（固定於沉箱背、打摺 2 m）；回填料（地質改良）；後方 C 填區臨時擋土板樁'], ['計畫水深', 'EL−9.00 m；M.H.W.L.+2.48、M.L.W.L.+0.55 m']];
+  function buildN1(){
+    const z0 = -12.5, z1 = state.cut ? 0 : 12.5, zF = state.cut ? 0 : -12.5, zc = (z0 + z1) / 2, zl = z1 - z0, ZB = 12.35;
+    const clip = (a, b) => [Math.max(a, z0), Math.min(b, z1)];
+    const Bz = (g, w, h, a, b, m, x, y) => { const [qa, qb] = clip(a, b); if(qb - qa > .001) B(g, w, h, qb - qa, m, x, y, (qa + qb) / 2); };
+    const XW = [[.45, .95], [5.49, 5.74], [10.28, 10.53], [15.07, 15.57]], CX = [[.95, 5.49], [5.74, 10.28], [10.53, 15.07]];
+    const ZW = [[-12.35, -11.85], [-7.31, -7.06], [-2.52, -2.27], [2.27, 2.52], [7.06, 7.31], [11.85, 12.35]], CZ = [[-11.85, -7.31], [-7.06, -2.52], [-2.27, 2.27], [2.52, 7.06], [7.31, 11.85]];
+    const WB = -8.9, WT = 2.5;
+    Bz(grp, 15.12, .6, -ZB, ZB, mC, 8.01, -9.2);                                         // 底版 EL−9.50～−8.90
+    XW.forEach(([a, b], i) => Bz(grp, b - a, WT - WB, -ZB, ZB, i === 0 || i === 3 ? mC : mCin, (a + b) / 2, (WT + WB) / 2));
+    ZW.forEach(([a, b], i) => Bz(grp, 15.12, WT - WB, a, b, i === 0 || i === 5 ? mC : mCin, 8.01, (WT + WB) / 2));
+    for(const sz of [-1, 1]) for(const x of [1.8, 4.6, 6.6, 9.4, 11.4, 14.2]) Bz(grp, .5, WT - WB, sz > 0 ? ZB : -ZB - .15, sz > 0 ? ZB + .15 : -ZB, mCin, x, (WT + WB) / 2);   // 兩端榫
+    // 艙角隅補強（117／110 斜角，示意）
+    for(const [xa, xb] of CX) for(const [za, zb] of CZ){ for(const [x, z] of [[xa, za], [xb, za], [xa, zb], [xb, zb]]){ if(z < z0 - .01 || z > z1 + .01) continue; const f = new THREE.Mesh(new THREE.BoxGeometry(.4, WT - WB, .4), mCin); f.position.set(x, (WT + WB) / 2, z); f.rotation.y = Math.PI / 4; f.scale.set(.75, 1, .75); grp.add(f); } }
+    // 25/30 cmψ 進水孔（前牆，底版上 3.00 m）
+    for(const z of [-9.58, 9.58].filter(z => z >= z0 && z <= z1)){ const h = new THREE.Mesh(new THREE.CircleGeometry(.15, 16), mat(0x222426)); h.rotation.y = -Math.PI / 2; h.position.set(.44, -6.5, z); grp.add(h); }
+    if(state.cut) B(grp, 15.12, .02, .02, mCin, 8.01, 2.5, 0);
+    if(state.fill) for(const [xa, xb] of CX) for(const [za, zb] of CZ){ const w = xb - xa, x = (xa + xb) / 2;
+      Bz(grp, w, 1.2 - WB, za, zb, mSand, x, (1.2 + WB) / 2); Bz(grp, w, .3, za, zb, mRk, x, 1.35); Bz(grp, w, .5, za, zb, mCap, x, 1.75); Bz(grp, w, .5, za, zb, mat(0xb8b4ab), x, 2.25); }
+    // 上部結構（分開展示時上移 8 m）
+    const EX = state.ex ? 8 : 0, LG = state.ex ? 1.4 : 0;
+    if(state.top){
+      const top = new THREE.Group(); top.position.y = EX; grp.add(top);
+      const mCast = mat(0xc3bfb6), mRC = mat(0xdcd9d2), mSub = mat(0x8e8a84, {roughness: 1}), mBase = mat(0x6f6b66, {roughness: 1}), mBf = mat(0xd9c48c, {roughness: 1});
+      B(top, .45, 2.5, zl, mCast, .225, 1.25, zc);                                         // 前緣非分離混凝土 EL±0.00～+2.50
+      B(top, 3.0, 2.0, zl, mCast, 1.5, 3.5, zc);                                            // 場鑄 0～3.00 m，EL+2.50～+4.50
+      B(top, 2.5, 1.0, zl, mCast, 4.25, 3.0, zc);                                           // 場鑄 3.00～5.50 m，EL+2.50～+3.50
+      B(top, 10.07, .9, zl, mBf, 10.535, 2.95, zc);                                         // 沉箱頂回填 EL+2.50～+3.40
+      B(top, 27, .5, zl, mBase, 16.5, 3.75 + LG, zc); B(top, 27, .25, zl, mSub, 16.5, 4.125 + LG * 2, zc); B(top, 27, .25, zl, mRC, 16.5, 4.375 + LG * 3, zc);
+      for(const x of [15.75, 29.6]) B(top, .9, .6, zl, mat(0x55585b), x, 4.2 + LG * 3, zc);   // 5U、6U 型排水溝
+      { const s = tex(256, 32, (g, w, h) => { g.fillStyle = '#f2c21a'; g.fillRect(0, 0, w, h); g.fillStyle = '#151515'; for(let x = -32; x < w + 32; x += 32){ g.beginPath(); g.moveTo(x, h); g.lineTo(x + 16, h); g.lineTo(x + 32, 0); g.lineTo(x + 16, 0); g.fill(); } });
+        const mm = mat(0xffffff, {map: s}); mm.map.wrapS = THREE.RepeatWrapping; mm.map.repeat.set(zl / 2, 1); B(top, .3, .25, zl, mm, .25, 4.625, zc); }
+      for(const z of [-6.25, 6.25].filter(z => z >= z0 && z <= z1)){ const b = new THREE.Mesh(new THREE.CylinderGeometry(.32, .4, .6, 20), mat(0x1c1c1d, {metalness: .5})); b.position.set(1.0, 4.8, z); top.add(b);
+        for(const sd of [-1, 1]){ const h = new THREE.Mesh(new THREE.CylinderGeometry(.17, .23, .6, 12), b.material); h.position.set(1.0, 5.2, z + sd * .25); h.rotation.x = sd * .62; top.add(h); } }
+      for(const z of [-9.45, -3.15, 3.15, 9.45].filter(z => z - .6 >= z0 && z + .6 <= z1)){ B(top, .6, 3.5, 1.2, mat(0x141414, {roughness: .9}), -.3, 2.25, z); B(top, .12, 3.6, 1.6, mat(0xf3f3ee), -.66, 2.25, z); }
+    }
+    if(state.sea){
+      const poly = (pts, m, op) => { const sh = new THREE.Shape(pts.map(([a, b]) => new THREE.Vector2(a, b))); const ge = new THREE.ExtrudeGeometry(sh, {depth: zl, bevelEnabled: false}); ge.translate(0, 0, z0);
+        const mm = op ? m.clone() : m; if(op){ mm.transparent = true; mm.opacity = op; mm.depthWrite = false; } const ms = new THREE.Mesh(ge, mm); ms.receiveShadow = true; grp.add(ms); return ms; };
+      poly([[-30, -9.0], [-7.55, -9.0], [-4.55, -11.0], [20.57, -11.0], [30, -4.7], [30, -14], [-30, -14]], mat(0x8f8169, {roughness: 1}));
+      poly([[-1.55, -9.5], [17.57, -9.5], [20.57, -11.0], [-4.55, -11.0]], mRk);                           // 10～100 kg 卵塊石
+      poly([[-.55, -9.5], [-1.55, -9.5], [-4.55, -11.0], [-3.55, -11.0]].map(([a, b]) => [a, b]), mat(0x6d6a64, {roughness: 1}));  // 前趾 5～100 kg
+      poly([[15.57, -9.5], [17.57, -9.5], [20.57, -11.0], [22.8, -11.0], [18.57, -8.5], [15.57, -8.5]], mat(0x5f6670, {roughness: 1}));   // F2
+      poly([[15.57, -8.5], [18.57, -8.5], [22.8, -11.0], [25.0, -11.0], [19.6, -7.5], [15.57, -7.5]], mat(0x8a929b, {roughness: 1}));     // F1
+      poly([[15.57, -7.5], [19.6, -7.5], [25.0, -11.0], [26.2, -10.2], [18.57, -6.9], [15.57, -6.5]], mat(0xb9a57a, {roughness: 1}));     // 粗砂（頂 1:5）
+      for(const [[ax, ay], [bx, by]] of [[[18.6, -6.85], [26.2, -10.15]], [[15.6, -8.4], [18.0, -8.4]]]){ const L = Math.hypot(bx - ax, by - ay), f = new THREE.Mesh(new THREE.BoxGeometry(L, .06, zl), mat(0x2a2c2e)); f.position.set((ax + bx) / 2, (ay + by) / 2, zc); f.rotation.z = Math.atan2(by - ay, bx - ax); grp.add(f); }
+      poly([[15.57, -6.5], [18.57, -6.9], [26.2, -10.2], [30, -4.7], [30, 2.5], [15.57, 2.5]], mat(0xd9c48c, {roughness: 1}), .45);      // 回填料（地質改良）
+      B(grp, .25, 17, zl, mat(0x3c4046, {metalness: .5}), 30.1, -5.5, zc);                                  // 臨時擋土板樁
+      const w = new THREE.Mesh(new THREE.BoxGeometry(30, 2.48 + 11, zl), mW); w.position.set(-15, (2.48 - 11) / 2, zc); grp.add(w);
+    }
+    labels = [['280 kgf/cm² 場鑄混凝土（EL+4.50）', 1.5, 4.6 + EX, zF], ['25 cm RC 鋪面', 22, 4.5 + LG * 3 + EX, zF], ['25 cm 碎石級配底層', 22, 4.25 + LG * 2 + EX, zF], ['50 cm 碎石級配基層', 22, 4.0 + LG + EX, zF], ['5U 型排水溝', 15.75, 4.6 + LG * 3 + EX, zF], ['6U 型排水溝', 29.6, 4.6 + LG * 3 + EX, zF], ['70T 雙曲柱', 1.0, 5.7 + EX, -6.25], ['600H×3500L 防舷材', -.7, 4.2 + EX, -9.45], ['非分離混凝土 EL±0.00', -.2, .2 + EX, zF],
+      ['SC03 沉箱 15.12×25.0×12.0 m', 8, 2.6, -12.5], ['EL+2.50 沉箱頂', 13, 2.6, zF], ['進水孔 25/30 cmψ', .3, -6.2, -9.58], ...(state.fill ? [['回填砂', 8, -4, zF], ['封頂／堤面混凝土', 8, 2.0, zF]] : [['空艙（未回填）', 8, -4, zF]]), ['EL−9.50 沉箱底', 8, -9.6, zF],
+      ['M.H.W.L.+2.48', -15, 2.6, zF], ['計畫水深 EL−9.00', -15, -8.9, zF], ['10～100 kg 卵塊石', 8, -10.6, zF], ['5～100 kg 卵塊石', -3.2, -9.9, zF], ['F2 濾料', 19, -9.6, zF], ['F1 濾料', 20.5, -8.4, zF], ['粗砂 EL−6.50', 18.5, -7.0, zF], ['濾布', 24, -8.8, zF], ['回填料（地質改良）', 24, -1, zF], ['開挖坡 1:1.5', 27, -7.5, zF], ['臨時擋土板樁', 30.1, 3.2, zF], ['EL−11.00', -4.5, -10.9, zF]];
+    if(!state.top) labels = labels.filter(l => !/場鑄|RC|級配|排水溝|雙曲柱|防舷材|非分離/.test(l[0]));
+    else if(!state.ex){ labels = labels.filter(l => !/^(25 cm|50 cm)/.test(l[0])); labels.push(['鋪面：RC 25＋底層 25＋基層 50 cm', 22, 4.6, zF]); }
+    if(!state.sea) labels = labels.filter(l => !/W\.L|計畫水深|卵塊石|濾料|粗砂|濾布|回填料|開挖|板樁|EL−11/.test(l[0]));
+    lbBox.innerHTML = labels.map(([t]) => `<div class="lb">${t}</div>`).join('');
+  }
+  function init(){
+    R = new THREE.WebGLRenderer({canvas: cv, antialias: true, preserveDrawingBuffer: true}); R.setPixelRatio(Math.min(devicePixelRatio, 2));
+    R.toneMapping = THREE.ACESFilmicToneMapping; R.toneMappingExposure = .9; R.shadowMap.enabled = true;
+    S = new THREE.Scene(); S.background = new THREE.Color(0x14202c);
+    S.add(new THREE.HemisphereLight(0xe8f0ff, 0x3a3428, 1.1));
+    const d = new THREE.DirectionalLight(0xffffff, 2.2); d.position.set(-30, 40, 35); d.castShadow = true; d.shadow.mapSize.set(2048, 2048); Object.assign(d.shadow.camera, {left: -40, right: 40, top: 40, bottom: -40}); S.add(d);
+    C = new THREE.PerspectiveCamera(35, 1, .1, 1000); CT = new OrbitControls(C, cv); CT.enableDamping = true;
+    new ResizeObserver(() => { const w = cv.clientWidth, h = cv.clientHeight; if(!w) return; R.setSize(w, h, false); C.aspect = w / h; C.updateProjectionMatrix(); }).observe(cv);
+    build(); fit();
+    const v = new THREE.Vector3();
+    R.setAnimationLoop(() => { if(!dlg.classList.contains('open')) return; CT.update(); R.render(S, C);
+      const w = cv.clientWidth, h = cv.clientHeight, els = lbBox.children;
+      labels.forEach(([, x, y, z], i) => { v.set(x, y, z).project(C); const e = els[i]; if(!e) return; const ok = v.z < 1 && Math.abs(v.x) < 1 && Math.abs(v.y) < 1; e.style.display = ok ? '' : 'none'; if(ok) e.style.transform = `translate(${(v.x + 1) / 2 * w}px,${(1 - v.y) / 2 * h - 12}px) translate(-50%,-100%)`; e.style.left = e.style.top = '0'; }); });
+  }
+  function fit(){ if(mode === 'N1'){ CT.target.set(8, -1, 0); C.position.set(-42, 22, -60); } else if(mode === 'RV'){ CT.target.set(5, -1.5, 0); C.position.set(-24, 14, -30); } else { CT.target.set(9, 0, 0); C.position.set(-46, 32, -62); } CT.update(); }
+  const BTN = {CS: {csCut: '剖切顯示艙格', csSea: '海水及拋石基礎', csTop: '上部結構', csEx: '上部／沉箱分開', csFill: '艙內回填'}, N1: {csCut: '剖切顯示艙格', csSea: '海水及拋石基礎', csTop: '上部結構', csEx: '上部／沉箱分開', csFill: '艙內回填'}, RV: {csCut: '半段剖切', csSea: '基礎及背填', csTop: '冠牆及附屬', csEx: '方塊分層展開', csFill: '回填砂及鋪面'}};
+  const KEY = {csCut: 'cut', csSea: 'sea', csTop: 'top', csEx: 'ex', csFill: 'fill'};
+  function open(k){
+    mode = k === 'RV' || k === 'N1' ? k : 'CS'; state = {RV: stRV, N1: stN1, CS: stCS}[mode];
+    for(const [id, t] of Object.entries(BTN[mode])){ const b = document.getElementById(id); b.textContent = t; b.setAttribute('aria-pressed', state[KEY[id]]); }
+    if(mode === 'N1'){ document.getElementById('csT').textContent = '南一碼頭 · SC03 沉箱 3D'; document.getElementById('csSub').textContent = 'S01（南一）碼頭 長 271.4 m · SC03 沉箱 #1～#9 · EB-03 A-A 斷面、EC-01';
+      document.getElementById('csTab').innerHTML = rowsN1.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join(''); }
+    else if(mode === 'RV'){ document.getElementById('csT').textContent = '永久護岸 · 方塊式護岸 3D'; document.getElementById('csSub').textContent = 'F0k+000～F0k+789（長 789 m）· 圖示冠牆一單元 21.0 m（含階梯）· AE-07／AF-01';
+      document.getElementById('csTab').innerHTML = rowsRV.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join(''); }
+    else { const I = INFO[k]; document.getElementById('csT').textContent = `${I.name} · SA01 沉箱 3D`; document.getElementById('csSub').textContent = I.sub;
+      document.getElementById('csTab').innerHTML = rows.concat([['備註', I.note]]).map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join(''); }
+    document.getElementById('csNote').textContent = mode === 'N1' ? '沉箱依 EC-01 SC03 沉箱平、立及斷面圖；高程、基礎、後線及上部結構依 EB-03 S01 碼頭斷面圖(一) A-A 斷面。' : mode === 'RV' ? '方塊排列依 AF-01、高程依 AE-07 永久護岸立面圖，數量依契約詳細表及第一次變更數量計算書。' : '沉箱依 CC-36 SA01 沉箱透視圖建模；高程、回填及上部結構依 CB-05 碼頭斷面圖（A0k+201.55～601.45）。';
+    dlg.classList.add('open'); if(!R) init(); else { build(); fit(); } document.getElementById('csClose').focus();
+  }
+  document.querySelectorAll('#spec tr.cs').forEach(tr => { tr.addEventListener('click', () => open(tr.dataset.cs)); tr.addEventListener('keydown', e => { if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(tr.dataset.cs); } }); });
+  document.getElementById('csClose').addEventListener('click', () => dlg.classList.remove('open'));
+  addEventListener('keydown', e => { if(e.key === 'Escape') dlg.classList.remove('open'); });
+  for(const [id, k] of [['csCut', 'cut'], ['csSea', 'sea'], ['csTop', 'top'], ['csEx', 'ex'], ['csFill', 'fill']]){ const b = document.getElementById(id); b.addEventListener('click', () => { state[k] = !state[k]; b.setAttribute('aria-pressed', state[k]); build(); }); }
+  document.getElementById('csFit').addEventListener('click', fit);
+  document.getElementById('csSec').addEventListener('click', () => { if(mode === 'N1'){ for(const [id, k] of [['csCut', 'cut'], ['csSea', 'sea']]) if(!state[k]){ state[k] = true; document.getElementById(id).setAttribute('aria-pressed', true); } build(); CT.target.set(9, -3, 0); C.position.set(9, -3, 62); CT.update(); return; } if(mode === 'RV'){ if(!state.cut){ state.cut = true; document.getElementById('csCut').setAttribute('aria-pressed', true); } build(); CT.target.set(9, -1.8, 0); C.position.set(9, -1.8, 36); CT.update(); return; } if(!state.cut){ state.cut = true; document.getElementById('csCut').setAttribute('aria-pressed', true); } if(!state.sea){ state.sea = true; document.getElementById('csSea').setAttribute('aria-pressed', true); } build(); CT.target.set(14, -7, 0); C.position.set(14, -7, 78); CT.update(); });
+  window.__openCS = open;
+}
+
+window.__cam = (px, py, pz, tx, ty, tz) => { anim = null; camera.position.set(px, py, pz); controls.target.set(tx, ty, tz); controls.update(); };
 window.__ready = true;
 }
 </script>
