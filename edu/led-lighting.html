@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>照明燈桿及警示燈標 3D 分解</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造查核用的技術圖面，冷靜、精確，像一張會動的施工詳圖
+   IDEA: 港區夜間的鍍鋅鋼構，一鍵展開成零件，每個零件掛上契約條文
+   PICTURE: 大幅 3D 夜景視窗，燈具發光、警示燈依燈質實時閃爍
+   COLOUR and TYPE: 夜港深藍 + 鍍鋅灰 + IALA 黃色燈光；Noto Sans TC
+   LAYOUT: 標題列 → 機型切換 → 3D 視窗與規範面板並列 → 全部位查核表 */
+:root{color-scheme:light dark;
+--bg:light-dark(#f2f4f5,#0a131c);--card:light-dark(#ffffff,#111e2a);--ink:light-dark(#0f1a22,#e8eef2);
+--mute:light-dark(#566470,#93a3b0);--line:light-dark(#d7dde1,#22313f);--acc:#ffb020;--acc2:light-dark(#a86a00,#ffc65a);
+--ok:light-dark(#0b6b57,#4fd1b0);--chk:light-dark(#9a5a00,#ffbf47);--na:light-dark(#4b5a66,#9fb0bd);--sel:light-dark(#1d5fd8,#6aa2ff)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,14px)}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.1;margin:0 0 8px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 12px;line-height:1.25}
+.sub{color:var(--mute);margin:0;max-width:80ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px}
+.tab{font:inherit;font-weight:700;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;line-height:1.25}
+.tab small{display:block;font-weight:400;color:var(--mute);font-size:13px}
+.tab[aria-selected=true]{background:#13283a;color:#fff;border-color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.tab[aria-selected=true] small{color:#ffd27a}
+.tab:focus-visible,.btn:focus-visible,.pin:focus-visible,.plist button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.viewer{position:relative;height:min(78vh,760px);min-height:460px;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#1d3347 0%,#0c1824 60%,#070e15 100%);border:1px solid #1c2d3c}
+.viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.pins{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:26px;height:26px;padding:0 6px;border-radius:13px;border:1.5px solid #ffd27a;background:rgba(10,20,30,.82);color:#ffe3a6;font:700 13px/22px "Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
+.pin span{display:none;font-weight:500;margin-left:4px}
+.pin:hover span,.pin.on span{display:inline}
+.pin.on{background:var(--acc);color:#111;border-color:#fff;z-index:2}
+.pin.chk{border-color:#ff8a3d}
+.hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(8,16,24,.78);backdrop-filter:blur(6px);border:1px solid #24374a;border-radius:12px;padding:8px 10px;color:#dfe8ee}
+.hud label{display:flex;align-items:center;gap:8px;flex:1 1 220px;font-size:14px}
+.hud input[type=range]{flex:1;accent-color:var(--acc);height:28px}
+.btn{font:inherit;font-size:14px;font-weight:700;min-height:40px;padding:6px 12px;border-radius:9px;border:1px solid #35506a;background:#16293b;color:#eaf2f7;cursor:pointer}
+.btn[aria-pressed=true]{background:var(--acc);color:#141414;border-color:var(--acc)}
+.tag{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);background:rgba(8,16,24,.72);color:#cfdbe4;border:1px solid #24374a;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.45}
+.tag b{color:#ffd27a}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;max-height:min(78vh,760px);overflow:auto}
+.ph{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ph h2{margin:0}
+.no{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:15px;background:var(--acc);color:#141414;font-weight:900;margin-right:8px;font-size:15px}
+.chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;border:1.5px solid currentColor}
+.chip.ok{color:var(--ok)}.chip.chk{color:var(--chk)}.chip.na{color:var(--na)}
+.sec{margin-top:14px}
+.sec h3{font-size:14px;color:var(--mute);margin:0 0 6px;font-weight:700}
+.sec ul{margin:0;padding-left:1.1em}
+.sec li{margin:3px 0}
+.src{font-size:12px;color:var(--acc2);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.note{margin-top:14px;padding:10px 12px;border-radius:10px;background:light-dark(#fff6e3,#2a2110);border:1px solid light-dark(#f0d39a,#5a4519);font-size:15px}
+.plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.plist button{font:inherit;font-size:13px;min-height:34px;padding:3px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.plist button.on{border-color:var(--acc);background:light-dark(#fff3d6,#2b2412)}
+.sum{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 12px;color:var(--mute);font-size:15px}
+.sum b{color:var(--ink);font-size:20px;margin-right:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--mute);font-weight:700;background:light-dark(#f6f8f9,#0f1b26)}
+td:first-child{white-space:nowrap;font-weight:700}
+tr.rowsel td{background:light-dark(#fff6e3,#241e10)}
+tbody tr{cursor:pointer}
+.issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.issue{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--chk);border-radius:10px;padding:12px 14px;font-size:15px}
+.issue b{display:block;margin-bottom:4px}
+.foot{color:var(--mute);font-size:13px}
+.err{position:absolute;inset:0;display:none;place-items:center;color:#cfdbe4;padding:20px;text-align:center}
+pre,.scroll{overflow-x:auto}
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.panel{max-height:none}.viewer{height:68vh}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:700}.stack td:empty{display:none}.pin span{display:none!important}.tag{font-size:12px}}
+@media(prefers-reduced-motion:reduce){.pin{transition:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+<h1>LED 路燈燈桿及陸上警示燈標 3D 分解查核</h1>
+<p class="sub">臺北港南碼頭 C 填區公共設施及永久護岸暨 S04～S05 碼頭工程。拖曳旋轉、滾輪縮放、拉動「分解」滑桿或按「播放」看組裝過程；點零件或編號，右側列出契約規範與送審資料的對照。</p>
+<div class="tabs" role="tablist" id="tabs"></div>
+</div></header>
+
+<main class="band" style="padding-top:0"><div class="wrap">
+<div class="grid">
+ <div class="viewer" id="viewer">
+  <div class="pins" id="pins"></div>
+  <div class="tag" id="tag"></div>
+  <div class="hud">
+   <label for="ex">分解 <input id="ex" type="range" min="0" max="100" value="0"></label>
+   <button class="btn" id="play" aria-pressed="false">▶ 播放分解</button>
+   <button class="btn" id="lbl" aria-pressed="true">標註</button>
+   <button class="btn" id="reset">重置視角</button>
+  </div>
+  <div class="err" id="err">3D 元件載入失敗，請重新整理頁面。下方查核表仍可使用。</div>
+ </div>
+ <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+
+<section style="margin-top:28px">
+ <h2 id="ttl">部位查核表</h2>
+ <div class="sum" id="sum"></div>
+ <div class="scroll"><table class="stack" id="tbl"><thead><tr><th>#</th><th>部位</th><th>契約規範要求</th><th>送審資料</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<section style="margin-top:28px">
+ <h2>監造待確認事項</h2>
+ <div class="issues" id="issues"></div>
+</section>
+
+<p class="foot" style="margin-top:26px">依據：第4次變更設計圖 BH9-02 螺栓式單(雙)臂照明燈柱安裝示意圖、BH9-01 照明設備配置圖（一變）、AJ-01 永久護岸電力管路配置圖、CD-14／DG-07 警示燈標詳圖；施工說明書技術條款第 16551 章、第 02396 章港灣導航設施；監造計畫修訂七版第五章材料抽驗、表 6-3-1 LED 道路照明單機測試紀錄表。送審資料：威盛照明 RL-150 燈具送審文件、永昇鋼構 8M/10M 燈桿製造圖、佑松機械警示燈標材料文件（114.04.07）、廷翰國際 WM-L350A 太陽能導航警示燈資審文件。3D 外形為示意，比例依圖面主要尺寸。</p>
+</div></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+/* ---------- 規範資料 ---------- */
+const S_BH='BH9-02', S_TB='監造計畫 表6-3-1', S_M5='監造計畫 5章', S_CD='CD-14/DG-07', S_96='第02396章', S_16='第16551章';
+const LED_SPEC=[
+ ['額定功率 ≦150W','BH9-02/表6-3-1'],['燈具光通量 ≧16,200 lm','BH9-02/表6-3-1'],['初始發光效率 ≧75 lm/W',S_TB],
+ ['防塵防水：發光室 IP65 以上、控制室 IP54 以上',S_TB],['鹽水噴霧 240 小時，分級數字 RN ≧10',S_TB],
+ ['外殼：壓鑄鋁、鋁擠型或沖壓鋁，烤漆防蝕防水',S_BH+' 說明4'],['燈罩：耐熱玻璃、壓克力或抗 UV 硬化 PC',S_TB],
+ ['反光板：陽極處理鋁板',S_TB],['電源供應器：內含於燈具或置於燈具外',S_TB],['輸入 1ψ110V 或 220V 60Hz',S_TB],
+ ['燈具型式：二方向型或全周型（遮隔／半遮隔）',S_TB],['LED 燈具仰角 0°～15°',S_BH+' 說明6'],['其他規格依技術條款第16551章',S_16]];
+const LED_SUB=[['威盛 RL-150：LED 150W','RL-150 型錄'],['發光效率 178 lm/W；3000h 光通量 27,373 lm','毅豐光電測報'],
+ ['防護等級 IP68（CNS 14165）','毅豐光電測報'],['本體壓鑄鋁成型、粉體烤漆；透鏡 PC','RL-150 型錄'],
+ ['二方向型半遮隔 A 型；PF 0.98；5230K','毅豐光電測報'],['AC110–220V 60Hz；安定器外置型（明緯驅動）','RL-150 型錄'],
+ ['耐風壓 60.5 m/s 正向／側向 2.5 小時無破壞','毅豐光電測報'],['外形 840×340×148mm，接口內徑∮66 深 100，可轉 90°','RL-150 型錄']];
+const LED_NOTE='數值全部優於契約下限。兩項要釐清：(1) BH9-01 圖例寫「並含內置式電源供應器」，RL-150 型錄寫安定器「外置型」，與表 6-3-1「內含或置於燈具外」皆可的寫法不同，請廠商說明驅動器實際安裝位置。(2) 鹽霧 240h RN≧10 與反光板陽極處理鋁兩項，請在測報中標出頁次。';
+
+const pole=(h)=>({
+ shaft:{name:'燈桿桿身',st:'chk',
+  spec:[['材質 ASTM A572 Gr50 或 CNS 2947 G3057 SM490',S_BH+' 說明5'],['整支單片鋼板油壓成圓錐狀、縱向接縫',S_BH+' 說明5'],
+   ['熱浸鍍鋅，含鋅量 ≧550 g/m²，符合 CNS 1247',S_BH+' 說明6'],['鍍鋅後漆水性鍍鋅鐵皮漆二度，顏色 NO.36',S_BH+' 說明6'],
+   ['設計風速 60 m/s，製造前提出風力與結構計算書',S_BH+' 說明7'],
+   [h==10?'尺寸 H1=10m、D1=203*、D2=69*、t=4.5*（*參考值）':'護岸尺寸 H1=8m、D1/D2/t 同表 *參考值',S_BH+' 尺寸表'],
+   ['燈柱材質、鍍鋅量進場前取樣送驗，不合格加倍取樣',S_M5+' 三十']],
+  sub:[[h==10?'10M：D1 203、D2 69、t 4.5mm':'8M：D1 178、D2 69、t 4.5mm','永昇 8M/10M 燈桿製造圖'],
+   ['圖註鍍鋅量 ≧550 g/m²','製造圖'],['SGS 鍍鋅報告 TK-22-06277：1004～1385 g/m²','SGS 112.01.03']],
+  note:(h==8?'8M 桿底徑 D1 178mm 小於契約表列 203*（參考值），需以結構計算書證明 60 m/s 風速下安全。':'')+'附件 SGS 鍍鋅報告的工程名稱是「高雄港第七貨櫃中心計畫-S4~S5 櫃場設施工程」，不是本案，只能當廠商能力參考。本案燈桿仍須依監造計畫進場取樣送驗材質與鍍鋅量。本次文件未見風力與結構計算書，請確認是否另案提送。'},
+ base:{name:'底座板及固定螺帽',st:'ok',
+  spec:[['螺栓式燈柱，以套筒式螺帽、六角螺帽、墊片及彈簧墊圈固定',S_BH+' 安裝示意'],['圖示結構及錨碇型式僅供參考，承包商依原廠資料繪製製造圖送核',S_BH+' 說明8']],
+  sub:[['底座板 334×334mm，孔距 260mm，加勁板','製造圖 燈桿底座詳圖']],note:'安裝查驗：錨碇螺栓與墊圈密合、螺帽鎖固、桿身垂直度。'},
+ bolt:{name:'錨碇螺栓及定位板',st:'ok',
+  spec:[['25mm×1016mm 錨碇螺栓 4 支（A307）',S_BH+' 詳圖B'],['10mm∮竹節鋼筋與錨碇螺栓緊固銲接',S_BH+' 詳圖B'],['鍍鋅鋼製定位板 t=3.0mm',S_BH+' 詳圖B']],
+  sub:[['25mm×1016mm 錨碇螺栓(A307) 4 支、定位板 t=3.0','製造圖']],note:'澆置前查驗螺栓位置、外露長度與定位板高程。'},
+ jbox:{name:'鍍鋅防水型接線盒',st:'ok',
+  spec:[['400(L)×150(W)×155(D)，箱體及蓋板厚 4mm，設滴水孔',S_BH+' 接線盒示意'],['鍍鋅量 ≧550 g/m²',S_BH],
+   ['內裝漏電斷路器 ELCB 2P 50AF 15AT 30mA 0.1s 5kA 220V，1燈1只',S_BH],['皿頭 6∮×14∮ 銅螺絲 2 支',S_BH],
+   ['接線盒位置與車行方向相反，面對接線盒工作時可看清來車',S_BH+' 說明3'],['燈具間按相序連結',S_BH+' 說明2']],
+  sub:[['400×150×155，蓋板 4.5mm','製造圖'],['ELCB 2P 50AF 15AT 30mA 0.1s 5kA 220V','製造圖']],note:'安裝時逐盞檢查開口方向背向車流。'},
+ plate:{name:'製造廠商銘牌／路燈號碼牌',st:'ok',
+  spec:[['t=0.8 銅板，字體凸字',S_BH+' 銘牌示意'],['3∮ 鉚釘固定，標示燈桿規格 H= m、製造日期',S_BH],['路燈號碼牌 TAP 47.6∮×2 孔',S_BH]],
+  sub:[['製造廠商銘牌 t=1.0 銅板，3∮ 鉚釘','製造圖']],note:''},
+ arm:{name:'燈臂',st:'ok',
+  spec:[['燈臂長度依燈具電腦照度模擬，1～2m',S_BH+' 說明5'],['燈臂仰角 ≦15°',S_BH+' 說明5'],[h==10?'道路照明 W=2m':'護岸照明 W=1m（尺寸表括號值）',S_BH+' 尺寸表']],
+  sub:[['W=2m','製造圖']],st2:h==8?'chk':'ok',
+  note:h==8?'護岸雙臂契約表列 W=1m，送審 W=2m。說明5 允許 1～2m，但須附照度模擬計算書支持 2m。':'請併同照度模擬計算書確認。'},
+ sleeve:{name:'燈具套管',st:'chk',
+  spec:[['套管配合燈具口徑順接套合，中心線與燈柱對齊',S_BH+' 套管說明1-2'],['套管嵌入後全周銲接；承包商依燈具重量提出套管厚度、嵌入深度及銲接尺寸',S_BH+' 說明3'],
+   ['填角銲尺寸不大於燈柱厚度，材料及施工依 AWS D1.1',S_BH+' 說明4']],
+  sub:[['製造圖標示銲接 4.0','製造圖'],['燈具接口內徑∮66、深 100mm','RL-150 型錄']],
+  note:'送審製造圖未見套管厚度、嵌入深度的檢討，請廠商補附；套管外徑要能插入 RL-150 ∮66 接口。'},
+ ground:{name:'接地棒',st:'na',spec:[['5/8"∮×8 呎 銅包鋼棒',S_BH],['接地電阻 R<50Ω（責任施工）',S_BH]],sub:[['現場量測','—']],note:'安裝後辦理接地電阻試驗、連續性試驗、功能試驗連續 1 天（監造計畫第七章）。'},
+ pvc:{name:'PVC 導線彎管／分路線',st:'na',spec:[['PVC 導線彎管，管徑詳單線圖',S_BH],['分路線引出孔 20mm∮，迴路幹線於接線盒內銜接',S_BH+' 接線示意']],sub:[['依設計圖施作','—']],note:''},
+});
+
+/* ---------- 3D 工具 ---------- */
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const MAT={
+ galv:()=>new THREE.MeshStandardMaterial({color:0xaab3b8,metalness:.55,roughness:.38}),
+ paint:()=>new THREE.MeshStandardMaterial({color:0x8d999f,metalness:.35,roughness:.45}),
+ conc:()=>new THREE.MeshStandardMaterial({color:0xbab4a8,metalness:0,roughness:.95}),
+ grout:()=>new THREE.MeshStandardMaterial({color:0xd8d2c4,roughness:1}),
+ cu:()=>new THREE.MeshStandardMaterial({color:0xc6834f,metalness:.65,roughness:.35}),
+ alu:()=>new THREE.MeshStandardMaterial({color:0x5c666c,metalness:.6,roughness:.35}),
+ lens:()=>new THREE.MeshStandardMaterial({color:0xfff6dc,emissive:0xfff0c4,emissiveIntensity:1.1,roughness:.3}),
+ pvc:()=>new THREE.MeshStandardMaterial({color:0x7b8790,roughness:.6}),
+ dark:()=>new THREE.MeshStandardMaterial({color:0x2a3036,metalness:.3,roughness:.6}),
+ amber:()=>new THREE.MeshStandardMaterial({color:0xffb020,emissive:0xffa000,emissiveIntensity:.2,transparent:true,opacity:.9,roughness:.2}),
+ solar:()=>new THREE.MeshStandardMaterial({color:0x1b2c52,metalness:.4,roughness:.18}),
+ batt:()=>new THREE.MeshStandardMaterial({color:0x353c44,roughness:.7}),
+ rebar:()=>new THREE.MeshStandardMaterial({color:0x8a4b2a,metalness:.5,roughness:.6})};
+function mk(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);return m}
+const box=(w,h,d,m,x,y,z)=>mk(new THREE.BoxGeometry(w,h,d),m,x,y,z);
+const cyl=(rt,rb,h,m,x,y,z,s=24)=>mk(new THREE.CylinderGeometry(rt,rb,h,s),m,x,y,z);
+function rod(a,b,r,m){const d=b.clone().sub(a),L=d.length();const c=cyl(r,r,L,m,0,0,0,10);c.position.copy(a).add(b).multiplyScalar(.5);c.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return c}
+
+/* 路燈零件建模 */
+function buildPole(H,W,dbl){
+ const P=[],d=pole(H),add=(id,no,obj,ex,extra)=>{P.push(Object.assign({id,no,obj,ex:V(...ex)},d[id]||{},extra||{}))};
+ const g=()=>new THREE.Group();
+ // 基礎
+ let f=g();
+ if(!dbl){const mc=MAT.conc();f.add(box(1,2.35,1,mc,0,-1.175,0),box(.506,.15,.506,mc,0,.075,0));
+  const mr=MAT.rebar();for(const x of[-.4,0,.4])for(const z of[-.4,.4]){f.add(cyl(.008,.008,2.2,mr,x,-1.2,z,6));f.add(cyl(.008,.008,2.2,mr,z,-1.2,x,6))}
+  add('found','1',f,[0,-2.4,0],{name:'RC 燈柱基礎（道路照明）',st:'na',spec:[['1000×1000×2500mm，高出地面基礎方型 50.6×50.6cm',S_BH+' 基礎詳圖'],['主筋 12-#5、8-#5，箍筋 #3@200',S_BH+' A-A/C-C'],['註：本基礎僅適用道路照明燈柱',S_BH]],sub:[['依設計圖施作（燈桿送審不含基礎）','—']],note:'鋼筋查驗、混凝土澆置前確認錨碇螺栓定位。'});
+ }else{const mc=MAT.conc();f.add(box(3.2,1.3,1.1,mc,0,-.65,0));
+  add('found','1',f,[0,-2,0],{name:'胸牆（護岸照明燈柱座）',st:'na',spec:[['護岸照明燈桿以 25∮ 螺栓固定於胸牆',S_BH+' 燈柱固定螺栓安裝示意'],['燈柱基礎詳圖註明僅適用道路照明，護岸不另設 RC 基礎','BH9-02 註'],['8m 螺栓式雙臂燈桿，150W LED×2','AJ-01']],sub:[['依胸牆施工圖預埋','—']],note:'胸牆澆置前確認預埋螺栓位置、間距 260mm 與燈桿底座相符。'});}
+ // 錨碇螺栓
+ let b=g();const mg=MAT.galv();for(const x of[-.13,.13])for(const z of[-.13,.13]){b.add(cyl(.0125,.0125,1.016,mg,x,-.33,z,10));b.add(cyl(.022,.022,.03,mg,x,.2,z,6))}
+ b.add(box(.4,.006,.4,mg,0,-.55,0));add('bolt','2',b,[0,-1.3,0]);
+ let bp=g();const mgb=MAT.galv();bp.add(box(.334,.025,.334,mgb,0,.165,0));for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,pl=box(.01,.18,.09,mgb,Math.cos(a)*.15,.27,Math.sin(a)*.15);pl.rotation.y=-a;bp.add(pl)}
+ add('base','3',bp,[0,-.55,0]);
+ // 桿身
+ const hs=H-1.4-.18,sh=g();sh.add(cyl(.0345,.1015,hs,MAT.paint(),0,.18+hs/2,0,32));add('shaft','4',sh,[0,0,0]);
+ // 接線盒
+ let jb=g();const mj=MAT.galv();jb.add(box(.15,.4,.155,mj,0,1.2,.095+.0775),box(.16,.41,.008,mj,0,1.2,.25));add('jbox','5',jb,[0,.1,.9]);
+ // 銘牌
+ let np=g();np.add(box(.13,.04,.004,MAT.cu(),0,2.0,.097),box(.1,.04,.004,MAT.cu(),0,1.9,.098));add('plate','6',np,[0,.4,.8]);
+ // 燈臂＋套管＋燈具
+ const sides=dbl?[1,-1]:[1];
+ sides.forEach((s,i)=>{
+  const tag=dbl?(s>0?'（右）':'（左）'):'';
+  const cv=new THREE.QuadraticBezierCurve3(V(0,H-1.4,0),V(0,H+.05,0),V(s*W,H+.25,0));
+  let a=g();a.add(mk(new THREE.TubeGeometry(cv,48,.0345,14,false),MAT.paint()));
+  add('arm'+(i?'2':''),'7'+(dbl?(i?'b':'a'):''),a,[s*.5,1.1,0],Object.assign({},d.arm,{name:'燈臂'+tag,st:d.arm.st2}));
+  let sl=g();const c=cyl(.03,.03,.16,MAT.galv(),s*(W+.06),H+.255,0,16);c.rotation.z=Math.PI/2;sl.add(c);
+  add('sleeve'+(i?'2':''),'8'+(dbl?(i?'b':'a'):''),sl,[s*1.0,1.35,0],Object.assign({},d.sleeve,{name:'燈具套管'+tag}));
+  let L=g();const lm=MAT.alu();const body=box(.84,.09,.34,lm,0,0,0);L.add(body);
+  const lens=box(.66,.012,.27,MAT.lens(),-.02,-.05,0);L.add(lens);
+  for(let k=0;k<7;k++)L.add(box(.6,.035,.008,lm,-.03,.06,-.15+k*.05));
+  L.add(box(.16,.06,.12,lm,.42,.0,0));
+  const cone=mk(new THREE.ConeGeometry(2.6,H*.92,32,1,true),new THREE.MeshBasicMaterial({color:0xfff1c8,transparent:true,opacity:.04,depthWrite:false,side:THREE.DoubleSide}),0,-H*.46,0);cone.userData.nosel=1;L.add(cone);
+  L.position.set(s*(W+.14+.42),H+.24,0);L.rotation.y=s>0?Math.PI:0;L.rotation.z=(s>0?1:-1)*0.087;
+  const LG=g();LG.add(L);
+  add('lamp'+(i?'2':''),'9'+(dbl?(i?'b':'a'):''),LG,[s*1.5,2.0,0],{name:'LED 路燈燈具'+tag+(dbl?'':'（RL-150）'),st:'chk',spec:LED_SPEC,sub:LED_SUB,note:LED_NOTE});
+ });
+ // 接地棒、PVC
+ let gr=g();gr.add(cyl(.008,.008,2.44,MAT.cu(),.75,-1.5,.3,8),rod(V(.75,-.28,.3),V(.12,.15,.08),.004,MAT.cu()));add('ground','10',gr,[1.0,-2.2,0]);
+ let pv=g();const pm=MAT.pvc(),c2=new THREE.QuadraticBezierCurve3(V(-1.2,-.6,0),V(0,-.6,0),V(0,.18,0));pv.add(mk(new THREE.TubeGeometry(c2,30,.028,10,false),pm));add('pvc','11',pv,[-.8,-1.7,0]);
+ return P;
+}
+
+/* 警示燈標 */
+function buildBeacon(){
+ const P=[],g=()=>new THREE.Group(),add=(id,no,obj,ex,o)=>P.push(Object.assign({id,no,obj,ex:V(...ex)},o));
+ const GEN=['鋼管材質 CNS 4435 STK400 或 ASTM A36 或同等品',S_CD+' 說明1'],GAL=['所有鋼料表面熱浸鍍鋅，鍍鋅量合乎 CNS 10007',S_CD+' 說明2'],PL=['其它鋼料 CNS 2473 SS400 或 ASTM A36',S_CD+' 說明1'];
+ const y0=.03;let f=g();f.add(box(2.6,.6,2.6,MAT.conc(),0,-.3,0));
+ add('slab','1',f,[0,-1.5,0],{name:'碼頭混凝土面',st:'na',spec:[['轉角警示燈標位於 S04～S05 碼頭法線轉角，距法線 150cm',S_CD+' 平面位置圖']],sub:[['依碼頭上部結構施作','—']],note:'放樣確認位置後再鑽／埋錨碇螺栓。'});
+ let bo=g();const mg=MAT.galv();const hp=[[-.42,-.42],[0,-.42],[.42,-.42],[-.42,0],[.42,0],[-.42,.42],[0,.42],[.42,.42]];
+ hp.forEach(([x,z])=>{bo.add(cyl(.015,.015,.75,mg,x,-.25,z,10),cyl(.027,.027,.03,mg,x,.09,z,6),cyl(.027,.027,.03,mg,x,.015,z,6))});
+ add('ab','2',bo,[0,-.9,0],{name:'M30 錨碇螺栓及定平螺帽',st:'ok',spec:[['8-M30 錨碇螺栓，L=700，埋入 502.5、外露 125',S_CD+' 錨碇螺栓詳圖'],['設定平用螺帽',S_CD],GAL],sub:[['依製造圖 8-M30','佑松 警示燈標立面圖']],note:''});
+ let gt=g();gt.add(box(1.04,.03,1.04,MAT.grout(),0,.015,0));
+ add('grout','3',gt,[0,-.45,0],{name:'無收縮水泥砂漿',st:'na',spec:[['底板下填無收縮水泥砂漿，強度 450 kgf/cm²，厚約 25～30mm',S_CD],['終凝及硬固膨脹率 0.0～0.4%；抗壓 >450 kgf/cm²',S_M5+' 二十二']],sub:[['施工前取樣送驗','—']],note:'每次澆置現場取樣。'});
+ let bp=g();bp.add(box(1,.025,1,MAT.galv(),0,y0+.0125,0));
+ add('bplate','4',bp,[0,-.2,0],{name:'底板 PL25×1000×1000',st:'chk',spec:[['PL 25×1000×1000mm，8-38∮ 孔（for M30 A.B.）',S_CD+' C-C 斷面'],PL,GAL],sub:[['A36 鋼板銷售證明僅見 10t×1530×3050 共 6 片','名祥鋼鐵 114.03.31']],note:'材料文件的 A36 鋼板證明只有 10mm 厚，未見 25mm 底板及 12mm 加勁板的來源，請補送材質證明。'});
+ let gu=g();const mgu=MAT.galv();for(let k=0;k<8;k++){const a=k*Math.PI/4,r=.3556+.075,p=box(.15,.2,.012,mgu,Math.cos(a)*r,y0+.025+.1,Math.sin(a)*r);p.rotation.y=-a;gu.add(p)}
+ add('gus','5',gu,[0,-.08,0],{name:'加勁板 PL12×150×200',st:'chk',spec:[['PL 12×150×200mm（TYP.），周圍 8 片',S_CD+' 立面/C-C'],PL,GAL],sub:[['同底板：未見 12mm 鋼板證明','—']],note:'銲道外觀與尺寸於工廠查驗。'});
+ const yL=y0+.025,hL=1.6;let lp=g();lp.add(cyl(.3556,.3556,hL,MAT.galv(),0,yL+hL/2,0,40));
+ add('lpipe','6',lp,[0,0,0],{name:'下段鋼管 711.2∮',st:'chk',spec:[['711.2mm∮，t≧9mm 鋼管',S_CD],GEN,GAL],sub:[['STK400 鋼管證明見 139.8×5.8、60.5×4.0','中宇鋼鐵證明書'],['STK400 60.3×4T×6M 4 支','佑松 銷售證明']],note:'送審材料證明未見 711.2∮ t9 鋼管，請確認是否以 A36 鋼板捲製，若是應附捲管製造圖與鋼板證明。'});
+ let dr=g();const md=MAT.galv();dr.add(box(.42,.5,.018,md,0,.8,.36));for(const x of[-.17,0,.17])for(const y of[.6,1.0])dr.add(cyl(.014,.014,.02,md,x,y,.372,8).rotateX(Math.PI/2));
+ add('door','7',dr,[0,0,1.0],{name:'電池室門板',st:'ok',spec:[['電池室設於下段鋼管內，螺栓固定門板',S_CD+' 立面圖'],GAL],sub:[['依製造圖','佑松 立面圖']],note:'門板須能密封，螺栓不鏽或鍍鋅。'});
+ let ws=g();const w1=box(.5,.008,.08,MAT.galv(),0,1.11,.39);w1.rotation.x=.35;ws.add(w1);
+ add('shield','8',ws,[0,.2,.8],{name:'遮水板',st:'ok',spec:[['遮水板 t≧3mm，設於電池室門上方',S_CD]],sub:[['依製造圖','—']],note:''});
+ let bt=g();bt.add(box(.33,.22,.17,MAT.batt(),0,.5,.1),box(.06,.03,.04,MAT.dark(),-.1,.625,.1),box(.06,.03,.04,MAT.dark(),.1,.625,.1));
+ add('batt','9',bt,[0,0,1.8],{name:'蓄電池',st:'ok',spec:[['免加水免保養鉛酸凝膠電池一組',S_96+'（二）1'],['設計使用壽命 3 年',S_96+'（二）2'],['無充電情況下連續供燈具發光 7 天以上，每天以 14 小時計',S_96+'（二）3']],sub:[['ZIBAK ZG12390 12V 100Ah 凝膠電池','型錄 p.17'],['80Ah÷3.5Ah/日 = 22.8 天','計算書 p.20']],note:'計算書把每日耗電寫成「3.5A」，單位應為 Ah/日；數值本身合理。'});
+ const yC=yL+hL;let cn=g();cn.add(cyl(.1778,.3556,.6,MAT.galv(),0,yC+.3,0,40));
+ add('cone','10',cn,[0,.35,0],{name:'變徑段',st:'ok',spec:[['711.2∮ 漸變至 355.6∮，高 600mm，全周電銲',S_CD+' 立面圖'],GAL],sub:[['依製造圖','—']],note:''});
+ const yU=yC+.6,hU=2.0;let up=g();up.add(cyl(.1778,.1778,hU,MAT.galv(),0,yU+hU/2,0,32));
+ add('upipe','11',up,[0,.7,0],{name:'上段鋼管 355.6∮',st:'chk',spec:[['355.6mm∮，t≧9mm 鋼管',S_CD],GEN,GAL],sub:[['未見 355.6∮ t9 鋼管證明','—']],note:'同下段鋼管，請補送材質證明。'});
+ let ld=g();const ml=MAT.galv();const rad=y=>y<yC?.3556:y<yU?.3556-(y-yC)/.6*.1778:.1778;
+ for(let k=0;k<12;k++){const y=.4+k*.3,r=rad(y);ld.add(box(.02,.02,.3,ml,r+.12,y,0),box(.12,.02,.02,ml,r+.06,y,.14),box(.12,.02,.02,ml,r+.06,y,-.14))}
+ add('ladder','12',ld,[.8,.2,0],{name:'鋼棒爬梯',st:'ok',spec:[['20mm∮ 鋼棒爬梯，間距 300，外伸 120、寬 300',S_CD+' A-A/B-B'],PL,GAL],sub:[['依製造圖','佑松 立面圖']],note:'高處作業：檢查爬梯銲接牢固。'});
+ const yP=yU+.15+1.3;let pf=g();const mp=MAT.galv();const ring=mk(new THREE.TorusGeometry(.75,.03,8,64),mp,0,yP,0);ring.rotation.x=Math.PI/2;pf.add(ring);
+ for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4,c=Math.cos(a),s=Math.sin(a);pf.add(rod(V(c*.18,yP,s*.18),V(c*.75,yP,s*.75),.03,mp),rod(V(c*.18,yP-.35,s*.18),V(c*.75,yP,s*.75),.03,mp))}
+ add('ring','13',pf,[0,1.0,0],{name:'護環 1500∮ 及斜撐',st:'ok',spec:[['外環 1500∮，以 60.5mm∮ t≧3.2mm 鋼管撐架',S_CD+' D-D'],GEN,GAL],sub:[['STK400 60.3×4T×6M 4 支（t=4 ≧3.2）','佑松 銷售證明']],note:''});
+ let vt=g();const cv=new THREE.CatmullRomCurve3([V(-.17,yP-.25,0),V(-.3,yP-.25,0),V(-.34,yP-.33,0),V(-.34,yP-.45,0)]);vt.add(mk(new THREE.TubeGeometry(cv,20,.03,10,false),MAT.galv()));
+ add('vent','14',vt,[-.7,.8,0],{name:'通風孔',st:'ok',spec:[['通氣孔開口向下，避免海水灌入；規格由承包商於製作圖提出經工程司核定',S_CD+' 說明4']],sub:[['製造圖標示通風孔','佑松 立面圖']],note:'查驗開口確實朝下。'});
+ let sp=g();const pan=g();pan.add(box(.54,.03,.67,MAT.solar(),0,0,0),box(.56,.035,.69,MAT.alu(),0,-.006,0));pan.position.set(.42,yP+.2,0);pan.rotation.z=-.5;sp.add(pan,rod(V(.17,yP+.02,0),V(.38,yP+.12,0),.015,MAT.galv()));
+ add('solar','15',sp,[1.0,1.3,0],{name:'太陽能板',st:'chk',spec:[['單晶矽晶片，輸出 18V 50W ×1 片',S_96+'（三）1']],sub:[['WMS-55C 單晶矽 17V 55W ×1 片','型錄 p.16'],['需求計算 23W，採 55W','計算書 p.20']],note:'功率 55W 高於 50W，但標稱電壓 17V 低於規範寫的 18V。請廠商說明 17V 為 Vmp（工作電壓）且對 12V 電池充電無虞，或由工程司認定為同等品。'});
+ const yT=yU+hU;let tp=g();tp.add(cyl(.2,.2,.01,MAT.galv(),0,yT+.005,0,32));
+ add('top','16',tp,[0,1.55,0],{name:'頂板 PL10',st:'ok',spec:[['PL 10mm 頂板封口',S_CD],PL,GAL],sub:[['依製造圖','—']],note:''});
+ let lp2=g();const ma=MAT.alu(),lensM=MAT.amber();lp2.add(cyl(.175,.175,.06,ma,0,yT+.04,0,32));
+ const lens=cyl(.13,.13,.26,lensM,0,yT+.2,0,32);lp2.add(lens);for(let k=0;k<6;k++)lp2.add(mk(new THREE.TorusGeometry(.135,.008,6,32),ma,0,yT+.09+k*.045,0).rotateX(Math.PI/2));
+ lp2.add(cyl(.15,.15,.03,ma,0,yT+.345,0,32),cyl(.004,.004,.16,ma,0,yT+.44,0,6));
+ add('beacon','17',lp2,[0,2.0,0],{name:'太陽能導航警示燈 WM-L350A',st:'ok',
+  spec:[['發光體 LED；燈色黃色（IALA）',S_96+' 一.1-2'],['燈質 4 秒 1 閃（0.5 明 3.5 暗）',S_96+' 一.3'],['有效光度黃色 ≧850 cd，垂直發散角 ≧2.5°',S_96+' 一.4'],['公稱光程 T=0.74 時黃色 ≧9 浬',S_96+' 一.5'],['透鏡壓克力經 UV 防紫外線處理不龜裂',S_96+' 一.6'],['基座及燈蓋鋁合金',S_96+' 一.7'],['水平強度：360° 內最低達最高 95% 以上',S_96+' 一.8'],['閃光器內附紅外線接收器，250 種以上 IALA 燈質',S_96+' 一.9'],['自動感應開關；IP68；GPS 無線同步閃光',S_96+' 一.10-12'],['12VDC，耗電 ≦25W',S_96+' 一.13']],
+  sub:[['WM-L350A 黃色 LED，4 秒 1 閃','型錄 p.8-9'],['有效光度 857 cd（1200×0.7143）、垂直 2.5°','計算書 p.20'],['T=0.74 黃色 9 浬','p.18'],['256 種燈質、IP68、GPS 同步、自動感光','p.8-9, p.15'],['12VDC，耗電 24W；鑄鋁合金','p.8-9']],
+  note:'有效光度 857 cd 僅比下限 850 cd 高 0.8%，安裝後功能測試時請一併確認燈質與同步閃光。'});
+ return P;
+}
+
+/* ---------- 模型清單 ---------- */
+const MODELS=[
+ {key:'single',tab:'單臂 LED 路燈',sm:'道路照明 · 10m · 102 座',title:'單臂 LED 路燈（道路照明，H1=10m，150W×1）',sp:[-4.9,12.7],build:()=>buildPole(10,2,false),
+  tag:'<b>道路照明</b> 螺栓式單臂燈桿 10m，LED 150W×1，數量 102 座（監造計畫 5章 材料抽驗表）'},
+ {key:'double',tab:'雙臂 LED 路燈',sm:'護岸照明 · 8m · 28 座',title:'雙臂 LED 路燈（護岸照明，H1=8m，150W×2）',sp:[-3.6,10.7],build:()=>buildPole(8,2,true),
+  tag:'<b>護岸照明</b> 8m 螺栓式雙臂燈桿，150W LED×2（AJ-01），數量 28 座；圖示 W 採送審 2m'},
+ {key:'beacon',tab:'陸上警示燈標',sm:'碼頭轉角 · 太陽能',title:'陸上警示燈標（WM-L350A 太陽能導航警示燈）',sp:[-2.2,7.0],build:buildBeacon,
+  tag:'<b>燈質實時模擬</b>：黃色 4 秒 1 閃（0.5 秒明、3.5 秒暗）'}];
+const ST={ok:'符合',chk:'待確認',na:'現場查驗'};
+
+/* ---------- 介面 ---------- */
+const $=s=>document.querySelector(s);
+const tabs=$('#tabs'),pinsEl=$('#pins'),panel=$('#panel');
+tabs.innerHTML=MODELS.map((m,i)=>`<button class="tab" role="tab" id="t-${m.key}" aria-selected="${i==0}">${m.tab}<small>${m.sm}</small></button>`).join('');
+let cur=null,parts=[],sel=null,t=0,playing=false,showLbl=true,ok3d=!!window.THREE;
+const li=a=>`<li>${a[0]}${a[1]&&a[1]!='—'?`<span class="src">${a[1]}</span>`:''}</li>`;
+function renderPanel(){
+ const p=sel;
+ const list=parts.map(q=>`<button data-id="${q.id}" class="${p&&q.id==p.id?'on':''}">${q.no} ${q.name}</button>`).join('');
+ if(!p){panel.innerHTML=`<h2>${cur.title}</h2><p class="sub" style="margin-top:6px">點選 3D 視窗中的零件或下方部位名稱，查看該部位的契約規範要求與送審資料。黃色編號對應查核表編號。</p><div class="plist">${list}</div>`;}
+ else panel.innerHTML=`<div class="ph"><h2><span class="no">${p.no}</span>${p.name}</h2><span class="chip ${p.st}">${ST[p.st]}</span></div>
+ <div class="sec"><h3>契約規範要求</h3><ul>${p.spec.map(li).join('')}</ul></div>
+ <div class="sec"><h3>送審資料</h3><ul>${p.sub.map(li).join('')}</ul></div>
+ ${p.note?`<div class="note">${p.note}</div>`:''}
+ <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="fc">聚焦此零件</button><button class="btn" id="clr">回到全覽</button></div>
+ <div class="plist">${list}</div>`;
+ panel.querySelectorAll('.plist button').forEach(b=>b.onclick=()=>select(b.dataset.id,true));
+ const fc=$('#fc');if(fc)fc.onclick=()=>focusPart(p);const cl=$('#clr');if(cl)cl.onclick=()=>{select(null);resetView()};
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.classList.toggle('rowsel',!!p&&r.dataset.id==p.id));
+}
+function renderTable(){
+ $('#ttl').textContent=cur.title+'：部位查核表';
+ const c={ok:0,chk:0,na:0};parts.forEach(p=>c[p.st]++);
+ $('#sum').innerHTML=`<span><b>${parts.length}</b>部位</span><span><b style="color:var(--ok)">${c.ok}</b>符合</span><span><b style="color:var(--chk)">${c.chk}</b>待確認</span><span><b style="color:var(--na)">${c.na}</b>現場查驗</span>`;
+ $('#tbl tbody').innerHTML=parts.map(p=>`<tr data-id="${p.id}"><td>${p.no}</td><td>${p.name}</td><td>${p.spec.map(s=>s[0]).join('<br>')}</td><td>${p.sub.map(s=>s[0]).join('<br>')}</td><td><span class="chip ${p.st}">${ST[p.st]}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.onclick=()=>{select(r.dataset.id,true);$('#viewer').scrollIntoView({behavior:'smooth',block:'start'})});
+ const seen=new Set();
+ $('#issues').innerHTML=parts.filter(p=>p.st=='chk'&&p.note&&!seen.has(p.note)&&seen.add(p.note)).map(p=>`<div class="issue"><b>${p.no} ${p.name}</b>${p.note}</div>`).join('')||'<p class="sub">無。</p>';
+}
+
+/* ---------- 3D ---------- */
+let renderer,scene,camera,controls,root,clock;
+const viewer=$('#viewer');
+if(ok3d){try{
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.outputEncoding=THREE.sRGBEncoding;viewer.prepend(renderer.domElement);
+ scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0c1824,30,70);
+ camera=new THREE.PerspectiveCamera(38,1,.05,200);
+ controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.95;
+ scene.add(new THREE.HemisphereLight(0xcfe2ff,0x2a2218,.85));
+ const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(6,12,8);scene.add(dl);
+ const dl2=new THREE.DirectionalLight(0x88aaff,.35);dl2.position.set(-8,4,-6);scene.add(dl2);
+ const gnd=mk(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0x3b4650,transparent:true,opacity:.45,depthWrite:false,roughness:1}));gnd.rotation.x=-Math.PI/2;gnd.userData.nosel=1;scene.add(gnd);
+ const grid=new THREE.GridHelper(40,40,0x4d6276,0x26384a);grid.material.transparent=true;grid.material.opacity=.5;scene.add(grid);
+ clock=new THREE.Clock();
+ const ro=new ResizeObserver(()=>{const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()});ro.observe(viewer);
+}catch(e){ok3d=false}}
+if(!ok3d)$('#err').style.display='grid';
+
+let tween=null;
+function flyTo(target,dist,dir){if(!ok3d)return;const d=(dir||camera.position.clone().sub(controls.target).normalize());tween={t0:performance.now(),ft:controls.target.clone(),fp:camera.position.clone(),tt:target.clone(),tp:target.clone().add(d.multiplyScalar(dist))}}
+const fit=()=>{const[a,b]=cur.sp,asp=Math.min(1,camera.aspect||1);return{c:V(0,(a+b)/2,0),d:Math.max(6,(b-a)/2/Math.tan(19*Math.PI/180)*1.18/Math.max(.55,asp))}};
+function resetView(){const f=fit();flyTo(f.c,f.d,V(.62,.22,.75).normalize())}
+function partCenter(p){return p.c.clone().add(p.ex.clone().multiplyScalar(ease(t)))}
+function focusPart(p){const sz=p.sz;flyTo(partCenter(p),Math.max(1.4,sz*2.2))}
+const ease=x=>x<.5?2*x*x:1-(-2*x+2)**2/2;
+
+function load(key){
+ cur=MODELS.find(m=>m.key==key);
+ tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.id=='t-'+key));
+ $('#tag').innerHTML=cur.tag;
+ parts=cur.build();sel=null;
+ if(ok3d){
+  if(root)scene.remove(root);root=new THREE.Group();scene.add(root);
+  parts.forEach(p=>root.add(p.obj));root.updateMatrixWorld(true);
+  parts.forEach(p=>{const bb=new THREE.Box3();p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){o.userData.part=p;bb.expandByObject(o)}});
+   p.c=bb.getCenter(V(0,0,0));p.sz=bb.getSize(V(0,0,0)).length();
+   p.mats=[];p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){p.mats.push(o.material);o.material.userData.e0=o.material.emissive.clone();o.material.userData.ei=o.material.emissiveIntensity}})});
+  pinsEl.innerHTML=parts.map(p=>`<button class="pin ${p.st=='chk'?'chk':''}" data-id="${p.id}" aria-label="${p.no} ${p.name}">${p.no}<span>${p.name}</span></button>`).join('');
+  pinsEl.querySelectorAll('.pin').forEach(b=>{b.onclick=()=>select(b.dataset.id,true);p0(b)});
+  const f=fit();controls.target.copy(f.c);camera.position.copy(V(.62,.22,.75).normalize().multiplyScalar(f.d).add(f.c));
+ }
+ renderTable();renderPanel();
+}
+function p0(b){const p=parts.find(q=>q.id==b.dataset.id);p.pin=b}
+function select(id,focus){
+ sel=id?parts.find(p=>p.id==id):null;
+ parts.forEach(p=>{const on=p==sel;p.pin&&p.pin.classList.toggle('on',on);
+  (p.mats||[]).forEach(m=>{if(on){m.emissive.setHex(0x2f6bff);m.emissiveIntensity=.55}else{m.emissive.copy(m.userData.e0);m.emissiveIntensity=m.userData.ei}})});
+ renderPanel();if(sel&&focus&&ok3d)focusPart(sel);
+}
+tabs.onclick=e=>{const b=e.target.closest('.tab');if(b)load(b.id.slice(2))};
+tabs.onkeydown=e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const i=MODELS.findIndex(m=>m==cur),n=(i+(e.key=='ArrowRight'?1:2))%3;load(MODELS[n].key);$('#t-'+MODELS[n].key).focus()};
+const ex=$('#ex'),play=$('#play');
+ex.oninput=()=>{t=ex.value/100;playing=false;play.setAttribute('aria-pressed','false');play.textContent='▶ 播放分解'};
+let ph=0;play.onclick=()=>{playing=!playing;play.setAttribute('aria-pressed',playing);play.textContent=playing?'❚❚ 暫停':'▶ 播放分解';ph=t<.5?0:2.2};
+$('#lbl').onclick=e=>{showLbl=!showLbl;e.currentTarget.setAttribute('aria-pressed',showLbl);pinsEl.style.display=showLbl?'':'none'};
+$('#reset').onclick=()=>{select(null);resetView()};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if(ok3d){
+ const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down=null;
+ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
+  const r=renderer.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);rc.setFromCamera(mv,camera);
+  const hit=rc.intersectObjects(root.children,true).find(h=>h.object.userData.part);select(hit?hit.object.userData.part.id:null,false)});
+ const pv=V(0,0,0);
+ (function loop(now){requestAnimationFrame(loop);const dt=Math.min(clock.getDelta(),.05);
+  if(playing){ph=(ph+dt)%4.4;const k=ph<.4?0:ph<2?(ph-.4)/1.6:ph<2.6?1:ph<4.2?1-(ph-2.6)/1.6:0;t=reduce?(ph<2.2?1:0):k;ex.value=Math.round(t*100)}
+  const e=ease(t);parts.forEach(p=>p.obj.position.copy(p.ex).multiplyScalar(e));
+  if(tween){const k=Math.min(1,(now-tween.t0)/(reduce?1:650)),s=ease(k);controls.target.lerpVectors(tween.ft,tween.tt,s);camera.position.lerpVectors(tween.fp,tween.tp,s);if(k>=1)tween=null}
+  const bl=parts.find(p=>p.id=='beacon');if(bl){const on=(clock.elapsedTime%4)<.5;bl.mats.forEach(m=>{if(m.transparent&&sel!=bl)m.emissiveIntensity=on?2.6:.12})}
+  controls.update();renderer.render(scene,camera);
+  if(showLbl){const w=viewer.clientWidth,h=viewer.clientHeight;parts.forEach(p=>{if(!p.pin)return;pv.copy(p.c).add(p.ex.clone().multiplyScalar(e)).project(camera);
+   const vis=pv.z<1&&Math.abs(pv.x)<1.05&&Math.abs(pv.y)<1.05;p.pin.style.display=vis?'':'none';if(vis){p.pin.style.left=((pv.x+1)/2*w)+'px';p.pin.style.top=((1-pv.y)/2*h)+'px'}})}
+ })(performance.now());
+}
+const hk=location.hash.slice(1);load(MODELS.some(m=>m.key==hk)?hk:'single');
+addEventListener('hashchange',()=>{const k=location.hash.slice(1);if(MODELS.some(m=>m.key==k))load(k)});
+}
+</script>
+</body>
+</html>
