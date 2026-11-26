@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>合約管材 3D 規範對照</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+/* VOICE: 監造查核用的工程資料表，冷靜、精確
+   IDEA: 材料送審核對表，貼在 3D 拆解模型旁
+   PICTURE: 可旋轉、可剖切的管材組立動畫，編號針腳對應條文
+   COLOUR and TYPE: 鈷藍標題條＋白底＋黑字，待確認以橘色；Space Grotesk 數字＋Noto Sans TC
+   LAYOUT: 標題條→管材頁籤→左 3D、右條文清單→待確認總表→資料來源 */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#0a0d18);--ink:light-dark(#0b0d12,#e7eaf4);--mut:light-dark(#4b5366,#9ba4ba);--zone:light-dark(#eef2ff,#111832);--line:light-dark(#d6ddf1,#26314f);--co:#1240e0;--co2:light-dark(#1240e0,#86a2ff);--warn:#e85d00;--warnbg:light-dark(#fff0e4,#3a1d08);--okbg:light-dark(#e6ecff,#16224a)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans TC","Space Grotesk",system-ui,sans-serif;overflow-x:clip}
+.num,.pin,.no{font-family:"Space Grotesk","Noto Sans TC",sans-serif}
+header{background:var(--co);color:#fff;padding:22px max(4vw,16px) 20px;display:flex;flex-wrap:wrap;gap:16px 40px;align-items:flex-end;justify-content:space-between}
+h1{margin:0;font-size:clamp(26px,3.4vw,40px);line-height:1.08;font-weight:700;text-wrap:balance}
+header p{margin:6px 0 0;font-size:14px;opacity:.88;max-width:70ch}
+.kpi{display:flex;gap:26px}.kpi div{display:grid}.kpi b{font:600 32px/1 "Space Grotesk";}.kpi span{font-size:13px;opacity:.85}
+.kpi .w b{color:#ffd2b0}
+nav{display:flex;gap:0;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--bg);scrollbar-width:thin}
+nav button{flex:none;border:0;background:none;color:var(--mut);font:500 15px "Noto Sans TC";padding:12px 18px 10px;min-height:52px;border-bottom:3px solid transparent;cursor:pointer;text-align:start}
+nav button small{display:block;font-size:12px;font-weight:400}
+nav button[aria-selected=true]{color:var(--ink);border-bottom-color:var(--co)}
+nav button:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--co2);outline-offset:2px}
+.main{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);max-width:1440px;margin:0 auto}
+.stage{border-right:1px solid var(--line)}
+.view{position:relative;height:clamp(380px,62vh,700px);background:radial-gradient(120% 90% at 50% 40%,light-dark(#fff,#1a2346),var(--zone));overflow:hidden;touch-action:none}
+.view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;left:14px;top:12px;right:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;pointer-events:none}
+.hud>*{pointer-events:auto}
+.vchip{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:500 14px "Noto Sans TC";min-height:36px;padding:4px 12px;border-radius:18px;cursor:pointer}
+.vchip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.read{margin-left:auto;font:600 14px "Space Grotesk","Noto Sans TC";background:var(--ink);color:var(--bg);padding:6px 12px;border-radius:4px;white-space:nowrap}
+.read:empty{display:none}
+.scale{position:absolute;left:14px;bottom:10px;font-size:12px;color:var(--mut);pointer-events:none}
+.pin{position:absolute;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:2px solid var(--co);background:light-dark(#fff,#0a0d18);color:var(--co2);font-weight:600;font-size:13px;display:grid;place-items:center;cursor:pointer;padding:0;z-index:2;box-shadow:0 1px 4px #0003}
+.pin::before{content:"";position:absolute;inset:-8px}
+.pin.chk{border-color:var(--warn);color:var(--warn)}
+.pin.on{background:var(--co);color:#fff;z-index:4;transform:scale(1.18)}.pin.chk.on{background:var(--warn);border-color:var(--warn)}
+.pin .tip{display:none;position:absolute;left:34px;top:50%;transform:translateY(-50%);white-space:nowrap;background:var(--ink);color:var(--bg);font:500 13px "Noto Sans TC";padding:4px 9px;border-radius:4px}
+.pin.on .tip,.pin:hover .tip{display:block}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:12px max(2vw,14px);border-top:1px solid var(--line)}
+.btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);font:500 14px "Noto Sans TC";min-height:44px;padding:0 16px;border-radius:6px;cursor:pointer}
+.btn.pri{background:var(--co);border-color:var(--co);color:#fff;min-width:88px}
+.btn[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.rng{display:flex;align-items:center;gap:10px;flex:1 1 260px;font-size:13px;color:var(--mut)}
+.rng input{flex:1;accent-color:var(--co);height:44px}
+.rng span{white-space:nowrap}
+aside{padding:20px max(2vw,16px) 28px}
+aside h2{margin:0;font-size:24px;line-height:1.15}
+.sub{margin:6px 0 0;color:var(--mut);font-size:14px}
+.qty{margin:10px 0 0;font-size:14px;background:var(--zone);padding:8px 12px;border-radius:6px}
+.cnt{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 6px}
+.chip{font-size:12px;font-weight:500;padding:2px 8px;border-radius:10px;white-space:nowrap;background:var(--zone);color:var(--mut)}
+.chip.ok{background:var(--okbg);color:var(--co2)}.chip.chk{background:var(--warnbg);color:var(--warn)}
+ol{list-style:none;margin:0;padding:0}
+.sp{display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:12px 8px;border-top:1px solid var(--line);cursor:pointer;border-radius:4px}
+.sp:hover{background:var(--zone)}.sp.on{background:var(--zone);box-shadow:inset 3px 0 0 var(--co)}.sp.chk.on{box-shadow:inset 3px 0 0 var(--warn)}
+.no{width:26px;height:26px;border-radius:50%;border:2px solid var(--co);color:var(--co2);display:grid;place-items:center;font-size:12px;font-weight:600}
+.sp.chk .no{border-color:var(--warn);color:var(--warn)}
+.hd{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.hd b{font-size:15px}
+.sp p{margin:4px 0 0;font-size:14px}
+.sp .v{color:var(--ink)}.sp .v i{font-style:normal;font-size:12px;color:var(--mut);margin-right:6px}
+.sp.chk .v{color:var(--warn)}
+.sp .src{font-size:12.5px;color:var(--mut)}
+.band{padding:clamp(28px,4vw,56px) max(4vw,16px);max-width:1440px;margin:0 auto}
+.band h2{font-size:clamp(22px,2.4vw,30px);margin:0 0 6px;line-height:1.1}
+.band>p{margin:0 0 18px;color:var(--mut);max-width:72ch}
+.alt{background:var(--zone);max-width:none}.alt>*{max-width:1440px;margin-inline:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:start;font-weight:500;color:var(--mut);border-bottom:2px solid var(--ink);padding:8px 10px}
+td{border-bottom:1px solid var(--line);padding:10px;vertical-align:top}
+td:first-child{white-space:nowrap;font-weight:500}
+tr.go{cursor:pointer}tr.go:hover td{background:light-dark(#fff,#0a0d18)}
+.src-l{columns:2 320px;font-size:14px;padding-left:18px;margin:0}.src-l li{margin-bottom:6px;break-inside:avoid}
+.fall{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--mut)}
+@media(max-width:900px){.main{grid-template-columns:minmax(0,1fr)}.stage{border-right:0}.view{height:clamp(340px,56vh,520px)}}
+@media(max-width:600px){header{padding-block:16px}.kpi b{font-size:24px}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mut)}.stack td:empty{display:none}.pin .tip{display:none!important}}
+@media(prefers-reduced-motion:reduce){.pin.on{transform:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+  <div>
+    <h1>合約管材 3D 規範對照</h1>
+    <p>臺北港南碼頭 C 填區公共設施及永久護岸暨 S04~S05 碼頭工程｜C 填區自來水及機電工程（TPS-112-017，展新綠能）。模型上的編號對應右側契約條文與送審實測值。</p>
+  </div>
+  <div class="kpi" aria-label="摘要">
+    <div><b id="kFam" class="num">5</b><span>管材類別</span></div>
+    <div><b id="kSpec" class="num">—</b><span>查核條目</span></div>
+    <div class="w"><b id="kChk" class="num">—</b><span>待確認</span></div>
+  </div>
+</header>
+<nav id="tabs" role="tablist" aria-label="管材"></nav>
+<div class="main">
+  <section class="stage">
+    <div class="view" id="view">
+      <canvas id="cv" aria-label="管材 3D 模型，可拖曳旋轉、滾輪縮放"></canvas>
+      <div id="pins"></div>
+      <div class="hud"><div id="vars" style="display:flex;gap:6px;flex-wrap:wrap"></div><div class="read" id="read" aria-live="polite"></div></div>
+      <div class="scale" id="scale"></div>
+    </div>
+    <div class="ctrl">
+      <button class="btn pri" id="play" type="button">暫停</button>
+      <label class="rng"><span id="rl">分解</span><input id="rg" type="range" min="0" max="1000" value="0" aria-label="動畫進度"><span id="rr">組合</span></label>
+      <button class="btn" id="cut" type="button" aria-pressed="false">剖切</button>
+      <button class="btn" id="reset" type="button">重設視角</button>
+    </div>
+  </section>
+  <aside>
+    <h2 id="mt"></h2>
+    <p class="sub" id="ms"></p>
+    <p class="qty" id="mq"></p>
+    <div class="cnt" id="mc"></div>
+    <ol id="specs"></ol>
+  </aside>
+</div>
+<section class="band alt">
+  <div>
+    <h2>待確認事項</h2>
+    <p>以下各項在送審資料中看不到足夠證明，或規範與送審值之間有落差，建議於材料進場前請承包商補件或釐清。點一列可跳到該管材與條目。</p>
+    <table class="stack"><thead><tr><th>管材</th><th>項目</th><th>查核說明</th><th>依據</th></tr></thead><tbody id="chkT"></tbody></table>
+  </div>
+</section>
+<section class="band">
+  <h2>資料來源</h2>
+  <p>契約條文取自施工說明書（定稿）技術條款、監造計畫修訂七版第五章及第四次變更設計圖；送審值取自本次五份材料送審資料。模型為示意比例，尺寸以條文為準。</p>
+  <ul class="src-l">
+    <li>施工說明書（定稿）：02505 自來水管埋設、02511 自來水用塑膠管、02514 自來水用延性鑄鐵管件、02552 地下配電管路、15223 不銹鋼管及管件、特別條款材料試驗表</li>
+    <li>監造計畫修訂七版 第五章：二十、二十七～二十九、三十八項抽驗標準；材料送審與抽驗管制表</li>
+    <li>4變第二部份 公共設施：BE-08、BE-10 集水井詳圖（RCP 三級）、BF-08 管溝開挖示意圖、管路埋設標準圖</li>
+    <li>DIP管材料送審資料：興南鑄造報價單 A1230816005、型錄、SGS／TAF 試驗報告</li>
+    <li>HDPE 管送審資料：雄宇事業正字標記 8110、晟恩報告 22120616、23032910、契約數量表</li>
+    <li>PVC E 管送審資料：億豐綜合工業正字標記 05972／05973 檢驗報告、型錄 p.11</li>
+    <li>RCP 管送審資料：工信備忘錄 (113)臺北港字第 03-005 號、BSMI CNM07089Y11210、瑞山報告 20230035／20240004／20240006</li>
+    <li>可撓管送審資料：泰祥興報價單（113/5/31）、三球可撓性內平面防震管結構設計圖 φ50／φ100／φ150</li>
+  </ul>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=s=>document.querySelector(s);
+const ST={ok:'符合',chk:'待確認',req:'契約規定'};
+/* ---------- 條文資料 ---------- */
+const FAM=[
+{tab:'延性鑄鐵管 DIP',sm:'K 型接頭・興南鑄造',v:[{id:'dip',label:'K 型接頭',name:'K 型延性鑄鐵管（3 種管）',sub:'自來水配水管。直管依 CNS 10808、管件依 CNS 13272，K 型機械接頭：承口＋橡膠圈＋壓圈＋T 頭螺栓。',qty:'報價數量：φ75×4 m 85 支、φ200×6 m 522 支、φ300×6 m 7 支，機械接頭同數',scale:'示意比例：φ200 mm 直管，管長截短',sl:['分解','組合'],b:'dip',specs:[
+{a:'body',t:'管種與規格',r:'直管依 CNS 10808 G3219 K 型 3 種管製造；接合型式按 K 型。',s:'02514 §2.2.1(1)；興南報價單附註',v:'興南鑄造：K3 水泥內襯直管，ISO 9001（DNV）、品保實驗室 TAF L0805',st:'ok'},
+{a:'socket',t:'承口接合查核',r:'K 型接頭依檢核確認表逐一查核，對應工作日報表管線詳圖之接頭編號；廠商標誌與口徑記號朝上。',s:'02505 §3.3.1(8)、§3.3.2(1)A',st:'req'},
+{a:'ring',t:'橡膠圈 SBR',r:'良質苯乙烯丁二烯橡膠，符合 CNS 10774；水密部位不得有分模面；浮雕標示業主標誌、廠名、年份末二位、標稱管徑。',s:'02514 §2.2.2(3)',v:'SGS 依 CNS 10774／CNS 15274 試驗報告',st:'ok'},
+{a:'gland',t:'壓圈 FCD-400',r:'材質依 CNS 2869 FCD-400；外面塗裝同 CNS 4939；鑄製 D 符號、年份、廠名、管徑，不得焊貼或黏貼。',s:'02514 §2.2.2(1)(2)',st:'req'},
+{a:'bolt',t:'T 頭螺栓、螺帽',r:'FCD-400 螺紋加工後加熱 ≥750 ℃ 生成氧化膜；3% 食鹽水常溫浸漬 6 小時無異常；負載試驗 M16 ≥38 kN、M20 ≥59 kN、M24 ≥85 kN；螺紋依 CNS 497。',s:'02514 §2.2.2(2) E、I、K',st:'req'},
+{a:'lining',t:'內面塗裝／內襯',r:'管件內面 ≤600 mm 依 CNS 13273 環氧樹脂粉體，總厚 ≥0.3 mm，色號 1-46。',s:'02514 §2.2.1(6)A',v:'直管為「管內襯一般水泥砂漿」（型錄 φ200／φ300 內襯 4 mm）。02514 只規範管件，管件進場須確認為環氧粉體塗裝。',st:'chk'},
+{a:'coat',t:'外面塗裝',r:'依 CNS 4939 環氧樹脂柏油漆，總厚 ≥0.15 mm。',s:'02514 §2.2.1(6)B',v:'報價：管外黑色環氧樹脂柏油漆；附東本塗料出廠報告',st:'ok'},
+{a:'mark',t:'管身標示',r:'鑄製或刻印，不得焊貼或黏貼：自來水用字樣、種類符號、管徑、使用壓力、年份末二位、廠名、製造編號（順號且不重號）。',s:'02514 §2.2.1(7)',st:'req'},
+{a:'end',t:'試壓與漏水量',r:'最高許可使用壓力 10 kgf/cm²；1.5 倍超過 10 時以 10 kgf/cm² 試壓 1 小時；容許漏水量 L = NDP/600（公升/時）。',s:'02505 §3.4.3',st:'req'},
+{a:'bed',t:'回填與警示帶',r:'管底砂 ≥10 cm、管頂 40 cm 內回填砂料，管頂 40 cm 放警示帶（φ75～400 1 條）；併排給水管間距 ≥25 cm，與他種埋設物 ≥30 cm。',s:'02505 §3.3.1(2)、§3.5.1～3.5.2',st:'req'},
+{a:'cover',t:'最小覆土深度',r:'人行道 ≥50 cm、巷道 ≥70 cm、快車道 ≥120 cm；慢車道說明書為 ≥100 cm，設計圖 BF-08 為 ≥120 cm。',s:'02505 §3.3.1(11)；BF-08 管溝開挖示意圖',v:'說明書與設計圖不一致；依「設計圖另有規定者從其規定」，建議以 120 cm 查核並請設計單位確認',st:'chk'},
+{a:'sample',t:'材料抽驗',r:'DI 給水管每種管材抽驗一次；拉伸 CNS 2111／2112 4 號試片、勃氏硬度 CNS 2113、石墨球化率 CNS 2869 §11.6.4。',s:'監造計畫 二十八.2；02514 §2.3.6',v:'113/4/24 抽樣，結果合格（M-0854）',st:'ok'}]}]},
+{tab:'HDPE 管',sm:'給水管／管中管・雄宇事業',v:[
+{id:'hdpe',label:'給水管・電熔接頭',name:'HDPE 自來水管（電銲套接頭）',sub:'高密度聚乙烯管依 CNS 2456-2，接頭採電銲套或熱融。動畫示意插入、通電熔接、指示銷凸出。',qty:'契約數量：φ25 290 m、φ32 200 m、φ90 64,693 m、φ160 44,208 m、φ100 自來水管 600 m',scale:'示意比例：OD 110 mm',sl:['插入','熔接完成'],b:'hdpe',specs:[
+{a:'body',t:'管材 CNS 2456-2',r:'高密度聚乙烯管依 CNS 2456-2 製造。',s:'02511 §2.2.1(1)',v:'雄宇事業 正字標記 台正字第 8110 號、ISO 9001:2015、環保標章',st:'ok'},
+{a:'coupler',t:'接頭：電銲套或熱融',r:'採電銲套接頭或熱融接頭；電銲套材質須與直管相同並能互相熔接。',s:'02511 §2.2.1(2)(3)',v:'本送審檔以直管為主，未見電銲套材質或熔接相容證明',st:'chk'},
+{a:'mark',t:'管身標示（每 1 m 內）',r:'以不易消失方法標明自來水用字樣、標稱管徑、廠名或代號、使用壓力、製造年月、製造編號。',s:'02511 §2.2.2',st:'req'},
+{a:'wall',t:'物理性質',r:'抗拉降伏 ≥200 kgf/cm²、斷裂伸長 ≥350%、偏圓率 ≤3.0%、環剛度 ≥1000 kPa、氧化誘導時間 ≥20 min。',s:'晟恩 22120616；監造計畫 二十八.1',v:'238 kgf/cm²、387%、1.6%、1753 kPa、101 min；密度 0.945',st:'ok'},
+{a:'bore',t:'衛生溶出',r:'濁度 ≤0.5 度、色度 ≤1.0 度、餘氯減量 ≤0.7 mg/L、鉛 ≤0.008 mg/L、過錳酸鉀消耗量 ≤2.0 mg/L。',s:'晟恩 22120616',v:'0、0、0.5、0.0025、0.66',st:'ok'},
+{a:'end',t:'報告時效',r:'長期耐水壓、加熱復原、耐候、灰分、溶出等，可提通知交貨前 6 個月內之政府或第三者檢驗合格證明，免再取樣。',s:'02511 §3.1.1',v:'晟恩報告日期 2022/12/22；HDPE 進場自 113/05/27 起，已逾 6 個月，需補新報告或取樣送驗',st:'chk'},
+{a:'term',t:'熔接施工',r:'採適合接頭之縮緊機具施工，不得以開挖機推送，避免接頭受損破裂。',s:'02511 §3.2',st:'req'},
+{a:'store',t:'儲存與端口',r:'避免長期日照，室外應設遮棚；兩端端口以不易破裂之防塵措施封住。',s:'02511 §1.7.2、§1.7.4',st:'req'},
+{a:'press',t:'試壓',r:'最高許可使用壓力 16 kgf/cm²，現場以 10 kgf/cm² 試壓 1 小時；出廠短期水壓 25 kgf/cm²、20 ℃、1 小時不漏不裂。',s:'02505 §3.4.3；晟恩 22120616',v:'短期水壓：無漏水、無破裂',st:'ok'},
+{a:'sample',t:'抽樣頻率',r:'≤65 mm 每 1,000 支、80～150 mm 每 500 支、≥200 mm 每 200 支抽 1 支；不合格加倍再驗，仍不合格整批剔除。',s:'02511 §3.1；特別條款（二十五）',v:'113/4/24 抽樣合格（M-0867）',st:'ok'}]},
+{id:'pip',label:'管中管 PIP',name:'HDPE 管中管（4" COD 螺旋管＋D36 子管 ×4）',sub:'地下配電／電信用管中管：波紋母管內穿 4 支 D36×2.1 mm 子管。動畫示意子管穿入母管。',qty:'契約數量：φ100（4"）PIP 管 371 m＋157 m = 528 m',scale:'示意比例：母管 OD 113 mm，子管 D36',sl:['穿管前','穿管完成'],b:'pip',specs:[
+{a:'mother',t:'母管性質',r:'外徑 113 ±5%；抗拉降伏 ≥200 kgf/cm²；斷裂點伸長 ≥350%；密度 0.941～0.955。',s:'監造計畫 二十七.2；晟恩 23032910',v:'113.3 mm、237 kgf/cm²、467%、0.948',st:'ok'},
+{a:'rib',t:'母管抗外壓強度',r:'內徑 5% 變形量時 ≥750 kgf/m。',s:'監造計畫 二十七.2(4)',v:'766 kgf/m，數值符合；但報告註明此項非實驗室 TAF 認證項目，宜確認可否採認',st:'chk'},
+{a:'duct',t:'子管尺寸 D36',r:'外徑 36 ±0.2 mm、厚度 2.1 +0.5 mm。',s:'晟恩 23032910 要求值',v:'外徑實測 36.3 mm，超出上限 36.2 mm；厚度 2.17 mm 符合',st:'chk'},
+{a:'duct2',t:'子管材質',r:'抗拉降伏 ≥200 kgf/cm²、斷裂點伸長 ≥350%、密度 0.941～0.955。',s:'監造計畫 二十七.2',v:'239 kgf/cm²、503%、0.949',st:'ok'},
+{a:'sample',t:'抽樣頻率',r:'母管 ≤1,000 m 抽 1 支、1,001～3,000 m 抽 2 支…；內管 ≤4,000 m 抽 1 支、4,001～12,000 m 抽 2 支…；不合格加倍取樣。',s:'監造計畫 二十七.2',st:'req'}]}]},
+{tab:'PVC E 管',sm:'電線導管・億豐綜合',v:[{id:'pvc',label:'管路埋設',name:'硬質 PVC 電線導管（E 管）',sub:'地下配電管路。E 管依 CNS 1302，以承口膠合接合，安放於混凝土隔離板，外包 140 kgf/cm² PC。',qty:'契約數量：E 管 28 mm 1,051 m、52 mm 450 m、80 mm 1,661 m、100 mm 2,995 m、150 mm 2,606 m；15 cm PVC 管 3,175 m',scale:'示意比例：4" E 管 3 支一排，管長截短',sl:['塗膠插入','包覆完成'],b:'pvc',specs:[
+{a:'body',t:'E 管規格',r:'硬質聚氯乙烯電線導管 CNS 1302 K3006，以灰色為主。',s:'正字標記產品檢驗報告；監造計畫 二十七.1',v:'億豐綜合工業 台正字第 05973 號，110/10/19 普查合格',st:'ok'},
+{a:'dims',t:'尺度（外徑／最小厚度）',r:'28：34±0.3／2.7；52：60±0.5／3.6；80：89±0.5／5.1；100：114±0.6／6.6；150：165±1.0／8.5 mm；長度 +30／−10 mm。',s:'CNS 1302 E 管（億豐型錄 p.11）',v:'52 mm 實測：外徑 59.9、厚 3.7、長 4001 mm',st:'ok'},
+{a:'crush',t:'耐壓扁性',r:'載重 1250 N 時外徑減少 ≤25%，除載後 ≤10%，目視無裂紋或破裂。',s:'CNS 1302',v:'4%／0.4%',st:'ok'},
+{a:'elec',t:'絕緣與耐燃',r:'絕緣電阻 ≥100 MΩ；移開火源後 30 秒內自熄。',s:'CNS 1302',v:'≥250 MΩ；符合',st:'ok'},
+{a:'bell',t:'承插膠合',r:'接頭內外清潔；插入端磨成楔形並塗黏劑，插入承接套管 ≥50 mm；接管保持水平並固定至黏劑凝固。',s:'02552 §3.2.1(1)',st:'req'},
+{a:'spacer',t:'混凝土隔離板',r:'導管安放於混凝土隔離板上；隔板混凝土 fc′ ≥175 kgf/cm²，5"、6" 鋼筋採 #3。',s:'02552 §3.2.1(2)A；管路埋設標準圖 註 1～2',st:'req'},
+{a:'encase',t:'管路包覆',r:'140 kgf/cm² PC 包覆、碎石級配底層、鍍鋅鐵線綁紮；寬深依管路埋設尺寸表。',s:'4變 管路埋設標準圖',st:'req'},
+{a:'tape',t:'警示帶',r:'依設計回填高程放置；拉力 ≥1.2 kgf/mm²、延伸率 ≥150%、加熱後無顯著變色。',s:'02552 §3.2.1(2)D；監造計畫 二十九',v:'113/8/05 抽驗合格（IM-0996）',st:'ok'},
+{a:null,t:'15 cm PVC 管（CNS 1298）',r:'PVC 管依 CNS 1298 K3004；抗拉降伏 ≥45 MPa、維氏軟化 ≥76 ℃、比重 1.40～1.44。',s:'02552 §2.1.5',v:'台正字第 05972 號（VP 50 mm 樣品）：50 MPa、82 ℃、1.42',st:'ok'},
+{a:'entry',t:'進場查驗',r:'持經濟部正字標記者免出廠檢驗；每次進場書面審查並現場查對；每種規格各取一支。',s:'監造計畫 二十七.1、抽驗管制表',v:'112/10/06 PVC E 管抽樣合格（M-0534）',st:'ok'}]}]},
+{tab:'RCP 混凝土管',sm:'三級 B 型・瑞山水泥',v:[
+{id:'rcp',label:'管座安裝',name:'三級 B 型鋼筋混凝土管（RCP）',sub:'C 填區集水井與排水管。CNS 483 三級、B 型承插接頭，坐於 280 kgf/cm² RC 管座。',qty:'送審規格：φ500、φ600、φ800 × 2400 mm，三級 B 型',scale:'示意比例：φ800 mm，管長截短',sl:['分離','承插到位'],b:'rcp',specs:[
+{a:'body',t:'管種',r:'集水井接管及排水管採 RCP 管（三級），依 CNS 483 A1001。',s:'設計圖 BE-08、BE-10',v:'瑞山水泥 台正字第 07089 號（800×2400 厚三級 B 型），ISO 9001:2015',st:'ok'},
+{a:'dims',t:'尺度 φ800',r:'內徑 800±4、管厚 100（−2／+4）、有效長 2400（−5／+10）mm；承口 D1 900±2、插口 D2 884±1 mm。',s:'CNS 483（BSMI 正字標記檢驗報告）',v:'799、102、2398 mm；D1 900、D2 884 mm',st:'ok'},
+{a:null,t:'尺度 φ600／φ500',r:'φ600：內徑 600±4、管厚 87（−2／+4）、D1 687±2、D2 671±1 mm；φ500：內徑 500±4、管厚 71（−2／+4）mm；長 2400（−5／+10）mm。',s:'瑞山報告 20230035、20240004',v:'φ600：599.5、87.7、686.5、671.0；φ500：499.0、72.7；長 2400 mm',st:'ok'},
+{a:'bore',t:'吸水率',r:'≤8%。',s:'CNS 483',v:'3.5%（φ800）',st:'ok'},
+{a:'joint',t:'B 型承插與接縫',r:'插口推入承口到底；集水井接管處以填縫料（聚硫膠或變性 PU）處理。',s:'BE-08～BE-10 說明 5',st:'req'},
+{a:'cradle',t:'RC 管座',r:'280 kgf/cm² RC 管座，下設碎石級配底層；集水井混凝土 fc′ ≥280 kgf/cm²、第 II 型水泥。',s:'BE-08「60∮RCP 管承斷面圖」、說明 3',st:'req'},
+{a:'base',t:'打底',r:'打底混凝土 fc′ ≥140 kgf/cm²、第 I 型水泥；碎石級配底層 10～15 cm。',s:'BE-08～BE-10 說明',st:'req'},
+{a:'submit',t:'送審方式',r:'預鑄鋼筋混凝土管於資料送審時書面審查，提供檢驗合格證明文件；不符者重新提送。',s:'監造計畫 三十八',v:'工信備忘錄 (113)臺北港字第 03-005 號，113/03/14 檢送',st:'ok'}]},
+{id:'rcpt',label:'三點外壓試驗',name:'RCP 外壓強度試驗（CNS 484）',sub:'上方載重梁加壓至裂紋強度，再至破壞強度。三級管破壞強度須為裂紋強度 1.5 倍。',qty:'規範值依監造計畫第三十八項；實測值取自 BSMI 與瑞山 TAF 1612 實驗室報告',scale:'示意比例：φ800×2400 mm',sl:['加壓前','破壞載重'],b:'rcpt',specs:[
+{a:'beam',t:'裂紋強度（三級）',r:'φ800 ≥52、φ600 ≥39、φ500 ≥33 kN/m。',s:'監造計畫 三十八.1；CNS 483 表 11',v:'52.5（BSMI）、39.4、33.5 kN/m',st:'ok'},
+{a:'crack',t:'裂紋判定',r:'達裂紋強度時，不得出現寬 0.3 mm、長 300 mm 之裂紋。',s:'CNS 484（2005）',v:'各報告：達測試值時無此裂紋',st:'ok'},
+{a:'pipe',t:'破壞強度',r:'≥ 裂紋強度 1.5 倍：φ800 ≥78、φ600 ≥58.5、φ500 ≥49.5 kN/m。',s:'監造計畫 三十八.2',v:'φ800 78.4、φ600 59.0、φ500 50.0 kN/m',st:'ok'},
+{a:'strip',t:'試驗方法與單位',r:'三點載重外壓試驗依 CNS 484；試驗單位 BSMI 新竹分局、瑞山測試實驗室（TAF 1612）。',s:'CNS 484',st:'req'},
+{a:'water',t:'耐水壓',r:'經耐水壓試驗後不得漏水。',s:'CNS 483',v:'符合（φ800 BSMI 報告）',st:'ok'}]}]},
+{tab:'可撓防震管',sm:'三球內平面・泰祥興',v:[{id:'flex',label:'偏位動作',name:'三球可撓性內平面防震管',sub:'橡膠本體三球形、內孔平面，SUS316 JIS 7.5K 凸緣。動畫示意側向偏位至 30 cm。',qty:'報價數量：4" φ100 自來水 24 只（7.5 kg/cm²）；配電電管 6" 16 只、4" 8 只、2" 16 只（3 kg/cm²）',scale:'示意比例：φ100×800 mm，偏位依比例放大',sl:['0 mm','偏位 300 mm'],b:'flex',specs:[
+{a:'body',t:'本體與長度',r:'三球形可撓本體，長 800 ±20 mm，設計偏位量 30 cm。',s:'泰祥興 結構設計圖；報價單 113/5/31',v:'φ50、φ100、φ150 三種設計圖皆為 800 ±20 mm',st:'ok'},
+{a:'flange',t:'凸緣 SUS316、JIS 7.5K',r:'凸緣接頭按 JIS 7.5 kgf/cm² 規格製造。',s:'比照 15223 §2.1.2',v:'材質表：法蘭 SUS316，RF 面 JIS 7.5K',st:'ok'},
+{a:'bolt',t:'凸緣螺栓須不銹鋼',r:'凸緣及螺栓均須為不銹鋼。',s:'比照 15223 §2.1.4',v:'設計圖材質表未列螺栓、螺帽材質，需補送',st:'chk'},
+{a:'pcd',t:'凸緣尺寸',r:'φ50：PCD 143、外徑 186；φ100：PCD 195、外徑 238；φ150：PCD 247 ±1.5、外徑 290 ±6 mm。',s:'泰祥興 結構設計圖',st:'req'},
+{a:'bore',t:'內平面膠層 NR',r:'內膠層與外層為天然橡膠（NR），內孔平面無波紋，不阻礙通水或穿線。',s:'結構設計圖 材質表 5、6',v:'φ100 內徑 101.6、φ150 內徑 152 ±10 mm',st:'req'},
+{a:'rein',t:'補強層',r:'鋼線 SWMB；補強簾子為合成纖維（兩層）。',s:'結構設計圖 材質表 2～4',st:'req'},
+{a:'press',t:'使用壓力與管線試壓',r:'自來水 4"：使用壓力 7.5 kg/cm²；配電電管 2"／4"／6"：3 kg/cm²。',s:'報價單；02505 §3.4.3',v:'自來水管線試壓 10 kgf/cm² 高於 7.5 kg/cm²，試壓時須隔離或取得廠商耐壓證明',st:'chk'},
+{a:'mat',t:'SUS316 材質證明',r:'不銹鋼 316：Ni 10～14%、Cr 16～18%、Mo 2～3%；每批每 25 T 抽驗。',s:'監造計畫 二十；特別條款（十八）',v:'送審檔未見材質證明或耐壓試驗報告，報價亦註明不含檢驗費',st:'chk'},
+{a:'corr',t:'埋設防蝕',r:'地下金屬管須防蝕包覆。',s:'比照 15223 §3.4.1(10)',st:'req'}]}]}];
+
+/* ---------- 介面 ---------- */
+let fi=0,vi=0,cur=null,act=-1;
+const all=FAM.flatMap(f=>f.v);
+$('#kSpec').textContent=all.reduce((n,v)=>n+v.specs.length,0);
+$('#kChk').textContent=all.reduce((n,v)=>n+v.specs.filter(s=>s.st==='chk').length,0);
+$('#tabs').innerHTML=FAM.map((f,i)=>`<button role="tab" id="tab${i}" aria-selected="${i===0}" data-i="${i}">${esc(f.tab)}<small>${esc(f.sm)}</small></button>`).join('');
+$('#chkT').innerHTML=FAM.flatMap((f,i)=>f.v.flatMap((v,j)=>v.specs.map((s,k)=>s.st==='chk'?`<tr class="go" tabindex="0" data-f="${i}" data-v="${j}" data-k="${k}"><td>${esc(f.tab)}</td><td>${esc(s.t)}</td><td>${esc(s.v)}</td><td>${esc(s.s)}</td></tr>`:''))).join('');
+
+function panel(V){
+  $('#mt').textContent=V.name;$('#ms').textContent=V.sub;$('#mq').textContent=V.qty;$('#scale').textContent=V.scale;
+  $('#rl').textContent=V.sl[0];$('#rr').textContent=V.sl[1];
+  const c={ok:0,chk:0,req:0};V.specs.forEach(s=>c[s.st]++);
+  $('#mc').innerHTML=Object.keys(c).filter(k=>c[k]).map(k=>`<span class="chip ${k}">${ST[k]} ${c[k]}</span>`).join('');
+  $('#specs').innerHTML=V.specs.map((s,i)=>`<li class="sp ${s.st}" data-i="${i}" tabindex="0"><span class="no">${s.a?i+1:'–'}</span><div><div class="hd"><b>${esc(s.t)}</b><span class="chip ${s.st}">${ST[s.st]}</span></div><p>${esc(s.r)}</p>${s.v?`<p class="v"><i>送審</i>${esc(s.v)}</p>`:''}<p class="src">${esc(s.s)}</p></div></li>`).join('');
+  const F=FAM[fi];
+  $('#vars').innerHTML=F.v.length>1?F.v.map((v,j)=>`<button class="vchip" type="button" aria-pressed="${j===vi}" data-j="${j}">${esc(v.label)}</button>`).join(''):'';
+  $('#pins').innerHTML=V.specs.map((s,i)=>s.a?`<button class="pin ${s.st}" type="button" data-i="${i}" aria-label="${i+1} ${esc(s.t)}">${i+1}<span class="tip">${esc(s.t)}</span></button>`:'').join('');
+}
+function setAct(i,scroll){
+  act=i;
+  document.querySelectorAll('.sp').forEach(e=>e.classList.toggle('on',+e.dataset.i===i));
+  document.querySelectorAll('.pin').forEach(e=>e.classList.toggle('on',+e.dataset.i===i));
+  if(scroll){const li=document.querySelector(`.sp[data-i="${i}"]`);if(li)li.scrollIntoView({block:'nearest',behavior:'smooth'});}
+}
+
+/* ---------- 3D ---------- */
+const view=$('#view');
+let ok=typeof THREE!=='undefined';
+let R,S,C,O,root,clipOn=false,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,ph=0,tv=playing?0:1,last=performance.now();
+const clip=ok?[new THREE.Plane(new THREE.Vector3(0,0,-1),0)]:[];
+const sm=(a,b,t)=>{let x=Math.min(1,Math.max(0,(t-a)/(b-a)));return x*x*(3-2*x)};
+const lp=(a,b,k)=>a+(b-a)*k;
+function M(c,o={}){return new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.6,metalness:.1,side:THREE.DoubleSide},o))}
+function wrap(m){const w=new THREE.Group();w.add(m);return w}
+function tube(ri,ro,len,mat,seg=64){const g=new THREE.Group();
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(ro,ro,len,seg,1,true),mat),new THREE.Mesh(new THREE.CylinderGeometry(ri,ri,len,seg,1,true),mat));
+  for(const s of [1,-1]){const r=new THREE.Mesh(new THREE.RingGeometry(ri,ro,seg),mat);r.rotation.x=-s*Math.PI/2;r.position.y=s*len/2;g.add(r)}
+  g.rotation.z=-Math.PI/2;return wrap(g)}
+function lathe(pts,mat,seg=72){const geo=new THREE.LatheGeometry(pts.map(p=>new THREE.Vector2(p[0],p[1])),seg);geo.rotateZ(-Math.PI/2);return wrap(new THREE.Mesh(geo,mat))}
+function rodX(r,len,mat,seg=16){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,seg),mat);m.rotation.z=-Math.PI/2;return wrap(m)}
+function box(x,y,z,mat){return new THREE.Mesh(new THREE.BoxGeometry(x,y,z),mat)}
+function anc(p,x,y,z){const o=new THREE.Object3D();o.position.set(x,y,z);p.add(o);return o}
+function extr(shape,depth,mat){const geo=new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:false,curveSegments:40});const m=new THREE.Mesh(geo,mat);m.rotation.y=-Math.PI/2;m.position.x=depth/2;return wrap(m)}
+function label(txt,w,h,col,bg){const c=document.createElement('canvas');c.width=1024;c.height=64;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,1024,64);x.fillStyle=col;x.font='600 34px "Noto Sans TC",sans-serif';x.textBaseline='middle';x.fillText(txt,16,34);const t=new THREE.CanvasTexture(c);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:t,transparent:true}));return m}
+
+const B={
+dip(){const g=new THREE.Group(),A={};
+  const iron=M(0x1c1e22,{roughness:.5,metalness:.35}),cem=M(0x9d9b93,{roughness:.95}),rub=M(0x4a2e28,{roughness:.9}),gl=M(0x454a51,{metalness:.55,roughness:.4}),bo=M(0x8c939b,{metalness:.8,roughness:.3}),sand=M(0xd8c59b,{roughness:1,transparent:true,opacity:.5,depthWrite:false});
+  const Bp=new THREE.Group();g.add(Bp);
+  Bp.add(lathe([[1.24,0],[1.16,.18],[1.115,.3],[1.115,.9],[1.04,.93],[1.04,3.9],[1.1,3.9],[1.1,1.05],[1.32,.86],[1.32,.24],[1.7,.24],[1.7,0],[1.24,0]],iron));
+  const lb=tube(1,1.04,2.97,cem);lb.position.x=2.415;Bp.add(lb);
+  const P=new THREE.Group();g.add(P);const pa=tube(1.04,1.1,4,iron);pa.position.x=-1.15;P.add(pa);const la=tube(1,1.04,4,cem);la.position.x=-1.15;P.add(la);
+  const Rg=new THREE.Group();const rm=new THREE.Mesh(new THREE.TorusGeometry(1.18,.075,14,72),rub);rm.rotation.y=Math.PI/2;Rg.add(rm);g.add(Rg);
+  const G=lathe([[1.13,0],[1.7,0],[1.7,.22],[1.32,.22],[1.2,.32],[1.13,.32],[1.13,0]],gl);g.add(G);
+  const Bo=new THREE.Group();g.add(Bo);let b0;
+  for(let i=0;i<6;i++){const a=i/6*Math.PI*2,b=new THREE.Group(),s=rodX(.065,.95,bo);s.position.x=-.125;b.add(s);const h=box(.1,.14,.32,bo);h.position.x=.34;b.add(h);const n=rodX(.11,.12,bo,6);n.position.x=-.43;b.add(n);b.position.set(0,Math.cos(a)*1.5,Math.sin(a)*1.5);Bo.add(b);if(i===1)b0=b}
+  const sd=box(9.5,1,3.4,sand);sd.position.set(-.8,-1.6,0);g.add(sd);
+  A.body=anc(P,-1.5,1.1,0);A.socket=anc(Bp,.6,1.32,0);A.ring=anc(Rg,0,-1.25,0);A.gland=anc(G,.1,1.2,-1.2);A.bolt=anc(b0,.34,.08,0);A.lining=anc(P,-2.2,-1,0);A.coat=anc(Bp,3,0,1.1);A.mark=anc(Bp,2.1,1.1,0);A.end=anc(Bp,3.9,.6,0);A.bed=anc(g,-3.6,-1.6,1.7);A.cover=anc(P,-2.9,1.1,0);A.sample=anc(Bp,3.4,-1.1,0);
+  return{g,A,cam:[2,4.4,12.8],tgt:[-.8,0,0],upd(t){P.position.x=lp(-3.4,0,sm(.05,.4,t));Rg.position.x=lp(-1.0,.12,sm(.38,.55,t));G.position.x=lp(-1.9,-.36,sm(.5,.7,t));Bo.position.x=lp(-2.8,0,sm(.66,.92,t))},ro(t){return t<.4?'① 插口管插入承口':t<.55?'② 橡膠圈就位':t<.7?'③ 壓圈推入':t<.95?'④ 鎖緊 T 頭螺栓':'接合完成'}}},
+hdpe(){const g=new THREE.Group(),A={};
+  const hd=M(0x16181c,{roughness:.55}),blu=M(0x1f5fff,{roughness:.5}),cp=M(0x2c2f35,{roughness:.5}),cu=M(0xc47a3a,{metalness:.7,roughness:.3,emissive:0xff5a00,emissiveIntensity:0}),tm=M(0xd9d4c7,{roughness:.6}),ind=M(0xffc400,{roughness:.5});
+  const mk=sx=>{const p=new THREE.Group();const t=tube(.9,1.1,5.3,hd);t.position.x=sx*2.7;p.add(t);for(const a of [0,2.09,4.19]){const s=box(5.3,.03,.15,blu);s.position.set(sx*2.7,Math.cos(a)*1.105,Math.sin(a)*1.105);s.rotation.x=a;p.add(s)}g.add(p);return p};
+  const PL=mk(-1),PR=mk(1);
+  const lab=label('自來水用・HDPE・標稱管徑・使用壓力・廠名・製造年月・製造編號',3.6,.225,'#ffffff','rgba(0,0,0,0)');lab.rotation.x=-Math.PI/2;lab.rotation.z=0;lab.position.set(-3.2,1.122,.36);PL.add(lab);
+  const C=tube(1.12,1.42,3.2,cp);g.add(C);
+  for(const s of [-1,1])for(let k=0;k<6;k++){const r=new THREE.Mesh(new THREE.TorusGeometry(1.14,.028,8,64),cu);r.rotation.y=Math.PI/2;r.position.x=s*(.4+k*.18);g.add(r)}
+  const T=[],I=[];for(const s of [-1,1]){const t=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.45,20),tm);t.position.set(s*1.25,1.62,0);g.add(t);T.push(t);const i=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.24,14),ind);i.position.set(s*.55,1.3,0);g.add(i);I.push(i)}
+  A.body=anc(PL,-4.7,1.1,0);A.coupler=anc(C,0,-1.42,0);A.mark=anc(PL,-2.2,1.12,.4);A.wall=anc(PR,4.3,0,1.1);A.bore=anc(PR,3.6,-.9,0);A.end=anc(PL,-5.35,.5,0);A.term=anc(T[1],0,.25,0);A.store=anc(PR,5.35,.5,0);A.press=anc(PR,2.2,1.1,0);A.sample=anc(PL,-3.6,-1.1,0);
+  return{g,A,cam:[1.6,5.6,16.5],tgt:[0,0,0],upd(t){PL.position.x=lp(-3.4,0,sm(.08,.4,t));PR.position.x=lp(3.4,0,sm(.08,.4,t));cu.emissiveIntensity=2.2*sm(.45,.7,t)*(1-.85*sm(.8,1,t));I.forEach(i=>i.position.y=1.3+.32*sm(.72,.9,t))},ro(t){return t<.42?'插入電銲套至定位':t<.75?'通電熔接中':'冷卻：熔接指示銷凸出'}}},
+pip(){const g=new THREE.Group(),A={};
+  const hd=M(0x17191d,{roughness:.6}),cols=[0xe07020,0x2050d0,0x8a9098,0xe9e6df];
+  const pts=[];for(let x=-5;x<=5.0001;x+=.05)pts.push([2.12+.14*(.5+.5*Math.sin(x*Math.PI*2/.7)),x]);
+  const prof=[[1.95,-5],[1.95,5],...pts.reverse(),[1.95,-5]];
+  const Mo=lathe(prof,hd,80);g.add(Mo);
+  const D=[];[[1,1],[1,-1],[-1,-1],[-1,1]].forEach((p,i)=>{const d=new THREE.Group();const t=tube(.636,.72,11,M(cols[i],{roughness:.5}),40);d.add(t);d.position.set(0,p[0]*.78,p[1]*.78);g.add(d);D.push(d)});
+  A.mother=anc(Mo,-3,2.26,0);A.rib=anc(Mo,2.6,0,2.26);A.duct=anc(D[0],4.8,.72,0);A.duct2=anc(D[1],3.2,0,.72);A.sample=anc(Mo,4.6,-2.2,0);
+  return{g,A,cam:[3,7.5,24],tgt:[-2.2,0,0],upd(t){D.forEach((d,i)=>d.position.x=lp(-9,0,sm(.08+i*.1,.42+i*.1,t)))},ro(t){return t<.75?'子管穿入母管':'4 支 D36 子管就位'}}},
+pvc(){const g=new THREE.Group(),A={};
+  const pv=M(0x7d848c,{roughness:.45}),pv2=M(0x656b73,{roughness:.45}),glue=M(0xffd23a,{roughness:.4,transparent:true,opacity:0,emissive:0x6a4b00,emissiveIntensity:.4}),con=M(0x9f9a8f,{roughness:1}),enc=M(0xc9c4b6,{roughness:1,transparent:true,opacity:0,depthWrite:false}),grv=M(0xa79d88,{roughness:1}),wr=M(0xb8bcc2,{metalness:.8,roughness:.3}),tp=M(0xf2c200,{roughness:.6});
+  const cd=z=>{const t=tube(1.008,1.14,14,pv);t.position.z=z;g.add(t);return t};const cF=cd(3.08),cB=cd(-3.08);
+  const Lp=new THREE.Group();g.add(Lp);const lt=tube(1.008,1.14,6.8,pv);lt.position.x=-3.6;Lp.add(lt);const bl=tube(1.15,1.3,1.4,pv2);bl.position.x=.5;Lp.add(bl);
+  const Rp=new THREE.Group();g.add(Rp);const rt=tube(1.008,1.14,7,pv);rt.position.x=3.5;Rp.add(rt);const gb=tube(1.14,1.17,1,glue);gb.position.x=.5;Rp.add(gb);
+  const sh=new THREE.Shape();sh.moveTo(-5.6,-1.9);sh.lineTo(5.6,-1.9);sh.lineTo(5.6,0);for(const z of [3.08,0,-3.08]){sh.lineTo(z+1.16,0);sh.absarc(z,0,1.16,0,Math.PI,true)}sh.lineTo(-5.6,0);sh.closePath();
+  for(const x of [-4.6,4.6]){const s=extr(sh,1.2,con);s.position.x=x;g.add(s);const w1=rodX(.035,.035,wr);const top=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,10.2,8),wr);top.rotation.x=Math.PI/2;top.position.set(x,1.22,0);g.add(top);for(const z of [-5.1,5.1]){const v=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,3.1,8),wr);v.position.set(x,-.33,z);g.add(v)}}
+  const E=box(14,4.6,12,enc);E.position.y=.2;g.add(E);const gv=box(14,1.3,12,grv);gv.position.y=-2.75;g.add(gv);
+  const T=box(14,.03,1.6,tp);T.position.y=3.6;g.add(T);
+  A.body=anc(cF,-5.4,1.14,0);A.dims=anc(Rp,7,1.14,0);A.crush=anc(cB,-1.8,1.14,0);A.elec=anc(cF,2.4,1.14,0);A.bell=anc(Lp,1.2,1.3,0);A.spacer=anc(g,-4.6,-1.2,5.6);A.encase=anc(g,6.2,2.5,6);A.tape=anc(g,-2.5,3.62,0);A.entry=anc(cF,5.6,-1.14,0);
+  return{g,A,cam:[10,10.5,21],tgt:[0,-.2,0],upd(t){glue.opacity=sm(.1,.25,t);Rp.position.x=lp(4.4,.2,sm(.3,.62,t));enc.opacity=.3*sm(.72,.92,t)},ro(t){return t<.28?'插入端塗黏劑':t<.64?'插入承口 ≥50 mm':t<.72?'安放隔離板':'140 kgf/cm² PC 包覆'}}},
+rcp(){const g=new THREE.Group(),A={};
+  const rc=M(0x8f8b82,{roughness:.95}),cr=M(0xb0aa9e,{roughness:1}),gv=M(0x9c927e,{roughness:1});
+  const Bp=lathe([[2.25,0],[2.25,.6],[2,.66],[2,6],[2.5,6],[2.5,.95],[2.85,.75],[2.85,0],[2.25,0]],rc);g.add(Bp);
+  const Ap=lathe([[2,-6],[2,.55],[2.21,.55],[2.21,-.05],[2.5,-.15],[2.5,-6],[2,-6]],rc);g.add(Ap);
+  const a0=Math.atan2(-1.25,2.222);const sh=new THREE.Shape();sh.moveTo(-3.3,-3.2);sh.lineTo(3.3,-3.2);sh.lineTo(3.3,-1.25);sh.lineTo(2.222,-1.25);sh.absarc(0,0,2.55,a0,Math.PI-a0,true);sh.lineTo(-3.3,-1.25);sh.closePath();
+  const cd=extr(sh,13,cr);g.add(cd);const gr=box(13,.75,7.4,gv);gr.position.y=-3.575;g.add(gr);
+  A.body=anc(Bp,4,2.5,0);A.dims=anc(Bp,6,2.25,0);A.bore=anc(Bp,3,-2,0);A.joint=anc(Ap,.3,2.21,0);A.cradle=anc(g,-3,-2.2,3.3);A.base=anc(g,3,-3.6,3.7);A.submit=anc(Ap,-4.2,2.5,0);
+  return{g,A,cam:[9,8.5,26],tgt:[0,-.8,0],upd(t){Ap.position.x=lp(-3.8,.03,sm(.12,.7,t))},ro(t){return t<.7?'插口推入承口':'B 型接頭到位'}}},
+rcpt(){const g=new THREE.Group(),A={};
+  const rc=M(0x8f8b82,{roughness:.95}),st=M(0x3d4249,{metalness:.6,roughness:.4}),rd=M(0xe00000,{roughness:.5,transparent:true,opacity:0}),ar=M(0x1240e0,{roughness:.5});
+  const p=tube(2,2.5,12,rc,72);g.add(p);
+  for(const z of [-.9,.9]){const s=box(12,.3,.3,st);s.position.set(0,-2.62,z);g.add(s)}
+  const bs=box(13,1.2,.4,st);bs.position.y=-3.37;g.add(bs);
+  const Bm=new THREE.Group();g.add(Bm);const bm=box(12.4,.5,1,st);Bm.add(bm);
+  for(const x of [-4,0,4]){const c=new THREE.Mesh(new THREE.ConeGeometry(.28,.6,20),ar);c.rotation.x=Math.PI;c.position.set(x,1.05,0);Bm.add(c);const sh=new THREE.Mesh(new THREE.CylinderGeometry(.08,.08,1,10),ar);sh.position.set(x,1.85,0);Bm.add(sh)}
+  const ck=box(10.5,.03,.05,rd);ck.position.set(0,1.985,0);g.add(ck);const ck2=box(10.5,.03,.05,rd);ck2.position.set(0,-1.985,0);g.add(ck2);
+  A.beam=anc(Bm,-5.2,.25,.5);A.crack=anc(g,1.5,1.98,0);A.pipe=anc(g,-3,0,2.5);A.strip=anc(g,4.6,-2.62,.9);A.water=anc(g,6,1.2,1.4);
+  let L=0;
+  return{g,A,cam:[9,6,23],tgt:[0,0,0],upd(t){Bm.position.y=2.75+1.6*(1-sm(0,.25,t));L=t<.25?0:t<.6?52.5*sm(.25,.6,t):52.5+25.9*sm(.65,.95,t);rd.opacity=sm(.55,.62,t)},ro(t){return t<.25?'載重梁下降':t<.6?`裂紋載重 ${L.toFixed(1)} kN/m`:t<.65?'φ800 裂紋強度 52.5 kN/m（≥52）':`破壞載重 ${L.toFixed(1)} kN/m${t>.94?'（≥78）':''}`}}},
+flex(){const g=new THREE.Group(),A={},dyn=[];
+  const nr=M(0x202124,{roughness:.85}),sus=M(0xd3d7dc,{metalness:.9,roughness:.25}),stl=M(0x50565e,{metalness:.6,roughness:.4}),bw=M(0x9aa0a6,{metalness:.8,roughness:.3}),cord=new THREE.MeshBasicMaterial({color:0xc9a46a,wireframe:true});
+  const X=7.56,rf=x=>1.35+.72*[-4.6,0,4.6].reduce((s,c)=>s+Math.exp(-(((x-c)/1.15)**2)),0)+.3*Math.max(0,(Math.abs(x)-6.6)/.96);
+  const pts=[[1.02,-X],[1.02,X]];for(let x=X;x>=-X-1e-6;x-=.08)pts.push([rf(x),x]);pts.push([1.02,-X]);
+  const mkD=(pp,mat,seg)=>{const geo=new THREE.LatheGeometry(pp.map(p=>new THREE.Vector2(p[0],p[1])),seg);geo.rotateZ(-Math.PI/2);const m=new THREE.Mesh(geo,mat);g.add(m);dyn.push({geo,base:geo.attributes.position.array.slice()});return m};
+  mkD(pts,nr,72);
+  const rp=[];for(let x=-X+.2;x<=X-.2;x+=.12)rp.push([1.15+(rf(x)-1.35)*.8,x]);mkD(rp,cord,36);
+  const bead=[];for(const s of [-1,1]){const b=new THREE.Mesh(new THREE.TorusGeometry(1.55,.06,8,48),bw);b.rotation.y=Math.PI/2;b.position.x=s*7.1;g.add(b);bead.push(b)}
+  const side=s=>{const G=new THREE.Group();const f=tube(1.02,2.38,.44,sus);f.position.x=s*7.78;G.add(f);const m=tube(1.0,2.38,.4,stl);m.position.x=s*8.2;G.add(m);const pp=tube(.95,1.1,3,stl);pp.position.x=s*9.9;G.add(pp);let b0;for(let i=0;i<8;i++){const a=(i+.5)/8*Math.PI*2,b=new THREE.Group(),r=rodX(.1,1.3,sus);b.add(r);const n=rodX(.17,.16,sus,6);n.position.x=s*.66;b.add(n);b.position.set(s*8.0,Math.cos(a)*1.95,Math.sin(a)*1.95);G.add(b);if(!i)b0=b}g.add(G);return{G,b0}};
+  const Ls=side(-1),Rs=side(1);
+  const ad=(x,y,z)=>{const o=anc(g,x,y,z);dyn.push({o,x,z});return o};
+  A.body=ad(-4.6,rf(-4.6),0);A.flange=anc(Ls.G,-7.78,-2.38,0);A.bolt=anc(Ls.b0,0,.1,0);A.pcd=anc(Rs.G,7.78,0,2.38);A.bore=ad(0,-1.02,0);A.rein=ad(-2.3,0,1.2);A.press=ad(0,rf(0),0);A.mat=anc(Rs.G,7.78,2.38,0);A.corr=anc(Ls.G,-10.6,-1.1,0);
+  let d=0;const off=x=>{const s=Math.min(1,Math.max(0,(x+X)/(2*X)));return d*s*s*(3-2*s)};
+  return{g,A,cam:[3,9.5,30],tgt:[0,0,2.5],upd(t){d=6*t;Rs.G.position.z=d;bead[1].position.z=off(7.1);bead[0].position.z=off(-7.1);
+    for(const e of dyn){if(e.geo){const p=e.geo.attributes.position,a=p.array,b=e.base;for(let i=0;i<a.length;i+=3)a[i+2]=b[i+2]+off(b[i]);p.needsUpdate=true;e.geo.computeVertexNormals()}else e.o.position.z=e.z+off(e.x)}},
+    ro(t){return`偏位 ${Math.round(t*300)} mm`}}}
+};
+
+function build(){
+  if(root){S.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose()})}
+  const V=FAM[fi].v[vi];cur=B[V.b]();root=cur.g;S.add(root);resetCam();cur.upd(tv);
+}
+function resetCam(){const a=view.clientWidth/Math.max(1,view.clientHeight),k=Math.max(1,Math.pow(1.45/a,.85));const t=new THREE.Vector3(...cur.tgt),p=new THREE.Vector3(...cur.cam).sub(t).multiplyScalar(k).add(t);C.position.copy(p);O.target.copy(t);O.update()}
+function size(){const w=view.clientWidth,h=view.clientHeight;R.setSize(w,h,false);C.aspect=w/h;C.updateProjectionMatrix()}
+
+function select(f,v,keepAct){fi=f;vi=v;act=-1;
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',+b.dataset.i===f));
+  panel(FAM[f].v[v]);if(ok)build();}
+
+const pv=ok?new THREE.Vector3():null;
+function pins(){const V=FAM[fi].v[vi],w=view.clientWidth,h=view.clientHeight;
+  document.querySelectorAll('.pin').forEach(el=>{const s=V.specs[+el.dataset.i],o=cur.A[s.a];if(!o){el.style.display='none';return}
+    o.getWorldPosition(pv);pv.project(C);const vis=pv.z<1&&Math.abs(pv.x)<1.05&&Math.abs(pv.y)<1.05;el.style.display=vis?'':'none';
+    el.style.transform=`translate(${((pv.x*.5+.5)*w).toFixed(1)}px,${((-pv.y*.5+.5)*h).toFixed(1)}px)`})}
+function tick(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  if(playing){ph=(ph+dt/11)%1;const p=ph;tv=p<.08?0:p<.45?sm(.08,.45,p):p<.68?1:p<.92?1-sm(.68,.92,p):0;$('#rg').value=Math.round(tv*1000)}
+  cur.upd(tv);$('#read').textContent=cur.ro?cur.ro(tv):'';
+  O.update();R.render(S,C);pins();requestAnimationFrame(tick)}
+
+if(ok){try{
+  R=new THREE.WebGLRenderer({canvas:$('#cv'),antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));
+  S=new THREE.Scene();C=new THREE.PerspectiveCamera(35,1,.1,500);
+  S.add(new THREE.HemisphereLight(0xffffff,0x4a5470,.55));const d1=new THREE.DirectionalLight(0xffffff,.8);d1.position.set(6,10,8);S.add(d1);const d2=new THREE.DirectionalLight(0xa9bcff,.45);d2.position.set(-8,-3,-6);S.add(d2);S.add(new THREE.AmbientLight(0xffffff,.08));
+  O=new THREE.OrbitControls(C,R.domElement);O.enableDamping=true;O.dampingFactor=.08;O.minDistance=3;O.maxDistance=60;
+  size();new ResizeObserver(()=>{size();}).observe(view);
+}catch(e){ok=false}}
+if(!ok){view.insertAdjacentHTML('beforeend','<div class="fall">此瀏覽器無法載入 3D 模型（WebGL 或 three.js 未載入）。右側條文清單與下方待確認表仍可使用。</div>');$('#play').disabled=true;$('#cut').disabled=true;$('#reset').disabled=true;$('#rg').disabled=true}
+
+select(0,0);
+if(ok)requestAnimationFrame(t=>{last=t;tick(t)});
+$('#play').textContent=playing?'暫停':'播放';
+
+/* ---------- 事件 ---------- */
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)select(+b.dataset.i,0)});
+$('#tabs').addEventListener('keydown',e=>{if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;const n=(fi+(e.key==='ArrowRight'?1:-1)+FAM.length)%FAM.length;select(n,0);$('#tab'+n).focus()});
+$('#vars').addEventListener('click',e=>{const b=e.target.closest('button');if(b)select(fi,+b.dataset.j)});
+$('#specs').addEventListener('click',e=>{const li=e.target.closest('.sp');if(li)setAct(+li.dataset.i,false)});
+$('#specs').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const li=e.target.closest('.sp');if(li){e.preventDefault();setAct(+li.dataset.i,false)}}});
+$('#pins').addEventListener('click',e=>{const p=e.target.closest('.pin');if(p)setAct(+p.dataset.i,true)});
+$('#play').addEventListener('click',()=>{playing=!playing;if(playing){ph=tv>=.999?.45:tv*.37+.08}$('#play').textContent=playing?'暫停':'播放'});
+$('#rg').addEventListener('input',e=>{playing=false;$('#play').textContent='播放';tv=e.target.value/1000});
+$('#cut').addEventListener('click',()=>{clipOn=!clipOn;$('#cut').setAttribute('aria-pressed',clipOn);if(ok)R.clippingPlanes=clipOn?clip:[]});
+$('#reset').addEventListener('click',()=>{if(ok)resetCam()});
+const go=tr=>{select(+tr.dataset.f,+tr.dataset.v);setAct(+tr.dataset.k,true);$('#tabs').scrollIntoView({behavior:'smooth'})};
+$('#chkT').addEventListener('click',e=>{const tr=e.target.closest('tr.go');if(tr)go(tr)});
+$('#chkT').addEventListener('keydown',e=>{if(e.key==='Enter'){const tr=e.target.closest('tr.go');if(tr)go(tr)}});
+}
+</script>
+</body>
+</html>

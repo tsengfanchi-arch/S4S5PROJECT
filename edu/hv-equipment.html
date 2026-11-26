@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>高低壓設備及人手孔3D規範查核</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造查核用工作頁 — 冷靜、精確、可直接對照條文
+   IDEA: 像一張會動的「分解施工製造圖」，每個零件都掛著規範條文標籤
+   PICTURE: 大幅 3D 爆炸/組合動畫，編號標記對應右側規範對照表
+   COLOUR and TYPE: 白底、墨黑字、單一深青 #0b5d63；Noto Serif TC 標題 + Noto Sans TC 內文
+   LAYOUT: 頂部設備分頁 → 左 3D 視窗 / 右規範對照表；窄螢幕上下堆疊 */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0d1416);--ink:light-dark(#14161a,#e6ecec);--mut:light-dark(#5b636b,#93a3a6);--rule:light-dark(#dde2e4,#22302f);--teal:light-dark(#0b5d63,#3fb5ae);--tint:light-dark(#e8f2f2,#12282a);--warn:light-dark(#8a5a00,#e0b45a);--warnbg:light-dark(#fbf3e2,#2a2414);--vp:light-dark(#f3f5f6,#101a1c)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+h1,h2{font-family:"Noto Serif TC",serif;font-weight:700;line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(26px,3.4vw,40px)}h2{font-size:22px}
+.band{padding:clamp(20px,3vw,40px) max(4vw,16px)}
+header.band{padding-bottom:14px;border-bottom:1px solid var(--rule)}
+.lede{color:var(--mut);margin:8px 0 0;max-width:70ch}
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px max(4vw,16px);border-bottom:1px solid var(--rule);position:sticky;top:0;background:var(--bg);z-index:5}
+nav.tabs button{flex:none;min-height:44px;padding:8px 16px;border:1px solid var(--rule);background:transparent;color:var(--ink);border-radius:6px;font:500 15px "Noto Sans TC",sans-serif;cursor:pointer}
+nav.tabs button[aria-selected=true]{background:var(--teal);border-color:var(--teal);color:#fff}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.wrap{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0;max-width:1600px;margin:0 auto}
+.stage{position:relative;height:min(76vh,760px);background:var(--vp);border-right:1px solid var(--rule)}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:grab}
+.pins{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;width:26px;height:26px;border-radius:50%;background:var(--bg);color:var(--teal);border:2px solid var(--teal);font:700 12px/22px "Noto Sans TC",sans-serif;text-align:center;cursor:pointer;box-shadow:0 1px 4px #0003}
+.pin.on{background:var(--teal);color:#fff;transform:translate(-50%,-50%) scale(1.25)}
+.hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:color-mix(in srgb,var(--bg) 88%,transparent);border:1px solid var(--rule);border-radius:8px;padding:8px 10px}
+.hud button,.hud select{min-height:40px;padding:6px 12px;border:1px solid var(--rule);border-radius:6px;background:var(--bg);color:var(--ink);font:500 14px "Noto Sans TC",sans-serif;cursor:pointer}
+.hud label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--mut);flex:1 1 180px}
+.hud input[type=range]{flex:1;accent-color:var(--teal);height:28px}
+.cap{position:absolute;left:12px;top:12px;right:12px;font-size:13px;color:var(--mut);pointer-events:none}
+.cap b{display:block;color:var(--ink);font-size:17px;font-family:"Noto Serif TC",serif}
+.side{padding:18px max(2vw,14px) 28px;max-height:min(76vh,760px);overflow:auto}
+.side .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px;color:var(--mut);margin:6px 0 14px}
+.side .meta span b{color:var(--ink);font-weight:500}
+.legend{display:flex;gap:12px;font-size:13px;color:var(--mut);margin-bottom:8px;flex-wrap:wrap}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-weight:500;color:var(--mut);border-bottom:2px solid var(--ink);padding:6px 6px;font-size:13px}
+td{border-bottom:1px solid var(--rule);padding:8px 6px;vertical-align:top}
+tr.row{cursor:pointer}tr.row:hover,tr.row.on{background:var(--tint)}
+td.n{font-weight:700;color:var(--teal);width:2.2em}
+td.it{width:8.5em;font-weight:500}.src{display:block;font-size:12px;font-weight:400;color:var(--mut);margin-top:2px}td:last-child{width:6.5em}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;white-space:nowrap}
+.ok{background:var(--tint);color:var(--teal)}.chk{background:var(--warnbg);color:var(--warn)}
+.note{font-size:13.5px;color:var(--mut);border-left:3px solid var(--teal);padding:6px 10px;margin:14px 0 0;background:var(--tint)}
+footer.band{border-top:1px solid var(--rule);font-size:14px;color:var(--mut)}
+footer ul{margin:6px 0 0;padding-left:1.2em}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.stage{height:62vh;border-right:0;border-bottom:1px solid var(--rule)}.side{max-height:none}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mut)}.stack td:empty{display:none}.pin{width:22px;height:22px;line-height:18px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.pin{transition:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band">
+<h1>高低壓設備、人手孔、制水閥及消防栓 — 3D 規範查核</h1>
+<p class="lede">臺北港南碼頭C填區公共設施及永久護岸暨S04～S05碼頭工程。每項設備以 3D 分解動畫呈現，編號標記對應右側「合約規範要求 ↔ 送審資料」對照；點選標記或表列即可高亮該部位。</p>
+</header>
+<nav class="tabs" id="tabs" role="tablist"></nav>
+<main class="wrap">
+<section class="stage" id="stage" aria-label="3D 模型">
+<div class="cap" id="cap"></div>
+<div class="pins" id="pins"></div>
+<div class="hud">
+<button id="play" type="button">暫停動畫</button>
+<label for="ex">組合 ↔ 分解<input id="ex" type="range" min="0" max="100" value="0"></label>
+<select id="mh" aria-label="人手孔型式" hidden></select>
+<button id="reset" type="button">重置視角</button>
+</div>
+</section>
+<aside class="side">
+<h2 id="ttl"></h2>
+<div class="meta" id="meta"></div>
+<div class="legend"><span><span class="tag ok">送審相符</span> 送審資料已載明且符合</span><span><span class="tag chk">進場/現場查驗</span> 送審未載明或須實測</span></div>
+<table class="stack"><thead><tr><th>#</th><th>部位／項目</th><th>合約規範要求</th><th>送審資料</th><th>查核</th></tr></thead><tbody id="rows"></tbody></table>
+<p class="note" id="note"></p>
+</aside>
+</main>
+<footer class="band">
+資料來源（本專案）：
+<ul>
+<li>施工說明書（定稿）：第16321章高壓配電盤、16325章高壓環路開關組、16401章低壓配電盤、16010章基本電機規則、02516章制水閥、15110章閥</li>
+<li>設計圖（4變）：BF-07 自來水制水閥及消防栓安裝詳圖、BF-04 C填區自來水管線平面圖、BH9-03/04/06/07 人孔詳圖、CG-10 A0型預鑄高壓電力人孔及人手孔蓋詳圖</li>
+<li>送審：維立電機 高低壓電力系統承認圖（工號1130115G，規範表、器具選用廠牌、箱體圖、塗裝規範書）；堅正金屬 高低壓/電信人手孔含鑄鐵孔蓋及制水閥箱體送審（材料規格數量表）；惠盈企業 50–400彈性座封閘閥設計構造圖(3-1)、100地上式消防栓(防撞型)設計構造圖(3-5)</li>
+</ul>
+3D 模型為示意比例，尺寸以圖說及送審資料為準。
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+/* ---------- materials ---------- */
+const MAT={};
+const mat=(k,c,o={})=>MAT[k]||(MAT[k]=new THREE.MeshStandardMaterial({color:c,metalness:o.m??0.15,roughness:o.r??0.6,transparent:o.t!=null,opacity:o.t??1,side:o.ds?THREE.DoubleSide:THREE.FrontSide}));
+const C={
+ paint:()=>mat('paint',0xc9ced3,{m:.3,r:.5}), sus:()=>mat('sus',0xc3c9ce,{m:.35,r:.35}), ang:()=>mat('ang',0x7d858c,{m:.5,r:.5}),
+ cu:()=>mat('cu',0xc27a45,{m:.8,r:.35}), tin:()=>mat('tin',0xcfcabb,{m:.7,r:.35}),
+ R:()=>mat('R',0xc62828), S:()=>mat('S',0x222222), T:()=>mat('T',0x1e4fb4), N:()=>mat('N',0xf2f2f2),
+ dark:()=>mat('dark',0x30363b,{m:.3,r:.5}), black:()=>mat('black',0x1c1c1c,{r:.9}), white:()=>mat('white',0xffffff,{r:.4}),
+ glass:()=>mat('glass',0x9fd3e0,{m:.1,r:.1,t:.35}), heat:()=>mat('heat',0xd9762b,{r:.5}), green:()=>mat('green',0x2e8b57),
+ conc:()=>mat('conc',0xb7b2a8,{r:.95}), lean:()=>mat('lean',0x9d988e,{r:.95}), iron:()=>mat('iron',0x4a5057,{m:.35,r:.55}),
+ dip:()=>mat('dip',0x1b8aa0,{m:.3,r:.45}), epdm:()=>mat('epdm',0x1a1a1a,{r:.95}), bronze:()=>mat('bronze',0xb08d57,{m:.7,r:.35}),
+ red:()=>mat('red',0xc62828,{m:.2,r:.45}), gal:()=>mat('gal',0xa9b2b8,{m:.6,r:.45}), sand:()=>mat('sand',0xd9c9a3,{r:1}),
+ brick:()=>mat('brick',0xa4553b,{r:.9}), rebar:()=>mat('rebar',0x8a5a3c,{m:.6,r:.5}), ghost:()=>mat('ghost',0xc9ced3,{m:.3,r:.5,t:.18,ds:1})
+};
+const edgeMat=new THREE.LineBasicMaterial({color:0x14161a,transparent:true,opacity:.22});
+function deco(m,edges=true){m.castShadow=true;m.receiveShadow=true;if(edges&&m.geometry.parameters&&!m.material.transparent){m.add(new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry,30),edgeMat))}return m}
+function box(w,h,d,m,x=0,y=0,z=0){const o=deco(new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m));o.position.set(x,y,z);return o}
+function cyl(rt,rb,h,m,x=0,y=0,z=0,seg=36,rot){const o=deco(new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,seg),m),seg<12);o.position.set(x,y,z);if(rot==='x')o.rotation.z=Math.PI/2;if(rot==='z')o.rotation.x=Math.PI/2;return o}
+function slabHole(w,d,t,m,y,hole){const s=new THREE.Shape();s.moveTo(-w/2,-d/2);s.lineTo(w/2,-d/2);s.lineTo(w/2,d/2);s.lineTo(-w/2,d/2);s.lineTo(-w/2,-d/2);
+ const h=new THREE.Path();if(hole.r){h.absarc(0,0,hole.r,0,Math.PI*2,true)}else{h.moveTo(-hole.w/2,-hole.d/2);h.lineTo(-hole.w/2,hole.d/2);h.lineTo(hole.w/2,hole.d/2);h.lineTo(hole.w/2,-hole.d/2);h.lineTo(-hole.w/2,-hole.d/2)}
+ s.holes.push(h);const g=new THREE.ExtrudeGeometry(s,{depth:t,bevelEnabled:false,curveSegments:40});g.rotateX(-Math.PI/2);const o=deco(new THREE.Mesh(g,m),false);o.position.y=y;return o}
+function P(key,objs,ex){const g=new THREE.Group();objs.flat().forEach(o=>g.add(o));g.userData={key,ex:new THREE.Vector3(...ex)};return g}
+
+/* ---------- models ---------- */
+function buildHV(){
+ const W=1.0,H=2.3,D=1.6,ps=[];
+ ps.push(P('base',[box(W,.1,.05,C.ang(),0,.05,D/2-.025),box(W,.1,.05,C.ang(),0,.05,-D/2+.025),box(.05,.1,D,C.ang(),-W/2+.025,.05,0),box(.05,.1,D,C.ang(),W/2-.025,.05,0)],[0,-.5,0]));
+ const fr=[];for(const x of[-1,1])for(const z of[-1,1])fr.push(box(.05,H,.05,C.ang(),x*(W/2-.025),.1+H/2,z*(D/2-.025)));
+ for(const y of[.12,H+.08])for(const z of[-1,1])fr.push(box(W,.05,.05,C.ang(),0,y,z*(D/2-.025)));
+ ps.push(P('frame',fr,[0,0,0]));
+ ps.push(P('side',[box(.02,H,D,C.paint(),-W/2-.01,.1+H/2,0)],[-.9,0,0]));
+ ps.push(P('side',[box(.02,H,D,C.paint(),W/2+.01,.1+H/2,0)],[.9,0,0]));
+ ps.push(P('side',[box(W,H,.02,C.paint(),0,.1+H/2,-D/2-.01),box(W,.02,D,C.paint(),0,H+.11,0)],[0,0,-.9]));
+ const door=[box(W,H,.03,C.paint(),0,.1+H/2,D/2+.015)];
+ for(let i=0;i<6;i++)door.push(box(.42,.025,.02,C.dark(),0,.35+i*.05,D/2+.04));
+ door.push(box(.3,.1,.01,C.glass(),0,1.55,D/2+.035));
+ door.push(box(.03,.25,.04,C.dark(),W/2-.1,1.1,D/2+.05));
+ ps.push(P('door',door,[0,0,1.1]));
+ ps.push(P('hinge',[box(.03,.12,.04,C.dark(),-W/2+.01,.6,D/2+.02),box(.03,.12,.04,C.dark(),-W/2+.01,1.9,D/2+.02)],[-.15,0,1.1]));
+ ps.push(P('nameplate',[box(.32,.12,.01,C.white(),0,2.15,D/2+.04)],[0,.35,1.3]));
+ const relay=[box(.5,.42,.25,C.dark(),0,1.85,.45)];for(let i=0;i<3;i++)relay.push(box(.12,.12,.02,C.white(),-.15+i*.15,1.9,.585));
+ ps.push(P('relay',relay,[0,.5,.6]));
+ const vcb=[box(.62,.6,.5,C.dark(),0,.85,.25)];for(let i=0;i<3;i++)vcb.push(cyl(.06,.06,.38,C.black(),-.2+i*.2,1.34,.15));
+ ps.push(P('vcb',vcb,[0,0,.85]));
+ const bus=[];[C.R(),C.S(),C.T()].forEach((m,i)=>bus.push(box(.9,.1,.012,m,0,1.65+i*0,-.25-i*.12)));bus.forEach((b,i)=>b.position.y=1.62);
+ [C.R(),C.S(),C.T()].forEach((m,i)=>bus.push(box(.012,.28,.08,m,-.2+i*.2,1.5,-.25-i*.12)));
+ ps.push(P('bus',bus,[0,.7,-.3]));
+ ps.push(P('gnd',[box(.9,.05,.006,C.tin(),0,.3,-.7)],[0,-.2,-.5]));
+ ps.push(P('heater',[box(.35,.08,.06,C.heat(),0,.22,.1),box(.08,.08,.04,C.white(),.3,.5,-.72)],[.3,-.25,.2]));
+ ps.push(P('wire',[box(.06,1.2,.06,C.T(),.42,1.1,-.6),box(.06,.06,.9,C.T(),.42,1.68,-.2)],[.55,0,0]));
+ return {parts:ps};
+}
+function buildRMU(){
+ const ps=[];
+ ps.push(P('pad',[box(1.9,.12,1.15,C.conc(),0,.06,0)],[0,-.45,0]));
+ ps.push(P('enc',[box(1.75,1.6,.95,C.ghost(),0,.92,0)],[0,0,-1.1]));
+ ps.push(P('tank',[box(1.35,.75,.55,C.sus(),0,1.25,-.05)],[0,.75,0]));
+ const bush=[];for(let k=0;k<3;k++)for(let i=0;i<3;i++){bush.push(cyl(.035,.06,.22,C.dark(),-.45+k*.45+(i-1)*.1,.72,.12))}
+ ps.push(P('bushing',bush,[0,-.15,.7]));
+ const mim=[box(1.35,.5,.02,C.white(),0,1.25,.235)];for(let k=0;k<3;k++){mim.push(cyl(.035,.035,.03,C.black(),-.45+k*.45,1.18,.25,24,'z'));mim.push(cyl(.025,.025,.03,C.black(),-.45+k*.45,1.36,.25,24,'z'));mim.push(box(.12,.012,.01,C.R(),-.45+k*.45,1.45,.25))}
+ ps.push(P('mimic',mim,[0,.75,.55]));
+ ps.push(P('lock',[box(.05,.06,.03,C.bronze(),-.45,1.08,.27),box(.05,.06,.03,C.bronze(),0,1.08,.27),box(.05,.06,.03,C.bronze(),.45,1.08,.27)],[0,.45,.9]));
+ ps.push(P('gauge',[cyl(.05,.05,.03,C.white(),.6,1.52,.25,24,'z')],[.3,1.1,.6]));
+ ps.push(P('vpis',[box(.22,.08,.03,C.dark(),-.55,1.52,.25)],[-.35,1.1,.6]));
+ ps.push(P('dehum',[box(.22,.16,.1,C.white(),.6,.42,-.3)],[.6,-.1,0]));
+ ps.push(P('fpi',[box(.18,.1,.05,C.green(),-.62,.42,-.3)],[-.6,-.1,0]));
+ return {parts:ps};
+}
+function buildLV(){
+ const W=1.2,H=2.0,D=.8,ps=[];
+ ps.push(P('found',[box(W+.2,.15,D+.2,C.conc(),0,.075,0)],[0,-.55,0]));
+ const fr=[];for(const x of[-1,1])for(const z of[-1,1])fr.push(box(.05,.1,.05,C.sus(),x*(W/2-.03),.2,z*(D/2-.03)));fr.push(box(W,.04,D,C.sus(),0,.27,0));
+ ps.push(P('sframe',fr,[0,-.3,0]));
+ ps.push(P('encl',[box(.015,H,D,C.sus(),-W/2,.29+H/2,0),box(.015,H,D,C.sus(),W/2,.29+H/2,0),box(W,H,.015,C.sus(),0,.29+H/2,-D/2),box(W+.06,.04,D+.06,C.sus(),0,.31+H,0)],[0,0,-.7]));
+ const dr=[box(W/2-.01,H,.02,C.sus(),-W/4,.29+H/2,D/2),box(W/2-.01,H,.02,C.sus(),W/4,.29+H/2,D/2),box(.3,.5,.01,C.glass(),-W/4,1.5,D/2+.015),box(.3,.5,.01,C.glass(),W/4,1.5,D/2+.015)];
+ for(let i=0;i<5;i++)dr.push(box(.4,.02,.02,C.dark(),W/4,.45+i*.04,D/2+.02));
+ ps.push(P('door',dr,[0,0,1.0]));
+ ps.push(P('name',[box(.3,.06,.005,C.white(),-W/4,2.05,D/2+.02)],[0,.3,1.25]));
+ ps.push(P('mtag',[box(.2,.07,.005,C.R(),W/4,1.15,D/2+.02)],[.25,0,1.25]));
+ const b=[];[C.R(),C.S(),C.T(),C.N()].forEach((m,i)=>b.push(box(1.05,.08,.01,m,0,2.1-i*.13,-.28)));
+ ps.push(P('bus',b,[0,.55,-.2]));
+ ps.push(P('gnd',[box(1.05,.05,.005,C.tin(),0,.42,-.33)],[0,-.25,-.25]));
+ const nfb=[];for(let r=0;r<3;r++)for(let i=0;i<5;i++)nfb.push(box(.12,.2,.12,C.dark(),-.42+i*.21,1.35-r*.28,0));
+ ps.push(P('nfb',nfb,[0,0,.6]));
+ ps.push(P('meter',[box(.22,.18,.08,C.white(),-.3,1.72,.25),box(.18,.18,.08,C.white(),.25,1.72,.25)],[0,.25,.8]));
+ const cap=[];for(let i=0;i<4;i++)cap.push(cyl(.06,.06,.24,C.gal(),-.36+i*.24,.62,0));
+ ps.push(P('cap',cap,[0,-.1,.55]));
+ ps.push(P('heater',[box(.3,.06,.05,C.heat(),.3,.38,.15)],[.4,-.2,.2]));
+ ps.push(P('wire',[box(.04,.9,.04,C.T(),-.55,1.0,-.2)],[-.5,0,0]));
+ return {parts:ps};
+}
+const MH={
+ A0:{n:'A0型預鑄高壓電力人孔（180×100×180）',o:[216,136,260],i:[180,100,180],t:18,fc:280,bar:'#3、#4、#5',cov:'電80人孔蓋 內φ80×高8 cm',lid:{r:.4},load:'80,000 kgf',q:54,pg:'p.14-15',dw:'BH9-04 / CG-10'},
+ A1:{n:'A1型預鑄電力人孔（180×150×180）',o:[220,190,260],i:[180,150,180],t:20,fc:280,bar:'#3、#4、#5',cov:'電80人孔蓋 內φ80×高8 cm',lid:{r:.4},load:'80,000 kgf',q:42,pg:'p.16-17',dw:'BH9-03',rack:1},
+ HH:{n:'高壓手孔（150×90×120）',o:[174,114,152],i:[150,90,120],t:12,fc:210,bar:'#4、#5',cov:'電60手孔蓋 內φ60×高8 cm',lid:{r:.3},load:'50,000 kgf',q:9,pg:'p.18-19',dw:'CG-10'},
+ LH:{n:'低壓手孔（120×80×90）',o:[142,102,117],i:[120,80,90],t:11,fc:210,bar:'#3、#4',cov:'電60手孔蓋 內φ60×高8 cm',lid:{r:.3},load:'50,000 kgf',q:19,pg:'p.20-21',dw:'CG-10'},
+ TA:{n:'電信#A人孔及頸圈（210×100×180）',o:[236,126,225],i:[210,100,180],t:13,fc:280,bar:'#3、#4、#5',cov:'電信60人孔蓋 內φ60×高16.2 cm',lid:{r:.3},load:'50,000 kgf',q:79,pg:'p.22-23',dw:'BH9-06'},
+ TB:{n:'電信大型B手孔（120×60×140）',o:[140,80,155],i:[120,60,140],t:10,fc:210,bar:'#3',cov:'電信大手孔蓋 內60×120 高13 cm',lid:{w:1.2,d:.6},load:'50,000 kgf',q:10,pg:'p.24-25',dw:'BH9-07'}
+};
+let mhType='A0';
+function buildMH(){
+ const s=MH[mhType],ps=[],ow=s.o[0]/100,od=s.o[1]/100,iw=s.i[0]/100,id=s.i[1]/100,ih=s.i[2]/100,t=s.t/100,base=.1;
+ const bh=t,y0=base+bh;
+ ps.push(P('lean',[box(ow+.3,base,od+.3,C.lean(),0,base/2,0)],[0,-.6,0]));
+ ps.push(P('bot',[box(ow,bh,od,C.conc(),0,base+bh/2,0)],[0,-.25,0]));
+ ps.push(P('wall',[box(ow,ih,t,C.conc(),0,y0+ih/2,(od-t)/2)],[0,0,.7]));
+ ps.push(P('wall',[box(ow,ih,t,C.conc(),0,y0+ih/2,-(od-t)/2),box(t,ih,od-2*t,C.conc(),-(ow-t)/2,y0+ih/2,0),box(t,ih,od-2*t,C.conc(),(ow-t)/2,y0+ih/2,0)],[0,0,0]));
+ const rb=[];for(let i=0;i<7;i++){rb.push(cyl(.008,.008,ih,C.rebar(),-ow/2+.15+i*(ow-.3)/6,y0+ih/2,od/2-t/2,6))}for(let j=0;j<4;j++)rb.push(cyl(.008,.008,ow-.1,C.rebar(),0,y0+.15+j*(ih-.3)/3,od/2-t/2+.02,6,'x'));
+ ps.push(P('rebar',rb,[0,0,1.25]));
+ const neck=s.lid.r?.0:0;const ty=y0+ih;
+ ps.push(P('top',[slabHole(ow,od,t,C.conc(),ty,s.lid.r?{r:s.lid.r+.06}:{w:s.lid.w+.08,d:s.lid.d+.08})],[0,.7,0]));
+ const fy=ty+t;
+ const fr=s.lid.r?[cyl(s.lid.r+.12,s.lid.r+.12,.04,C.iron(),0,fy+.02,0,48)]:[box(s.lid.w+.16,.04,s.lid.d+.16,C.iron(),0,fy+.02,0)];
+ ps.push(P('frame',fr,[0,1.15,0]));
+ const lid=s.lid.r?[cyl(s.lid.r,s.lid.r,.05,C.iron(),0,fy+.065,0,48)]:[box(s.lid.w,.05,s.lid.d,C.iron(),0,fy+.065,0)];
+ for(let i=-2;i<=2;i++)lid.push(box(s.lid.r?s.lid.r*1.4:s.lid.w*.85,.008,.02,C.dark(),0,fy+.094,i*.08));
+ ps.push(P('lid',lid,[0,1.65,0]));
+ const ko=[];[[-.3,.5],[0,.5],[.3,.5],[-.3,.25],[.3,.25]].forEach(([x,y])=>ko.push(cyl(.07,.07,t+.02,C.black(),x*ow/1.2,y0+y*ih/.9*.9,-(od-t)/2,24,'z')));
+ ps.push(P('knock',ko,[0,0,-.7]));
+ ps.push(P('gnd',[cyl(.012,.012,1.0,C.cu(),ow/2-t-.12,base-.3,od/2-t-.12,8),cyl(.02,.02,.04,C.cu(),ow/2-t-.12,y0+.02,od/2-t-.12,8)],[.6,-.4,.3]));
+ ps.push(P('hook',[cyl(.015,.015,.12,C.sus(),-ow/2+t+.1,y0+ih-.1,0,8,'x'),cyl(.015,.015,.12,C.sus(),ow/2-t-.1,y0+ih-.1,0,8,'x'),cyl(.012,.012,.1,C.sus(),-ow/2+t+.2,y0+.05,-od/2+t+.1,8)],[0,.35,0]));
+ if(s.rack){const r=[];for(const x of[-.5,.5]){r.push(box(.05,1.2,.05,C.gal(),x*iw/1.4,y0+.75,-id/2+.03));for(let k=0;k<4;k++)r.push(box(.04,.03,.3,C.gal(),x*iw/1.4,y0+.35+k*.3,-id/2+.18))}ps.push(P('rack',r,[0,.2,-.4]))}
+ return {parts:ps};
+}
+function buildGV(){
+ const ps=[],y=.7;
+ ps.push(P('pipe',[cyl(.11,.11,1.0,C.dip(),-.85,y,0,36,'x'),cyl(.11,.11,1.0,C.dip(),.85,y,0,36,'x')],[0,0,0]));
+ const body=[cyl(.13,.13,.42,C.dip(),0,y,0,36,'x'),cyl(.2,.2,.04,C.dip(),-.23,y,0,40,'x'),cyl(.2,.2,.04,C.dip(),.23,y,0,40,'x'),cyl(.15,.15,.38,C.dip(),0,y+.22,0,36)];
+ ps.push(P('body',body,[0,0,0]));
+ const bl=[];for(let i=0;i<8;i++){const a=i/8*Math.PI*2;for(const x of[-.255,.255])bl.push(cyl(.012,.012,.1,C.sus(),x,y+Math.cos(a)*.165,Math.sin(a)*.165,8,'x'))}
+ ps.push(P('bolt',bl,[0,0,.55]));
+ ps.push(P('disc',[box(.05,.26,.24,C.epdm(),0,y+.02,0)],[0,.75,0]));
+ ps.push(P('stem',[cyl(.016,.016,.62,C.sus(),0,y+.36,0,16)],[0,1.15,0]));
+ ps.push(P('nut',[cyl(.035,.035,.06,C.bronze(),0,y+.12,0,6)],[.35,.75,0]));
+ ps.push(P('bonnet',[cyl(.17,.17,.05,C.dip(),0,y+.43,0,40),cyl(.08,.1,.12,C.dip(),0,y+.51,0,32)],[0,1.45,0]));
+ ps.push(P('gland',[cyl(.06,.06,.05,C.dip(),0,y+.6,0,24),cyl(.025,.025,.03,C.bronze(),0,y+.64,0,16)],[0,1.75,0]));
+ ps.push(P('cap',[box(.07,.08,.07,C.dip(),0,y+.68,0)],[0,2.05,0]));
+ const gl=1.9;
+ ps.push(P('sand',[box(.8,.25,.8,C.sand(),0,y+.6,0)],[-1.3,-.2,0]));
+ const vb=[cyl(.223,.223,.235,C.conc(),0,gl-.36,0,36),cyl(.223,.223,.235,C.conc(),0,gl-.6,0,36)];
+ ps.push(P('vbase',vb,[1.4,0,0]));
+ ps.push(P('pvc',[cyl(.075,.075,.7,mat('pvc',0x8f9aa3,{t:.55}),0,gl-.55,0,24)],[1.4,.35,0]));
+ ps.push(P('vbox',[cyl(.115,.115,.2,C.iron(),0,gl-.1,0,36),cyl(.15,.15,.03,C.iron(),0,gl-.2,0,36)],[0,.6,0]));
+ ps.push(P('vlid',[cyl(.1,.1,.025,C.iron(),0,gl+.012,0,36),box(.03,.015,.06,C.sus(),.1,gl+.02,0)],[0,1.05,0]));
+ return {parts:ps};
+}
+function buildFH(){
+ const ps=[],gl=1.0;
+ ps.push(P('main',[cyl(.11,.11,2.6,C.dip(),.2,.25,0,36,'x')],[0,-.4,0]));
+ ps.push(P('bend',[cyl(.065,.065,.6,C.dip(),.9,.25,0,24,'x'),cyl(.065,.065,.55,C.dip(),1.2,.5,0,24),box(.32,.12,.3,C.conc(),1.2,.1,0)],[.5,-.3,0]));
+ ps.push(P('riser',[cyl(.075,.075,.6,C.red(),1.2,1.0,0,32)],[.5,0,0]));
+ ps.push(P('break',[cyl(.12,.12,.035,C.red(),1.2,gl+.32,0,32),cyl(.122,.122,.012,C.black(),1.2,gl+.345,0,32)],[.5,.35,0]));
+ const brl=[cyl(.085,.085,.62,C.red(),1.2,gl+.66,0,32),cyl(.045,.045,.18,C.red(),1.2,gl+.75,.15,24,'z')];
+ ps.push(P('barrel',brl,[.5,.7,0]));
+ ps.push(P('outlet',[cyl(.05,.05,.04,C.bronze(),1.2,gl+.75,.25,24,'z')],[.5,.7,.55]));
+ ps.push(P('hcap',[cyl(.065,.1,.12,C.red(),1.2,gl+1.03,0,32),cyl(.032,.032,.05,C.red(),1.2,gl+1.12,0,5)],[.5,1.15,0]));
+ ps.push(P('ground',[box(3.6,.04,1.6,mat('gnd',0x9aa48e,{t:.45,r:1}),.6,gl,0)],[0,0,0]));
+ ps.push(P('gv',[cyl(.12,.12,.3,C.dip(),-.4,.25,0,32,'x'),cyl(.09,.09,.3,C.dip(),-.4,.45,0,32),box(.06,.06,.06,C.dip(),-.4,.63,0)],[0,0,0]));
+ ps.push(P('gvbox',[cyl(.223,.223,.3,C.conc(),-.4,gl-.17,0,36),cyl(.115,.115,.02,C.iron(),-.4,gl+.01,0,32)],[0,.7,0]));
+ ps.push(P('sign',[cyl(.03,.03,2.5,C.gal(),2.1,gl+1.25,-.3,16),cyl(.3,.3,.02,C.red(),2.1,gl+2.25,-.29,40,'z'),cyl(.34,.34,.015,mat('aq',0x47b8e0),2.1,gl+2.25,-.31,40,'z')],[.4,0,0]));
+ return {parts:ps};
+}
+
+/* ---------- spec data ---------- */
+const S=(k,item,req,src,sub,st)=>({k,item,req,src,sub,st});
+const MODELS=[
+{id:'hv',tab:'高壓配電盤',title:'高壓金屬閉鎖型配電盤（DS／VCB／TR盤）',build:buildHV,
+ meta:[['依據','施工說明書第16321章、16323章'],['送審','維立電機 承認圖 1130115G'],['系統','3∮3W 11.4kV'],['標準','CNS 3990']],
+ rows:[
+ S('door','箱門鋼板','3.0 mm 厚鋼板，機械加工成型','16321 §2.1.2(2)','依承認圖鈑金規範表','chk'),
+ S('side','側板／背板／頂板','2.0 mm 厚鋼板','16321 §2.1.2(2)','依承認圖鈑金規範表','chk'),
+ S('frame','骨架角鐵','角鐵 50×50×4 mm 以上，銲接組立成自立堅固體','16321 §2.1.2(2)','進場量測','chk'),
+ S('base','底座槽鐵','100×50×5 mm 槽鐵；下方為電纜溝時須有底板並預留電纜開孔','16321 §2.1.2(2)','進場量測','chk'),
+ S('hinge','鉸鏈／門閂','隱藏式鉸鏈，附門閂；開口防塵、防水','16321 §2.1.2(3)','箱體圖：防滴通風孔，內部加可拆防塵網','ok'),
+ S('door','通風百葉','僅設於有鉸鏈之面板','16321 §2.1.2(3)','箱體圖：門板防滴通風孔','ok'),
+ S('side','鋼料處理／塗裝','澈底清潔＋磷酸處理＋防銹底漆，面色送業主核可','16321 §2.1.2(5)','塗裝規範書：鹽酸除鏽→草酸活化→皮膜處理→環氧樹脂粉體 200°C×20分','ok'),
+ S('bus','主匯流排','98%導電率銅排，熱縮絕緣全部遮蔽；接頭鍍錫鎖緊','16321 §2.1.3(1)(2)','規範表(電裝)：銅匯流排鍍錫、高壓熱縮絕緣套管、兩端倒1/2R角','ok'),
+ S('bus','相序色別','—（依屋內線路裝置規則）','16010','R紅／S黑／T藍；由左至右 R-S-T','ok'),
+ S('gnd','接地匯流排','鍍錫銅排水平貫通整套配電盤；斷路器座接地','16321 §2.1.3(3)(4)','落地盤 6t×50 mm 鍍錫；單線圖 R≦10Ω','ok'),
+ S('heater','電熱器','溫度控制，保持箱內高於周溫防凝水','16321 §2.1.6','電熱器（億薪）＋濕度電驛（DBK）','ok'),
+ S('wire','控制配線','600V 絞線 ≥1.25 mm²；CT二次 ≥5.5 mm²；兩端熱縮套管線號','16321 §2.1.7','控制 2.0 mm²、CT 5.5 mm²、熱印打字套管','ok'),
+ S('vcb','真空斷路器','24 kV 級，依 ANSI C37.04/06、NEMA SG4','16323','VCB：士林；保護電驛 SIEMENS 50/51、50N/51N、27/59/81','ok'),
+ S('relay','儀表／電驛室','每箱體隔間容納斷路器、儀表、輔助裝置','16321 §2.1.2(4)','集合式電錶 CHUNDE；CTR 巧力；79-RY KOMA','ok'),
+ S('nameplate','銘牌額定','24 kV 級；耐壓、衝擊耐壓依規','16321 / 16325 §2.1.2','CNS 3990(84)：24kV、630A、AC 50kV、BIL 125kV；白底黑字、電壓紅字','ok'),
+ S('frame','保固','自正式驗收合格日起 2 年','16321 §1.9.1','—','chk')
+ ],note:'工廠試驗含中間檢查依規定辦理（§2.2）；送審時應附「規範規格對照表並於型錄標示對應位置」（§1.5.3(3)）。'},
+{id:'rmu',tab:'高壓環路開關(RMU)',title:'SF6 高壓環路開關組（RMU-S4-2／S5-2／S6-2／S01／L1-2／L3）',build:buildRMU,
+ meta:[['依據','施工說明書第16325章'],['送審','維立電機 承認圖'],['廠牌','SIEMENS'],['額定','24 kV 630 A']],
+ rows:[
+ S('tank','高壓氣室','SF6 絕緣消弧（或真空），不鏽鋼固定型箱封，IP65 以上，附 SF6 壓力計','16325 §2.1.1(2)','RMU：SIEMENS（SF6）','ok'),
+ S('gauge','SF6 氣體壓力計','須附壓力計','16325 §2.1.1(2)','型錄核對','chk'),
+ S('enc','外箱防護等級','屋外防水型外箱，箱體 IP44 以上；可擴充','16325 §2.1.1(1)(3)','箱體圖','chk'),
+ S('enc','外形尺寸','不超過 1750 W × 1600 H × 950 D mm','16325 §2.1.1(9)','依箱體圖量測','chk'),
+ S('mimic','開關三位置','投入／開路／接地；主回路 DS、負載 LBS/GCB/VCB','16325 §2.1.1(3)','RMU-S01：2 in＋1 out，IN 3P 24kV 630A LBS','ok'),
+ S('lock','機械連鎖／掛鎖','各位置可加 padlock；接地開關與 LBS 機械連鎖；主開關、接地開關操作孔分離','16325 §2.1.1(3)(4)','型錄核對','chk'),
+ S('mimic','面板標示','高壓單線圖配操作孔；投入/開啟/接地方向標示','16325 §2.1.1(7)','型錄核對','chk'),
+ S('vpis','帶電指示','每盤前電容性帶電指示燈＋Test Point','16325 §2.1.1(6)','帶電指示器：巧力、USM','ok'),
+ S('bushing','電纜肘式處理頭','主回路 600A；負載 630A 或 200A','16325 §2.1.3','單線圖：3-38 25kV XLPE','chk'),
+ S('tank','電氣額定','24kV、60Hz、BIL 125kV、商頻 50kV、630A；短時 20kA/LBS 或 16kA/CB（3秒）','16325 §2.1.2','銘牌：24kV、630A、50kV、125kV','ok'),
+ S('dehum','除濕模組','熱電半導體；<45%RH 停、>55%RH 啟動；30℃85%RH 5 ml/hr；附引流管','16325 §2.1.1(3)','型錄核對','chk'),
+ S('fpi','輔助接點／故障指示','主接點 2a+2b、接地開關 1c；預留 SCADA 2a2b','16325 §2.1.1(4)(8)','電子式故障指示器：台灣四國','ok'),
+ S('pad','出廠試驗','開關操作、絕緣電阻、耐壓、接觸電阻試驗','16325 §2.3.2','—','chk')
+ ],note:'製造須符合能源局配電盤 ISO 9001／ISO 14001（§2.1.1(1)）；訓練計畫書應於訓練前 1 個月提送（§2.4）。'},
+{id:'lv',tab:'低壓配電盤',title:'低壓金屬閉鎖型配電盤（MP／S4-2～S6-2／L1～L6／P1～P10）',build:buildLV,
+ meta:[['依據','施工說明書第16401章、16010章'],['送審','維立電機 承認圖'],['系統','3∮4W 380/220V、3∮3W 220V'],['標準','CNS 13542／13543']],
+ rows:[
+ S('encl','型式試驗／認證','CNS 13543 或 IEC 61439-1 型式試驗（≦3200A、≧50kA）；TAF 17025；屋外落地盤 IP55','16401 §1.5.3～1.5.4','須附認證文件','chk'),
+ S('encl','製造廠驗證','CNS 12681、ISO 14001、OHSAS 18001','16401 §1.5.5','須附證書','chk'),
+ S('encl','箱體材質／塗裝','磷酸處理＋防銹底漆，顏色送核','16401 §2.1.2(4)','塗裝規範書：SUS不銹鋼／鍍鋅鋼板→脫脂→環氧樹脂粉體','ok'),
+ S('door','門板／通風','隱藏式鉸鏈；通風百葉僅設鉸鏈門板；防塵防水','16401 §2.1.2(2)','玻璃透視窗；防滴通風孔附可拆防塵網','ok'),
+ S('bus','主匯流排','銅製；接頭鍍銀或錫、≥4 螺栓；厚 ≦10 mm；40℃周溫溫升 ≦50℃','16401 §2.1.3(1)(3)(4)','銅排鍍錫；主線徑銅排選用表','ok'),
+ S('bus','熱縮被覆／倒角','不吸水、防電弧、防火自熄；相別顏色；兩端導 1/2R 角','16401 §2.1.3(8)','低壓熱縮絕緣套管；兩端倒 1/2R','ok'),
+ S('bus','中性匯流排','三相四線全額容量裸銅','16401 §2.1.3(9)','N相白色','chk'),
+ S('gnd','接地匯流排','未絕緣銅排 ≥50×5 mm，全長貫通；接地線 100 mm²','16401 §2.1.3(10)','落地盤 6t×50 mm','ok'),
+ S('nfb','斷路器','抽出型 ACB、NFB 等，短路啟斷容量依設計圖','16401 §2.1.1','NFB/ELCB 東元；CP/MC 士林','ok'),
+ S('meter','儀表','指針或數位、半嵌入；精度 ±1%；附蓋試驗端子','16401 §2.1.4','低壓儀表結線圖；PTT/CTT/CS YongSung','ok'),
+ S('cap','功因改善電容器','APFR 6/12段；乾式自癒，N2 填充；放電 1 分鐘內 ≦50V','16282 §2.2','APFR 中大；SC/SR 裕昌','ok'),
+ S('wire','控制配線','600V ≥2 mm²；CT 二次 ≥3.5 mm²；熱縮套管線號','16401 §2.1.8、2.1.11','控制 2.0 mm²、CT 3.5 mm²','ok'),
+ S('heater','電熱器','溫度控制防凝水','16401 §2.1.10','電熱器（億薪）','ok'),
+ S('name','名牌','耐蝕金屬或壓克力，白底黑字','16401 §2.2','壓克力/不銹鋼 1mmt，白底、盤名黑字、電壓紅字','ok'),
+ S('mtag','維修標示板','≥5 塊 7×20 cm 紅底白字附磁鐵「維修中，勿啟動」','16401 §2.2','紅底白字反刻、附磁鐵 70×200 mm 共 5 塊','ok'),
+ S('sframe','支撐鋼架','鋼架、U型槽鐵、錨碇螺栓均 SUS304','16010 §3.3.2(2)(5)','現場查驗','chk'),
+ S('found','設備基礎','混凝土強度 ≥140 kgf/cm²','16010 §3.3.2(1)','現場查驗','chk')
+ ],note:'備品：比壓器熔絲／600V 低壓熔絲／指示燈泡各 10（§2.4）；工廠試驗依 CNS 13543（§2.3）。'},
+{id:'mh',tab:'電力／電信人手孔',title:'',build:buildMH,mh:1,
+ meta:[],rows:[],note:''},
+{id:'gv',tab:'制水閥＋閥盒',title:'彈性座封閘閥（制水閥）及混凝土制水閥盒',build:buildGV,
+ meta:[['依據','施工說明書第02516章；BF-07'],['送審','惠盈企業 3-1 構造圖；堅正 閥盒'],['數量','φ200×25、φ75×10、φ300×2 套（甲項）'],['使用壓力','7.5 kgf/cm²']],
+ rows:[
+ S('body','型式／標準','凸緣豎式非升桿型，依 CNS 12795（φ50～350 第Ⅰ類）','02516 §2.2(1)(3)','DN50～DN350 依 CNS 12795 B2803 製造','ok'),
+ S('body','閥體材質','CNS 12795','02516 §2.2(2)','閥體：球狀石墨鑄鐵 FCD450','ok'),
+ S('disc','閥門橡膠披覆','閥門內外以橡膠一次性完整披覆，彈性封水','02516 §2.2(1)','閥門 FCD450 外覆合成橡膠 EPDM','ok'),
+ S('bolt','固定螺栓／螺帽','不銹鋼製造','02516 §2.2(2)','SUS304','ok'),
+ S('body','塗裝','環氧樹脂粉體；內 ≥0.3 mm、外 ≥0.15 mm；色號 1-46 土耳其藍','02516 §2.2(5)','內 ≥0.3 mm、外 ≥0.15 mm，1-46（土耳其藍）','ok'),
+ S('pipe','凸緣接頭','CNS 10808；≦7.5 kgf/cm² 採 7.5K 鑽孔','02516 §2.1.3','使用壓力 7.5 kgf/cm²，CNS 13272-7.5K','ok'),
+ S('stem','閥桿','不銹鋼（ANSI SUS 403/410）','02516 §1.3.2','SUS410','ok'),
+ S('nut','閥桿螺母／襯套','—','CNS 12795','閥桿螺母 BC6；自潤襯套 青銅','ok'),
+ S('cap','傳動頭（開關台）','FCD400 以上；1-46 色、塗膜 ≥0.125 mm','02516 §2.3.1','傳動頭 FCD450','ok'),
+ S('cap','轉動方向','順時針關閉；1 人拉力可開啟','02516 §2.1.4','操作手冊核對','chk'),
+ S('body','廠內試驗','逐套：開關 3 次、閥體耐壓、閥座洩漏；每 50 套抽 1 套開關 30 次','02516 §3.1.1','須附試驗紀錄','chk'),
+ S('disc','橡膠檢驗','交貨前 6 個月內該批橡膠圈第三者檢驗合格','02516 §3.1.2','TAF/SGS 試驗報告（送審附件）','ok'),
+ S('vbox','閥盒材質','FCD500-7（CNS 2869）；A型 φ300 以下 ≥24 kg；蓋外徑 200 mm','BF-07 附註2～4','1號制水閥盒 內φ23×高20 cm，FCD500，靜載重 2,500 kgf','ok'),
+ S('vlid','閥盒蓋','接觸面機械加工不搖晃；台水標誌防滑紋突出 3 mm；插梢 SUS304 雙端防脫落','BF-07 附註5～6','進場查驗','chk'),
+ S('vbase','混凝土基座','fc′=210 kgf/cm² 預鑄，7 天濕治','BF-07 基座附註','外φ44.6×高23.5、內φ23、壁4.5 cm；fc′≥210；#3 筋','ok'),
+ S('pvc','基座內套管','內套 φ150 mm PVC 管，長度配合深度','BF-07 基座附註3','現場查驗','chk'),
+ S('sand','回填','閥體周圍填砂、紅磚墊；試車連續 3 日','BF-07；02516 §3.3','現場查驗','chk')
+ ],note:'乙項另有 φ150×12 套、φ100×24 套制水閥（附手輪）。進場須附出廠證明、進口證明、不銹鋼材質證明正本（§3.1.3）。'},
+{id:'fh',tab:'地上式消防栓',title:'φ100 mm 單口地上式消防栓（防撞型）',build:buildFH,
+ meta:[['依據','BF-07、BF-04 設計圖'],['送審','惠盈企業 3-5 構造圖'],['數量','23 套（甲.壹.一.2.4.10）'],['接頭','CNS 13272-7.5K']],
+ rows:[
+ S('break','防撞（脫落）構造','防撞型','BF-04 圖例','受外力撞擊本體與底座脫落不漏水，換安全墊片即恢復','ok'),
+ S('riser','本體材質','—','送審構造圖','立管、閥筒、栓帽、傳動帽等 FCD450；閥桿 SUS304','ok'),
+ S('main','凸緣接頭','依自來水規定','BF-07','CNS 13272-7.5K','ok'),
+ S('outlet','出水口','—','台灣消防法規','2-1/2″ 快速接頭式出水口一口；五角傳動頭','ok'),
+ S('barrel','外觀塗裝','—','—','栓體紅色漆，白色螢光漆「消防栓」字樣；栓帽紅色','ok'),
+ S('bend','帶座彎管','消防栓下方設彎管座','BF-07 埋設斷面','現場查驗','chk'),
+ S('gv','前置制水閥','制水閥距消防栓 MIN. 60 cm；出地面 MIN. 100 cm','BF-07 埋設斷面','現場量測','chk'),
+ S('gvbox','制水閥盒','同制水閥盒規定','BF-07','見「制水閥＋閥盒」分頁','ok'),
+ S('sign','消防栓標誌','設於同側 3 m 內；鍍鋅鐵管/板；高 250 cm；紅圖案、白字、水藍外緣，反光塗料','BF-07 標誌附註','現場查驗','chk'),
+ S('ground','管線試壓','試水壓：最高使用壓力 1.5 倍或 10 kg/cm²（1 hr）','監造計畫 岸水抽查流程','試壓紀錄','chk')
+ ],note:'一變：φ100 地上式減 9 套，改設單口地下式消防栓 φ75 mm（含閥盒）9 套，詳 BF-11（盒蓋 JWWA B104、FCD、靜載 10,000 kgf）。'}
+];
+function mhData(){const s=MH[mhType];
+ return {title:s.n,meta:[['依據','圖說 '+s.dw],['送審','堅正金屬 材料規格數量表 '+s.pg],['數量',s.q+' 座'],['孔蓋','球狀石墨鑄鐵 FCD500']],
+ rows:[
+ S('wall','外部尺寸',`${s.o.join('×')} cm`,s.dw,`${s.o.join('×')} cm`,'ok'),
+ S('wall','內部尺寸',`${s.i.join('×')} cm`,s.dw,`${s.i.join('×')} cm`,'ok'),
+ S('wall','壁厚',`${s.t} cm`,s.dw,`${s.t} cm；尺寸檢查紀錄表`,'ok'),
+ S('bot','混凝土強度',`28 天 fc′ ≧ ${s.fc} kgf/cm²（第Ⅰ型水泥）`,s.dw+' 附註2',`fc′≧${s.fc}；圓柱試體抗壓報告`,'ok'),
+ S('rebar','鋼筋',`CNS 560 SD280 竹節鋼筋 ${s.bar}；保護層內 2.5、外 5 cm`,s.dw+' 附註3～4',`SD280 ${s.bar}；出廠及無輻射證明`,'ok'),
+ S('lean','基礎打底','10 cm 厚 fc′≧140 kgf/cm² 混凝土','BH9 附註5','現場查驗','chk'),
+ S('lid','鑄鐵蓋',s.cov,s.dw,s.cov,'ok'),
+ S('lid','孔蓋材質／載重','球狀石墨鑄鐵','BH9 / CG-10 附註',`FCD500，靜載重抗壓 ${s.load}；同批爐次材質報告`,'ok'),
+ S('frame','蓋架','與孔蓋配套，球狀石墨鑄鐵','CG-10','人孔蓋及蓋架詳圖','ok'),
+ S('knock','預留孔',"配合電力管路進出調整（2″/4″/6″）",s.dw+' 附註7','現場依管路核對','chk'),
+ S('gnd','接地','預留 1″ 孔供接地銅棒；人(手)孔接地詳 BH9-05 / CG-12','附註8','現場量測接地電阻','chk'),
+ S('hook','吊鉤／拉環','A/B 吊鉤 304 不銹鋼；2.2 cm 電纜拉環','BH9-03／CG-10','SUS304','ok'),
+ ...(s.rack?[S('rack','電纜固定架','100×450×1500 槽鋼支柱及支架','BH9-03','現場查驗','chk')]:[]),
+ S('top','標準衝突','與台電／中華電信材料標準衝突時，經工程司同意依其規定','附註9','—','chk')
+ ],note:'混凝土下游供料：毅和實業；試驗由 TAF 認證實驗室辦理（送審 p.40～64）。'}}
+
+/* ---------- three setup ---------- */
+const stage=$('stage'),pinsEl=$('pins');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;stage.prepend(renderer.domElement);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(38,1,.05,100);
+const ctl=new THREE.OrbitControls(cam,renderer.domElement);ctl.enableDamping=true;
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a9599,.85));
+const sun=new THREE.DirectionalLight(0xffffff,.8);sun.position.set(4,8,5);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-5,right:5,top:5,bottom:-5});scene.add(sun);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.12}));floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const grid=new THREE.GridHelper(12,24,0x9aa3a8,0xd4d9dc);grid.material.transparent=true;grid.material.opacity=.4;scene.add(grid);
+let root=null,parts=[],keys=[],cur=null,sel=null,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,tm=0,ex=0;
+const hl=new THREE.Color(0x0b5d63);
+function size(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(size).observe(stage);
+function load(m){
+ if(root){scene.remove(root)}
+ cur=m;const d=m.mh?Object.assign({},m,mhData()):m;
+ const b=m.build();root=new THREE.Group();parts=b.parts;parts.forEach(p=>root.add(p));scene.add(root);
+ parts.forEach(p=>{const bb=new THREE.Box3().setFromObject(p);p.userData.c=bb.getCenter(new THREE.Vector3());p.userData.top=bb.max.y});
+ keys=[...new Set(d.rows.map(r=>r.k))];
+ const bb=new THREE.Box3().setFromObject(root);const c=bb.getCenter(new THREE.Vector3()),sz=bb.getSize(new THREE.Vector3());
+ const r=Math.max(sz.x,sz.y,sz.z)*1.55+1.2;ctl.target.copy(c);ctl.target.y+=.15;
+ cam.position.set(c.x+r*.85,c.y+r*.55,c.z+r*1.05);ctl.update();root.userData.home=[cam.position.clone(),ctl.target.clone()];
+ grid.position.y=0;floor.position.y=0;
+ $('cap').innerHTML=`<b>${esc(d.title)}</b>拖曳旋轉・滾輪縮放・點編號看條文`;
+ $('ttl').textContent=d.title;
+ $('meta').innerHTML=d.meta.map(([a,b])=>`<span>${esc(a)}：<b>${esc(b)}</b></span>`).join('');
+ $('rows').innerHTML=d.rows.map((r,i)=>`<tr class="row" data-k="${esc(r.k)}"><td class="n">${keys.indexOf(r.k)+1}</td><td class="it">${esc(r.item)}<span class="src">${esc(r.src)}</span></td><td>${esc(r.req)}</td><td>${esc(r.sub)}</td><td><span class="tag ${r.st}">${r.st==='ok'?'送審相符':'進場/現場查驗'}</span></td></tr>`).join('');
+ $('note').textContent=d.note;$('note').hidden=!d.note;
+ pinsEl.innerHTML=keys.map((k,i)=>`<button class="pin" type="button" data-k="${esc(k)}" aria-label="部位 ${i+1}">${i+1}</button>`).join('');
+ $('mh').hidden=!m.mh;sel=null;
+}
+function select(k,scroll){sel=sel===k&&!scroll?null:k;
+ parts.forEach(p=>p.traverse(o=>{if(o.isMesh&&o.material.emissive){if(!o.userData.own){o.material=o.material.clone();o.userData.own=1}o.material.emissive.copy(p.userData.key===sel?hl:new THREE.Color(0));o.material.emissiveIntensity=p.userData.key===sel?.75:0}}));
+ pinsEl.querySelectorAll('.pin').forEach(b=>b.classList.toggle('on',b.dataset.k===sel));
+ let first=null;$('rows').querySelectorAll('tr').forEach(t=>{const on=t.dataset.k===sel;t.classList.toggle('on',on);if(on&&!first)first=t});
+ if(first&&scroll)first.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+const v=new THREE.Vector3();
+function loop(){requestAnimationFrame(loop);
+ if(playing){tm+=.006;ex=.5-.5*Math.cos(tm*2);$('ex').value=Math.round(ex*100)}
+ parts.forEach(p=>p.position.copy(p.userData.ex).multiplyScalar(ex));
+ ctl.update();renderer.render(scene,cam);
+ const w=stage.clientWidth,h=stage.clientHeight;
+ pinsEl.querySelectorAll('.pin').forEach(b=>{const p=parts.find(q=>q.userData.key===b.dataset.k);if(!p)return;
+  v.copy(p.userData.c).add(p.position);v.y=Math.min(p.userData.top+p.position.y+.05,v.y+.15);v.project(cam);
+  const ox=(keys.indexOf(b.dataset.k)%3-1)*6;b.style.left=((v.x+1)/2*w+ox)+'px';b.style.top=((1-v.y)/2*h)+'px';b.style.display=v.z<1?'':'none'})}
+/* ---------- UI ---------- */
+$('tabs').innerHTML=MODELS.map((m,i)=>`<button role="tab" type="button" id="t-${m.id}" aria-selected="${i===0}">${esc(m.tab)}</button>`).join('');
+$('mh').innerHTML=Object.entries(MH).map(([k,s])=>`<option value="${k}">${esc(s.n.replace(/（.*/,''))}</option>`).join('');
+function go(id){const m=MODELS.find(x=>x.id===id)||MODELS[0];document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.id==='t-'+m.id));load(m);if(location.hash!=='#'+m.id)history.replaceState(null,'','#'+m.id)}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.id.slice(2))});
+addEventListener('hashchange',()=>go(location.hash.slice(1)));
+$('mh').addEventListener('change',e=>{mhType=e.target.value;load(cur)});
+$('play').addEventListener('click',()=>{playing=!playing;$('play').textContent=playing?'暫停動畫':'播放動畫';if(playing)tm=Math.acos(1-2*ex)/2});
+$('ex').addEventListener('input',e=>{playing=false;$('play').textContent='播放動畫';ex=e.target.value/100});
+$('reset').addEventListener('click',()=>{const[h,t]=root.userData.home;cam.position.copy(h);ctl.target.copy(t)});
+pinsEl.addEventListener('click',e=>{const b=e.target.closest('.pin');if(b){if(playing){playing=false;$('play').textContent='播放動畫'}ex=Math.max(ex,.55);$('ex').value=ex*100;select(b.dataset.k,true)}});
+$('rows').addEventListener('click',e=>{const t=e.target.closest('tr');if(t)select(t.dataset.k,false)});
+$('play').textContent=playing?'暫停動畫':'播放動畫';
+size();go(location.hash.slice(1));loop();
+}
+</script>
+</body>
+</html>
