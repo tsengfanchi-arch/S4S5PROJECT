@@ -76,7 +76,7 @@ body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 aside#side{align-self:stretch;height:100%;overflow-y:auto;overscroll-behavior:contain;padding:16px;scrollbar-gutter:stable}
 aside#side h2{font-size:16px;margin:18px 0 8px}
 .more{border-top:1px solid var(--line);margin-top:14px}
-.zone{grid-template-columns:auto 1fr 1fr!important;font-size:12px}
+.zone{grid-template-columns:auto 1fr 1fr 1fr!important;font-size:12px}
 .zone .zh{font-weight:700;color:var(--mute);background:none!important;padding:2px}
 .zone .zp{font-weight:700;background:var(--bg)!important;color:var(--ink)!important;text-align:left}
 .legend{grid-template-columns:1fr 1fr!important;font-size:12px}
@@ -123,7 +123,7 @@ aside#side .no{font-size:36px}aside#side h3{font-size:18px}aside#side ol{font-si
   </div>
   <aside id="side"><div id="info" aria-live="polite"></div><div class="more"><h2>接縫斷面配置（ED-04，海側 → 陸側）</h2>
   <div class="zone" id="zone"></div>
-  <p class="foot">上列為 EL−8.50～±0.00 的配置，下列為 EL±0.00～+2.50。每支濾布筒長 0.80 m、寬 0.40 m，榫槽段長 2.00 m，筒與槽之間是寬 0.30 m 的頸部。間隙底部 EL−9.50～−8.50 為水中不分離混凝土填縫。</p>
+  <p class="foot">表中由左至右為 EL−8.50～−7.50、EL−7.50～±0.00、EL±0.00～+2.50 的配置；陸側筒①、筒②、槽 A 底部 1 m 先填 F2 濾料，濾布筒自 EL−7.50 起。每支濾布筒長 0.80 m、寬 0.40 m，榫槽段長 2.00 m，筒與槽之間是寬 0.30 m 的頸部。間隙底部 EL−9.50～−8.50 為水中不分離混凝土填縫。</p>
   <h2 style="margin-top:22px">施工抽查作業流程（十四）沉箱接縫處（防砂板及背填濾料）</h2>
   <div class="flow"><span>施工前準備工作</span><i>→</i><span>防砂板材料進場<br><small>☆ 必須墊高以防止污染</small></span><i>→</i><span>沉箱接縫處處理及濾布鋪設<br><small>☆ 1. 防砂板安裝　2. 濾料填縫、拋放及整平　3. 濾布筒鋪設及查驗　4. 混凝土查驗<br>★ 墜落、跌倒、物體飛落、被撞、溺水</small></span><i>→</i><span>防颱措施<br><small>★ 物體飛落</small></span><i>→</i><span>完成</span></div>
   <h2 style="margin-top:22px">主要允收值（南一監造計畫 修訂二版）</h2>
@@ -152,9 +152,9 @@ aside#side .no{font-size:36px}aside#side h3{font-size:18px}aside#side ol{font-si
 const C={cais:'#c9c4ba',sand:'#e2cf9b',cs:'#d8b36a',f1:'#c49b62',f2:'#94754b',f3:'#6c6358',conc:'#a3abb0',rc:'#6f7c86',rebar:'#b5532e',uw:'#4d6b8a',board:'#2b332e',ss:'#c3c9cf',wp:'#2d6db5',geo:'#f3f1ea',tube:'#ffffff',rock:'#8a857b',bed:'#74695a',slab:'#b5b0a6',cover:'#8d877c',top:'#a9a49a',mort:'#5e5a54',pipe:'#e0a020'};
 const LEG=[['cs','粗砂'],['f1','F1 濾料'],['f2','F2 濾料'],['f3','F3 濾料'],['conc','內灌混凝土 210 kgf/cm²'],['rc','鋼筋混凝土 280 kgf/cm²'],['rebar','鋼筋籠 20-#6、#4@15'],['uw','水中不分離混凝土 280'],['wp','防水布（寬≥4 m）'],['geo','濾布／濾布筒'],['board','合成防砂板 ≥1 cm'],['ss','316 不銹鋼壓板、螺栓'],['cover','TRC7 預鑄蓋板'],['sand','沉箱回填砂']];
 document.getElementById('legend').innerHTML=LEG.map(([k,t])=>`<div><i style="background:${C[k]}"></i>${t}</div>`).join('');
-const ZN=[['海側邊','',''],['筒⑤','conc','f2'],['槽 D','rc','f3'],['筒④','conc','f2'],['槽 C','rc','f2'],['筒③','conc','f2'],['槽 B','f2','f2'],['筒②','cs','f1'],['槽 A','f1','f1'],['筒①','cs','cs'],['陸側邊','cs','cs']];
+const ZN=[['海側邊','','',''],['筒⑤','conc','f2','conc'],['槽 D','rc','f3','rc'],['筒④','conc','f2','conc'],['槽 C','rc','f2','rc'],['筒③','conc','f2','conc'],['槽 B','f2','f2','f2'],['筒②','cs','f1','f2'],['槽 A','f1','f1','f2'],['筒①','cs','cs','f2'],['陸側邊','cs','cs','cs']];
 const NM={conc:'混凝土',rc:'鋼筋混凝土',f1:'F1',f2:'F2',f3:'F3',cs:'粗砂','':'—'};
-document.getElementById('zone').innerHTML='<div class="zh">位置</div><div class="zh">EL−8.50～±0.00</div><div class="zh">EL±0.00～+2.50</div>'+ZN.map(z=>`<div class="zp">${z[0]}</div>`+[1,2].map(k=>`<div style="background:${C[z[k]]||'#ddd'};${z[k]==='rc'||z[k]==='f3'||z[k]==='f2'?'color:#fff':''}">${NM[z[k]]}</div>`).join('')).join('');
+document.getElementById('zone').innerHTML='<div class="zh">位置</div><div class="zh">EL−8.50～−7.50</div><div class="zh">EL−7.50～±0.00</div><div class="zh">EL±0.00～+2.50</div>'+ZN.map(z=>`<div class="zp">${z[0]}</div>`+[3,1,2].map(k=>`<div style="background:${C[z[k]]||'#ddd'};${z[k]==='rc'||z[k]==='f3'||z[k]==='f2'?'color:#fff':''}">${NM[z[k]]}</div>`).join('')).join('');
 
 const ST=[
  {t:'接縫底部防水布鋪設',ph:'沉箱安放前',v:'iso',it:['於整平後的基礎拋石面，沿接縫位置鋪設不透水防水布','寬度至少 4 m；陸側（背填側）預留至少 2 m，日後向上摺起與防砂板密合','功能僅為防止水中不分離混凝土填縫時漏漿至基礎拋石'],sp:'材質需為不透水性質',dw:['ED-04 說明 2','ED-07 A-A','ED-01 ④①'],lb:[['防水布（寬≥4 m）',[-1.5,-9.4,6]],['陸側預留≥2 m',[0,-9.4,16.6]]]},
@@ -170,7 +170,7 @@ const ST=[
  {t:'第一階段防砂板',ph:'ED-01 施工順序 8 ②',v:'land',it:['吊放第一階段防砂板（EL−9.50～−3.00）及 PL 6 mm 不銹鋼壓板，配合潛水伕水下安裝','防水布置入防砂板內側並密合','頂部適度固定，並作臨時固定，防止回填前外翻'],sp:'合成防砂板厚≥1 cm，抗水平拉力≥24 T/m，抗縱向拉力≥15 T/m（CNS 10024）；被覆橡膠拉力≥140 kg/cm²、伸長率≥400%',dw:['ED-06 步驟 4','ED-06 規格','ED-04 說明 6'],lb:[['第一階段防砂板 EL−9.50～−3.00',[0,-5,15.4]],['PL 6 mm 壓板',[.45,-7,15.4]]]},
  {t:'背側底部濾料及濾布',ph:'ED-01 施工順序 8 ③～⑥',v:'sec',it:['底層 F2 濾料：漏管施工，漏管延伸至鋪設位置，不可直接傾倒拋放','濾布：濾布頭吊掛於沉箱 M12 不銹鋼化學螺栓（@150 cm，出場前施作），以 PL 5 mm 不銹鋼板鎖緊後向陸側鋪設，注意打摺不可鬆脫','上層 F1 濾料，再鋪粗砂，同樣採漏管施工'],sp:'濾布打摺至少 2 m；M12 化學螺栓容許拉力≥1.5 T',dw:['ED-02 施工步驟、流程圖','ED-02 詳圖 A','ED-06 步驟 5'],lb:[['底層 F2',[-3,-9.6,17.6]],['濾布＋M12 螺栓',[-3,-8.5,15.3]],['F1 濾料',[-3,-8.4,20]],['粗砂',[-3,-6.6,17]],['漏管',[-3,-1,19]]]},
  {t:'第二階段防砂板',ph:'ED-06 步驟 6',v:'land',it:['第二階段防砂板（EL−3.50～+2.50）與第一階段搭接至少 50 cm','完成後作臨時固定，避免後線回填前外翻','之後才可進行背側填築及沉箱間隙封堵'],sp:'',dw:['ED-06 步驟 6、說明 3','ED-04 說明 6'],lb:[['搭接≥50 cm',[0,-3.25,15.4]],['第二階段防砂板',[0,0,15.4]]]},
- {t:'陸側榫槽防漏砂',ph:'ED-01 施工順序 9 ②～⑦',v:'plan',it:['再吊移頂部蓋板','濾布筒①：上下段填粗砂；濾布筒②：下段粗砂、上段 F1 濾料','槽 A 填 F1 濾料、槽 B 填 F2 濾料','陸側間隙邊緣填粗砂'],sp:'',dw:['ED-04 平面（左、右）','ED-01 ⑨'],lb:[['濾布筒①②',[0,2.8,12.6]],['槽 A F1／槽 B F2',[0,2.6,10.4]],['縫隙填粗砂',[0,2.6,15]]]},
+ {t:'陸側榫槽防漏砂',ph:'ED-01 施工順序 9 ②～⑦',v:'sec',it:['再吊移頂部蓋板','筒①、筒②、槽 A 底部 EL−8.50～−7.50 先填 F2 濾料','筒①：EL−7.50～+2.50 濾布筒＋粗砂','筒②：EL−7.50～±0.00 濾布筒＋粗砂；EL±0.00～+2.50 濾布筒＋F1 濾料','槽 A：EL−7.50～+2.50 F1 濾料；槽 B 填 F2 濾料','陸側間隙邊緣填粗砂'],sp:'',dw:['ED-04 平面（左、右）','ED-01 ⑨'],lb:[['底部 F2 濾料 EL−8.50～−7.50',[0,-8,12.6]],['筒① 濾布筒＋粗砂',[0,-3,14.3]],['槽 A F1／槽 B F2',[0,-1,10.4]],['筒② 上段 F1',[0,1.8,11]],['縫隙填粗砂',[0,2.6,15]]]},
  {t:'後側回填砂',ph:'ED-01 施工順序 9 ①',v:'iso',it:['防漏砂措施完成後，沉箱背側回填砂','回填砂作業需與 C 填區臨時擋土板樁之打設、移除配合，並依工程司指示辦理'],sp:'',dw:['ED-01 ⑨①','ED-01 說明 5','EB-03'],lb:[['後側回填砂',[-3,1,21]]]},
  {t:'蓋板吊回封實、堤面混凝土',ph:'ED-01 施工順序 9 ⑧',v:'iso',it:['間隙全部工項填築完成後，頂部蓋板吊回復舊','以水泥砂漿封實','澆置 210 kgf/cm² 堤面混凝土至 EL+3.50'],sp:'',dw:['ED-08 說明 3','ED-08 D-D、E-E','ED-01 ⑨⑧'],lb:[['水泥砂漿封實',[0.75,3.1,4]],['堤面混凝土 EL+3.50',[3,3.6,10]]]}
 ];
@@ -272,7 +272,7 @@ const hook=grp([box(-.03,.03,0,12,-.03,.03,M('#333')),box(-.35,.35,-.15,0,-.1,.1
 // 底部填縫
 add(grp([box(-.05,.05,-9.5,-8.9,0,B,M(C.uw)),box(-.2,.2,-8.9,-8.5,.36,14.76,M(C.uw))]),4,.1,.85,'grow',{tool:'tremie',tp:[0,-9.5,7.5],ty:[-9.5,-8.5]});
 // 濾布筒與填充
-const skin=(k,s,a0,a1)=>add(prismV(oct(Z[k][0]-.01,Z[k][1]+.01,.215,.06),-8.5,2.5,M(C.tube,.35)),s,a0,a1,'drop',{h:9});
+const skin=(k,s,a0,a1,y0=-8.5)=>add(prismV(oct(Z[k][0]-.01,Z[k][1]+.01,.215,.06),y0,2.5,M(C.tube,.35)),s,a0,a1,'drop',{h:9});
 const fill=(k,y0,y1,c,s,a0,a1,o={})=>add(prismV(oct(Z[k][0]+.02,Z[k][1]-.02,.19,.04),y0,y1,M(C[c])),s,a0,a1,'grow',o);
 ['t3','t4','t5'].forEach((k,i)=>{const a=i*.32;skin(k,5,a,a+.08);fill(k,-8.5,0,'conc',5,a+.1,a+.3,{tool:'tremie',tp:[0,0,zc(k)],ty:[-8.5,0]})});
 // 鋼筋籠
@@ -293,10 +293,12 @@ add(prismX([[B+.07,-7.5],[18,-7.5],[23,-8.45],[24.8,-7.85],[18.12,-6.5],[B+.07,-
 // 第二階段防砂板
 add(grp([box(-.5,.5,-3.5,2.5,B+.09,B+.13,M(C.board)),box(-.45,-.35,-3.4,2.4,B+.13,B+.15,M(C.ss)),box(.35,.45,-3.4,2.4,B+.13,B+.15,M(C.ss))]),12,.05,.8,'drop',{h:8});
 // 陸側
-skin('t1',13,.15,.25);skin('t2',13,.15,.25);
-fill('t1',-8.5,2.5,'cs',13,.3,.5,{tool:'chute',tp:[0,2.5,zc('t1')],ty:[-8.5,2.5]});
-fill('t2',-8.5,0,'cs',13,.42,.58,{tool:'chute',tp:[0,2.5,zc('t2')],ty:[-8.5,0]});fill('t2',0,2.5,'f1',13,.58,.66);
-fill('A',-8.5,2.5,'f1',13,.6,.8,{tool:'chute',tp:[0,2.5,zc('A')],ty:[-8.5,2.5]});
+// 陸側底部 EL−8.50～−7.50 先填 F2 濾料
+['t1','t2','A'].forEach((k,i)=>fill(k,-8.5,-7.5,'f2',13,.04+i*.03,.12+i*.03,{tool:'chute',tp:[0,2.5,zc(k)],ty:[-8.5,-7.5]}));
+skin('t1',13,.18,.27,-7.5);skin('t2',13,.18,.27,-7.5);
+fill('t1',-7.5,2.5,'cs',13,.3,.5,{tool:'chute',tp:[0,2.5,zc('t1')],ty:[-7.5,2.5]});
+fill('t2',-7.5,0,'cs',13,.42,.58,{tool:'chute',tp:[0,2.5,zc('t2')],ty:[-7.5,0]});fill('t2',0,2.5,'f1',13,.58,.66);
+fill('A',-7.5,2.5,'f1',13,.6,.8,{tool:'chute',tp:[0,2.5,zc('A')],ty:[-7.5,2.5]});
 fill('B',-8.5,2.5,'f2',13,.72,.9,{tool:'chute',tp:[0,2.5,zc('B')],ty:[-8.5,2.5]});
 add(box(-.05,.05,-8.5,2.5,14.76,B,M(C.cs)),13,.88,1,'grow');
 // 後側回填
