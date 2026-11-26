@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>沉箱製作安放 3D 查驗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造現場教材——務實、精準、像港務工程的施工看板
+   IDEA: 一座沉箱從浮台船上誕生到碼頭坐底的全過程，每一步掛上查驗牌
+   PICTURE: 可旋轉的 3D 港區場景（浮台船、滑模、拖船、拋石基礎）
+   COLOUR and TYPE: 港灣藍綠為主、混凝土灰為輔、安全黃作重點、水尺紅標示；Noto Sans TC
+   LAYOUT: 上方大畫面動畫＋播放列，下方階段列，再下為「修訂七版抽查要點｜施工計畫要點」雙欄與允收值總表 */
+:root{color-scheme:light dark;--bg:light-dark(#f4f6f5,#0d1b1f);--ink:light-dark(#14262b,#e7eeee);--mute:light-dark(#566a6f,#9fb3b6);--card:light-dark(#ffffff,#132a30);--line:light-dark(#d6dfdf,#24424a);--sea:#0f5f6b;--yel:#f2c230;--red:#c8322b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+header{background:var(--sea);color:#fff;padding:22px max(4vw,16px) 18px}
+h1{font-size:clamp(24px,3.4vw,38px);line-height:1.1;margin:0 0 6px;font-weight:900;text-wrap:balance}
+header p{margin:0;opacity:.88;font-size:15px}
+.stage{position:relative;height:min(68vh,720px);min-height:420px;background:#cfe3ea;overflow:hidden}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.lbls{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;transform:translate(-50%,-100%);background:rgba(13,31,36,.86);color:#fff;font-size:13px;line-height:1.3;padding:4px 8px;border-radius:4px;white-space:nowrap;border-left:3px solid var(--yel)}
+.lb::after{content:"";position:absolute;left:50%;bottom:-8px;width:1px;height:8px;background:rgba(13,31,36,.86)}
+.lb.r{border-left-color:var(--red)}
+.cap{position:absolute;left:14px;top:14px;max-width:min(560px,calc(100% - 28px));background:rgba(255,255,255,.93);color:#14262b;border-radius:6px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.cap b{display:block;font-size:18px;line-height:1.3}
+.cap span{font-size:14px;color:#3f5459}
+.bar{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 14px;background:linear-gradient(transparent,rgba(8,24,28,.75))}
+.bar button,.bar select{height:44px;min-width:44px;border:0;border-radius:6px;background:rgba(255,255,255,.95);color:#14262b;font:600 15px "Noto Sans TC",sans-serif;padding:0 12px;cursor:pointer}
+.bar button:focus-visible,.chip:focus-visible,.bar input:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+.bar input{flex:1;accent-color:var(--yel);height:44px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px max(4vw,16px);background:var(--card);border-bottom:1px solid var(--line);scroll-snap-type:x mandatory}
+.chip{flex:none;scroll-snap-align:start;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 14px;font:500 14px "Noto Sans TC",sans-serif;cursor:pointer;min-height:44px}
+.chip.on{background:var(--yel);border-color:var(--yel);color:#14262b;font-weight:700}
+.chip i{font-style:normal;opacity:.6;margin-right:4px}
+.band{padding:clamp(22px,3.4vw,48px) max(4vw,16px);max-width:1280px;margin:0 auto}
+.cols{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px}
+@media(max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+h2{font-size:24px;line-height:1.2;margin:0 0 4px}
+h3{font-size:17px;margin:0 0 12px;color:var(--mute);font-weight:500}
+.it{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-bottom:10px}
+.it .k{display:inline-block;font-weight:700;color:#14262b;background:var(--yel);border-radius:4px;padding:0 6px;margin-right:6px;font-size:13px}
+.it .k.s{background:var(--red);color:#fff}
+.it b{font-size:16px}
+.it p{margin:4px 0 0;font-size:15px}
+.it small{display:block;color:var(--mute);font-size:13px;margin-top:4px}
+ul.pl{margin:0;padding-left:1.2em}ul.pl li{margin:0 0 8px;font-size:15px}
+.flow{list-style:none;margin:0 0 22px;padding:0;display:grid;gap:6px}.flow li{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr);gap:10px;align-items:start;padding:8px 12px;border-radius:6px;background:var(--card);border:1px solid var(--line);font-size:14px;opacity:.6}.flow li b{font-size:15px}.flow li.on{opacity:1;border-color:var(--yel);box-shadow:inset 4px 0 0 var(--yel)}.flow li span{color:var(--mute)}@media(max-width:600px){.flow li{grid-template-columns:minmax(0,1fr)}}
+.calc .cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}.calc label{font-size:14px;color:var(--mute)}.calc input{display:block;width:100%;height:44px;font-size:16px;padding:0 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);margin-top:4px}.calc p{margin:0 0 6px;font-size:15px}.ok{color:#1f8a4c;font-weight:700}.ng{color:var(--red);font-weight:700}
+.rc.dg{border-left-color:var(--yel)}.rc.dg em{background:#8a6d12}
+.rc{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--sea);border-radius:8px;padding:12px 14px;margin-bottom:10px}.rc b{font-size:16px}.rc em{font-style:normal;font-weight:700;background:var(--sea);color:#fff;border-radius:4px;padding:0 6px;margin-right:6px;font-size:13px}.rc ul{margin:6px 0 0;padding-left:1.2em;font-size:15px}.rc li{margin-bottom:4px}
+.hud{position:absolute;right:14px;top:14px;background:rgba(13,31,36,.88);color:#fff;border-radius:6px;padding:10px 14px;font-size:14px;line-height:1.5;min-width:220px;display:none}.hud b{font-size:20px;color:var(--yel)}.hud .ag{margin:6px 0 2px;font-size:12px}.hud .ag i{display:inline-block;width:10px;height:10px;margin-right:3px;vertical-align:-1px}.hud .ph{display:flex;gap:4px;margin-top:6px}.hud .ph span{flex:1;text-align:center;font-size:12px;padding:3px 2px;border-radius:3px;background:rgba(255,255,255,.15)}.hud .ph span.on{background:var(--yel);color:#14262b;font-weight:700}@media(max-width:600px){.hud{top:auto;bottom:70px;right:8px;min-width:0}}
+.vid{margin-top:16px;padding:12px 14px;border-left:4px solid var(--sea);background:var(--card);font-size:15px}
+table{width:100%;border-collapse:collapse;background:var(--card);font-size:15px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:500}
+td.v{font-weight:700;white-space:nowrap}
+.note{font-size:13px;color:var(--mute);margin-top:14px}
+@media(max-width:600px){.cap b{font-size:16px}.cap span{font-size:13px}.lb{font-size:12px}.bar{gap:6px;padding:8px}.bar select{display:none}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:400}.stack td:empty{display:none}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header>
+<h1>臺北港沉箱製作・出塢・拖航安放 3D 查驗動畫</h1>
+<p>依影片「臺北港沉箱製作介紹」0:30–2:30 流程，套入《監造計畫 修訂七版》第七章施工抽查標準（表 7-3-10、7-3-11 等）與《沉箱製作、儲存及安放施工計畫》滑動模板形式</p>
+</header>
+
+<section class="stage" id="stage">
+<canvas id="cv"></canvas>
+<div class="lbls" id="lbls"></div>
+<div class="cap"><b id="capT"></b><span id="capD"></span></div><div class="hud" id="hud"></div>
+<div class="bar">
+<button id="prev" aria-label="上一階段">◀</button>
+<button id="play" aria-label="播放或暫停">❚❚</button>
+<button id="next" aria-label="下一階段">▶</button>
+<input id="seek" type="range" min="0" max="10" step="0.001" value="0" aria-label="時間軸">
+<select id="spd" aria-label="播放速度"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+<button id="cam" aria-label="重設視角">視角</button>
+</div>
+</section>
+<nav class="chips" id="chips" aria-label="施工階段"></nav>
+
+<section class="band">
+<div class="cols">
+<div><h2 id="pT"></h2><h3 id="flT"></h3><ol class="flow" id="flow"></ol><h3>抽查標準表（表 7-3）　☆ 檢驗停留點／★ 安衛查驗點</h3><div id="insp"></div><h3>紀錄表填記（表 7-5）</h3><div id="rec"></div><div id="dsgW"><h3>設計圖說</h3><div id="dsg"></div></div></div>
+<div><h2>施工計畫作業要點</h2><h3>沉箱製作、儲存及安放施工計畫</h3><ul class="pl" id="plan"></ul><div class="vid" id="vid"></div></div>
+</div>
+</section>
+
+<section class="band" style="padding-top:0">
+<h2>主要允收值總表</h2><h3>現場查驗時對照用</h3>
+<table class="stack"><thead><tr><th>階段</th><th>項目</th><th>允收標準</th><th>紀錄表</th></tr></thead><tbody id="tol"></tbody></table>
+<p class="note">沉箱以 SA01 型 24.9 × 18.0 × 20.0 m 為代表（施工計畫圖 1-13、設計圖 CB-06），隔艙 5 × 4，靠海側第一排為消波室，外牆設 10 處消波孔及封口鋼板（CC-39／DD-57）。動畫水深、航線、位置為示意，非實測座標。滑鼠拖曳可旋轉、滾輪縮放。</p>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const ST=[
+{t:'施工前準備・浮台船鋪 PE 布・底模放樣',c:'浮沉台船甲板焊螺釘作底模三角支撐，鋪 PE 布隔離，底模鋼板放樣組立',v:'影片：底模鋼板放樣與組立，大底模先組好、放樣完成後固定。',fl:[0,[0,1]],
+ i:[['☆','場地整理','鋼筋加工場、滑模堆置場、泵車動線','施工前・現場查對・每次｜加強場地整理'],
+ ['☆','模板外觀','規格尺寸數量、進場應為新品、附屬配件齊備、表面處理、無變形','施工前・丈量・每批｜退貨'],
+ ['☆','鋼筋材料','物性、化性符合 CNS 560','進場時・取樣送驗・每次｜退料'],
+ ['☆★','工作浮台鋪設','是否鋪 PE 布、拖船及照明設備','施工前・現場查對・1 次｜更換或調整']],
+ r:[['7-5-10','沉箱製作施工抽查紀錄表（表頭）',['施工作業前應提出證明文件：材質證明、試驗報告及施工計畫，勾選「齊全／不齊全」','抽查時機勾選：檢驗停留點☆（安衛查驗點★）或不定期抽查','施工流程勾選：施工前','抽查結果：○ 合格、╳ 有缺失需改正、／無此項目']],
+  ['7-5-1','鋼筋工程施工抽查紀錄表（施工前）',['施工圖是否審查完成','☆★ 堆置儲放：不得直接堆置於土壤上方、堆置整齊及覆蓋、查驗爐號、鋼種、規格、尺寸、重量']],
+  ['7-5-2','模板工程施工抽查紀錄表（施工前）',['模板外觀 5 項：規格尺寸數量、新品、附屬配件、表面處理、無變形']]],
+ p:['每循環於浮沉台船上製作 1 座；浮沉台船先於港內測試起浮功能','依沉箱尺寸將螺釘焊牢於甲板作底板鋼模三角支撐，檢驗各轉角直角及對角線長度','底版作業區鋪 PE 布隔離，避免底版與甲板粘黏影響後續起浮']},
+{t:'底版鋼筋綁紮・大底鋼模組立',c:'大底鋼模吊立加斜撐，上下層鋼筋綁紮並預留艙牆插筋',v:'影片：鋪上帆布後開始綁大底鋼筋。',fl:[0,[2]],
+ i:[['☆','底板模板組立','鋼模組立尺寸符合、模板油、澆置位置清潔無雜物','澆置前・現場查對／尺規量測・每次｜調整綁紮'],
+ ['☆','底板鋼筋組立','另詳表 7-5-1 鋼筋品質抽查紀錄表','澆置前・現場查對・每次｜改善或重作']],
+ r:[['7-5-1','鋼筋工程施工抽查紀錄表（施工中，鋼筋綁紮★）',['☆ 鋼筋號數、長度及間距：依施工圖，量測位置 1、2、3 分別填記','☆ 鋼筋清潔：污泥、浮鏽、油脂等清除完成','☆ 搭接及錨定：搭接長度依鋼筋標準圖（頂層／底層分號數填記）；相鄰搭接錯開 ≧ 25D（#4 約 31.8、#5 約 39.8、#6 約 47.8、#8 約 63.5 cm）','☆ 綁紮鐵絲／間距：20 號鐵絲；交叉點間距 < 20 cm 可間隔結紮，≧ 20 cm 每點均需結紮','☆ 保護層（場鑄）：海水直接接觸、可能沖刷嚴重、嚴重受海風或飛沫作用 10.0 cm；其他部份 7.5 cm','☆ 埋設物、☆ 開口補強：依施工圖量化填入']],
+  ['7-5-2','模板工程施工抽查紀錄表（施工中）',['☆ 模板油：無色無污染','☆★ 支承：間距適當，無彎曲、變形、破裂；高 2 m 以上需有水平繫材','☆ 模板面：清潔、緊密，無過度使用','☆ 斷面尺寸 ±0.6 cm；☆ 斜撐、☆ 澆置高程依施工圖量化填入']]],
+ p:['大底鋼模吊立組裝並作斜撐加強','依放樣尺寸組立內外艙牆配筋，長短錯接','保護層以角鐵燒焊於外艙模為依準，外牆雙層筋加 ㄇ 字筋控制間距，水泥墊塊維持保護層']},
+{t:'沉箱底版混凝土澆置',c:'泵送車由遠端往近端，分區配合隔艙、每區分上下兩層澆置',v:'影片：大底鋼筋綁完後就繼續澆置混凝土。',fl:[0,[2]],
+ i:[['☆★','沉箱底層混凝土澆置','試體製作等、面層處理','澆置中・現場查對／尺規量測・每次｜面層改善處理']],
+ r:[['7-5-3','混凝土工程施工抽查紀錄表',['施工前：材料檢驗合格；驗廠紀錄符合 CNS 3090；配比設計符合 CNS 12891；☆ 鋼筋模板檢驗合格；☆ 澆置厚度及高度','施工中（混凝土澆置★）：自加水攪拌起 90 分鐘仍未澆置者不得使用；溫度 13–32 °C','☆ 坍度依配比設計許可差；氯離子 < 0.15 kg/m³','試體每 120 m³ 一批、每批至少 1 組（每組 3 只），最後餘數 > 40 m³ 增一組','落下高度 < 1.5 m；澆置中斷 ≦ 45 min；振動棒徹底搗實，避免損壞預埋件']],
+  ['7-5-3-1','混凝土試體品質施工抽查紀錄表',['試體取樣、編號、製作紀錄']]],
+ p:['箱體混凝土 fc′ = 280 kgf/cm²（Ⅱ 型水泥）','每循環一部泵送車；由遠端開始向近端進行，兼顧浮台船船體平衡','分區配合隔艙尺寸，每區分上下 2 層，下層完成再澆上層']},
+{t:'滑動模板組立（內模吊裝・外模安裝）',c:'各艙內模預組編號吊裝，再組外模、軛架、千斤頂、爬升桿與工作平台',v:'影片：澆置完後是滑模設備內艙模組立和外艙模的結合，豎筋立起後開始滑模。',fl:[0,[3]],
+ i:[['☆★','沉箱壁體滑動模板組立','鋼筋備料及人員；預埋件（水門、通水孔、消波室）；工作台及照明設備；內壁上下模差 4 mm、外壁內模上下模差 2 mm；升模速度','澆置中・現場查對／尺規量測・每次｜調整改正'],
+ ['☆★','壁體鋼筋組立','另詳表 7-5-1 鋼筋品質抽查紀錄表','澆置前・現場查對・每次｜改善或重作']],
+ r:[['7-5-10','沉箱製作施工抽查紀錄表（施工中）',['☆★ 沉箱壁體滑動模板組立 5 項逐項填實際抽查值（上下模差填 mm 實測值）','另詳表 7-5-2、7-5-10-1、7-5-10-2']],
+  ['7-5-2','模板工程施工抽查紀錄表',['☆ 斷面尺寸 ±0.6 cm','☆ 開口部位：位置正確、固定無鬆動（進水孔、通水孔、外牆消波孔隔板箱及其周邊 1″ψ PVC 套管）','☆ 繫結材、☆ 機電配管埋設螺栓：依施工圖量化填入']],
+  ['7-5-1','鋼筋工程施工抽查紀錄表',['☆ 埋設物、☆ 開口補強（進水孔角隅補強筋、C 型拖索環）']]],
+ p:['模板形式：活動模板（滑模）＝模板系統（襯板、橫箍樑、軛架）＋油壓系統（千斤頂、夾具、幫浦、油管、爬升桿）＋支撐系統（圍樑、加勁樑、工作吊架、平台、欄杆、安全網）','襯板：內模 1 m × 1.05 m × 3 mm、外模 1 m × 1.2 m × 3 mm；組立下寬上窄傾斜 3–6 mm 以減摩擦','橫箍樑上下 2 道 H100 × 75 × 6 × 8；軛架 2 直柱 2 橫擔，荷重直接傳至千斤頂','單動油壓千斤頂容許 3 t、衝程 25 mm；爬升桿 ψ25 mm 實心圓棒（3 m／1.5 m）','每艙內模預組編號後依序吊裝，再組外模、調整壁厚、鎖緊圍樑螺栓，核對內外模斜度並校正水平']},
+{t:'滑模昇模・牆身每次 40 cm 澆置',c:'大底完成後牆身每次澆置 40 cm、昇模 40 cm；模板高 1.2 m，模內約 3 層，最下層升出模板底時須已超過初凝',v:'影片：鋼筋豎筋立起後開始滑模，一次 40 公分、一次 40 公分一直往上，到預定高度結束。',fl:[0,[3]],
+ i:[['☆★','沉箱壁體混凝土澆置','另詳表 7-5-3、7-5-10-3 混凝土品質抽查紀錄表','澆置中・現場查對・每次｜改善或重作'],
+ ['☆★','滑動模板（升模中）','內壁上下模差 4 mm、外壁內模上下模差 2 mm；升模速度','澆置中・尺規量測・每次｜調整改正'],
+ ['','混凝土養護','噴灑養護劑，7 日內如養護表面受損應補塗','澆置後・不定時｜噴灑養護劑']],
+ r:[['7-5-10-3','沉箱昇模施工抽查紀錄表',['分大夜班、早班、夜班，先填起始高程與前一天累計方數','逐次填：交班時間、滑模高程、升模高度、叫料時間、開始澆置時間、澆置完成時間','「混凝土開始澆置至混凝土脫模時間」：模板高 1.2 m，某層混凝土自澆置起，到模板昇高 1.2 m 使該層由模板底脫出為止的時間，須超過初凝時間（不是每次 40 cm 都要等初凝）','備註 1 初凝時間依季節填記：夏季（30–33 °C）約 1–1.5 h、冬季（10–15 °C）約 4–4.5 h','備註 2 逐次確認「脫模時間是否超過初凝時間」','澆置方數、當日累計方數、累計方數；抽查人簽名']],
+  ['7-5-10-1','沉箱尺寸施工抽查紀錄表',['依沉箱編號，自 EL+0.6～+2 m 起每 1 m 一段填記','四角高程 ±2 cm、整體長 +3／−1 cm、整體寬 +3／−1 cm、外牆厚 ±1 cm、隔牆厚 ±1 cm']],
+  ['7-5-10-2','沉箱尺寸施工抽查位置紀錄表',['四角 A、B、C、D 量四角高程與整體長寬','量測點 1–38：外牆 1–5、16–20、21、26、27、32、33、38；隔牆 6–15、22–25、28–31、34–37']],
+  ['7-5-3','混凝土工程施工抽查紀錄表',['每車／每批：溫度、坍度、氯離子、試體數量、落下高度、中斷時間，同底版']]],
+ p:['混凝土初凝後即可開始昇高模板（施工計畫八（九）1）：指最下層由模板底脫出時已達初凝','檢核：出模時間 ≈ 1.2 m ÷ 昇模速度，須 ≧ 初凝時間；即昇模速度 ≦ 1.2 m ÷ 初凝時間','每升高 20–40 cm 檢查調整水平；每升高 50–100 cm 檢查高程','爬升桿每 20 cm 做水平記號、每 50 cm 做高程記號；外牆四角每 1 m 標示高程','垂直控制：外牆拉固定垂線，量上下兩處間距差','1″ 振動棒插入深度僅及本層一半，不得深入下層；最後一層留 5 cm 餘裕','預埋：進水孔、通水孔（PVC 綁牢）、C 型拖索環（保麗龍預留凹孔）、消波孔隔板箱；消波孔周邊預埋 1″ψ PVC 套管，供封口鋼板螺栓穿設（CC-39／DD-57）','異常：夾模、油壓管漏油即停昇模；混凝土中斷時每 10 分鐘提昇模板一次']},
+{t:'拆模・沉箱完成檢查・水尺標線',c:'到頂一天後拆外模、內模；量測尺寸、檢視表面、確認水尺標線',v:'影片：沉箱製作完成並將模板拆除後，等待混凝土達設計強度。',fl:[0,[4,5]],
+ i:[['☆','箱體檢查及水尺標線','壁厚 ±1 cm、高度 ±2 cm、長度與寬度 +3 cm／−1 cm','澆置後・現場查對／尺規量測・每次｜箱體修補'],
+ ['☆★','拆模後表面完整度','平順無蜂巢、無冷縫、無表面龜裂；輕微以同配比修補，嚴重應提報改善方案','拆模後・目視・每次澆置']],
+ r:[['7-5-10','沉箱製作施工抽查紀錄表（施工後）',['☆ 箱體檢查及水尺標線、☆★ 拆模後表面完整度','★ 檢視承攬廠商安全衛生自動檢查表單填報情形，填具施工安全衛生抽查紀錄表','缺失複查：已完成改善附改善前中後照片；未完成改善填「不合格追蹤管制表」追蹤']],
+  ['7-5-3','混凝土工程施工抽查紀錄表（施工後，拆模★）',['養護方式：澆水或養護膜，養護至少 7 天（經核定之加速養護除外）','澆置後 24 小時內禁止材料及物品荷載','拆模後表面完整度']],
+  ['7-5-10-1／10-2','尺寸及位置紀錄',['完成後依四角 A–D、量測點 1–38 彙整全高尺寸']]],
+ p:['澆至設計頂高經一天後拆模：模板昇離箱頂 5–10 cm，鋪 #8 鋼筋後落置，拆螺栓並移開吊架、昇高架、橫樑、昇高器','先吊移外模、再吊起昇高桿拆內模，至儲放區清理備用','外牆紅漆高程即吃水判讀依據；以養護劑噴塗養生','於製作場安裝外牆 10 處消波孔封口鋼板（CC-39／DD-57 說明 1），出塢前完成'],
+ d:[['CC-39／DD-57','沉箱消波孔封口詳圖',['封口原則上應於製作場安裝完成','僅外牆消波孔施作封口；消波室內消波孔無需封口','鋼板 PL10 mm（SS400 或 A36 同等品），130 × 380 cm；內襯 t = 10 mm 厚橡膠墊片','加勁：L100 × 100 × 10（SS400）','固定：預埋 1″ψ PVC 管，管內穿 22 mmψ、L = 80 cm 螺栓，附螺帽及墊片','封口須待沉箱頂層結構混凝土施工完成後，才可拆除；拆下鋼板由承包商自行處理、運離工區']],['CB-06','S04～S05 沉箱碼頭斷面圖（二）',['SA01 沉箱 24.9 × 18.0 × 20.0 m，靠海側第一排艙為消波室，外牆開消波孔（約 EL−1.50～+1.55 m）','底面 EL−17.50 m，頂 EL+2.50 m']],['一變數量計算','乙.壹.一.3.1 第 70、71 項',['沉箱消波孔封口製作及安裝 N = 10 × 8 = 80 處（每座 10 處）','沉箱消波孔封口拆除及吊移 N = 80 處']]]},
+{t:'沉箱出塢（浮台船坐底・沉箱起浮）',c:'拖船將浮台船拖至暫存區，浮台船進水坐底，沉箱達吃水自然脫離浮台後拖出',v:'影片：確認位置後浮台船進水坐底，沉箱達浮游吃水自然脫離浮台，再以拖船拖出浮沉台船。',fl:[0,[5]],
+ i:[['★','沉箱完成檢查及出塢儲存','安衛查驗：墜落、物體飛落、被撞、溺水','流程圖（十）']],
+ r:[['7-5-10','沉箱製作施工抽查紀錄表',['出塢前確認施工後各項已合格、缺失已複查改善','★ 安全衛生查驗點：施工後／不定期勾選']]],
+ p:['牆體澆置完成後 7 日或混凝土抗壓強度達 0.8 fc′ 以上方可出塢','拖航前詳細檢查箱體有無破損、內艙通水孔是否暢通；安裝進水孔閘門並試操作','檢視內外艙牆水位標示清楚；箱頂鋪工作台、安全網，備繩索、軟梯、救生設備','出塢前確認外牆 10 處消波孔封口鋼板已裝妥、螺栓鎖緊、橡膠墊片密貼（依 CC-39／DD-57；此項為監造建議併查）','視需要四角以鋼索固定於浮台；拖至暫存區附近適當水深停泊，再次檢視繫固','浮台船坐底後，拖索繫於沉箱拖索環並解開鋼索，依序拖至儲存位置']},
+{t:'暫存區進水坐底',c:'箱頂總指揮統一指揮開啟 6 個進水閥，控制鄰艙水位差與沉降速度',v:'影片：確認位置後由箱頂指揮人員統一指揮開啟 6 個進水閥門，沉箱平衡穩定進水坐底。',fl:[0,[5]],
+ i:[['★','出塢儲存','安衛查驗：墜落、物體飛落、被撞、溺水','流程圖（十）']],
+ r:[],
+ p:['水閥操作員各就定位，由總指揮下令漸進至半開進水，鄰艙水位差不得超過 1.0 m','初階段進水閥半開，艙內水位高於進水閥 1.0 m 以上再加大進水量','每階段每閥第一艙進水高度控制 1.5 m 內，水位平衡再下一階段','沉降速度最佳 8–10 cm/min；距儲存底面 50 cm 關閉所有進水閥，待內艙水位平衡再開','坐底時所有閘門關閉，船舶纜索保持拉緊','內外水位平衡後潛水員確認底部密合無懸空、內艙無破損、通水孔暢通，始可解纜、拆閥、撤離']},
+{t:'起浮・拖航（拖放前檢查）',c:'抽水打浮後，主拖船前拖、副拖船後推，輔助船支援，沿預定航線拖至安放區',v:'影片（接續流程）：拖船將沉箱拖至預定位置準備安放。',fl:[1,[1,2]],
+ i:[['☆★','拖放前檢查','①沉箱基礎拋石面整平檢驗結果 ②氣象條件 ③船機及人員 ④沉箱本體檢查 ⑤航道水深 ⑥鋪設安全網','施工前・現場查對・每次｜符合方可進行下階段作業'],
+ ['☆★','拖航起浮及拖航','海象條件確認、船機確認','拖航前・現場查對・每次｜擇期再行拖行']],
+ r:[['7-5-11','沉箱定置（拖航及安放）施工抽查紀錄表',['施工作業前應提出證明文件：施工計畫，勾選「齊全／不齊全」','施工前：★ 拖放前檢查 6 項逐項填實際抽查情形（拋石面整平引用表 7-5-9：沉箱底面 ±10 cm）','施工中：☆★ 拖航起浮及拖航 2 項','★ 檢視承攬廠商安全衛生自動檢查表單，填具施工安全衛生抽查紀錄表']]],
+ p:['拖放前 3 日掌握天候、決定最佳拖航時間；有颱風影響即停止拖航','航道水深至少較預估吃水深 1.0 m 以上；掌握當日潮汐海流','拖航前至少 24 h 提送拖航作業通知單予監造單位，轉知臺北港分局港勤所','前 1 日潛水員確認型式規格、拆進水孔封板、裝進水閥及連動桿','箱頂工作平台、臨時走道、安全網、發電機後抽水打浮；外側裝防撞碰墊；前後端架 1 m 寬輔助定位標尺（每 10 cm 記號）','主拖船前拖、副拖船必要時後推頂，另 1 艘輔助船支援','拖放前檢查第 ④ 項「沉箱本體檢查」，建議併查消波孔封口鋼板無鬆脫、滲漏'],d:[['CC-39／DD-57','沉箱消波孔封口詳圖',['封口鋼板須保持至頂層結構混凝土完成，拖航安放期間不得拆除']]]},
+{t:'定位・沉放・完成查驗',c:'以 RTK 即時比對四角設計座標定位（與岸上中心線一致），進水沉放，距基礎 0.5 m 關閥微調，坐底後查驗許可差並塞孔',v:'影片結尾：沉箱依序安放完成，形成碼頭岸線。',fl:[1,[3,4]],
+ i:[['☆★','定位','與岸上中心線一致','定位中・現場查對・每次｜起伏後重新安放'],
+ ['☆★','沉箱沉放','檢查間隙、法線、高程','安放中・現場查對・每次｜起伏後重新安放'],
+ ['☆★','沉放查驗：位置及平整性','法線方向最大許可差 ±20 cm；沉箱間隙 ≦ 20 cm；四角不均勻沉陷差 ≦ 20 cm；相鄰沉箱法線差 ≦ 10 cm；水門拆除及塞孔','沉放後・現場查對・每次｜起伏後重新安放']],
+ r:[['7-5-11','沉箱定置（拖航及安放）施工抽查紀錄表',['施工中：定位、☆★ 沉箱沉放','施工後：☆★ 位置及平整性查驗 4 項許可差填實測值，另填水門拆除及塞孔','缺失複查：施工前／中／後分別記錄改善情形']]],
+ p:['定位採 RTK／GPS（GNSS）：岸上控制點（KS01、KS02）設基準站，箱頂設移動站天線','事先檢算沉箱四角設計座標，於監控螢幕即時比對實際位置與預定位置差異，以無線電告知箱頂總指揮調整方位（施工說明書特別條款 9.6.10，定位精度原則 ±10 cm 內）','進水時控制四角隅水位同高；距基礎面約 0.5 m 關水門，再調整位置與內艙水位','法線、間隙超標即抽水打浮重放；四角高差超標先檢視基礎修正','潛水員拆進水閥，以圓錐形混凝土塊塞孔，外鎖不鏽鋼蓋板；箱頂前端設臨時警示燈桿','端進式工法，後續各座依同步驟安放','消波孔封口鋼板待沉箱頂層結構混凝土施工完成後才可拆除（DD-57 說明 4）；後續消波室頂預鑄板依表 7-3-12 於填充完成後 1 天內吊放並檢查平整'],d:[['CC-39／DD-57','沉箱消波孔封口詳圖',['拆除時機：沉箱頂層結構混凝土施工完成後','拆下鋼板由承包商自行處理、運離工區','數量：沉箱消波孔封口拆除及吊移 80 處（一變第 71 項）']]]}
+];
+const FL=[['（十）沉箱製作施工抽查作業流程',[['施工前準備工作',''],['工作浮台','★ 墜落、跌倒、被撞、溺水、感電'],['沉箱底版製作','★ 墜落、跌倒、物體飛落、被撞、穿刺、溺水｜查驗鋼筋、模板、混凝土作業'],['沉箱牆體製作','★ 墜落、跌倒、物體飛落、被撞、穿刺、溺水｜查驗鋼筋、模板、混凝土、沉箱尺寸、水平及升模速度'],['養護','養護形式'],['沉箱完成檢查及出塢儲存','沉箱箱體檢查、水尺標線及拆模後表面完整度｜★ 墜落、物體飛落、被撞、溺水'],['完成','']]],
+ ['（十一）沉箱定置（拖航及安放）施工抽查作業流程',[['施工前準備工作',''],['沉箱拖放前檢查','★ 墜落、物體飛落、被撞、溺水'],['沉箱起浮及拖航','1. 海氣象條件 2. 船機確認'],['沉箱安放','檢查間隙、法線、高程｜★ 墜落、被撞、溺水'],['沉箱拖放完成檢查','法線 ±20 cm；間隙 ≦ 20 cm；四角不均勻沉陷 ≦ 20 cm；相鄰法線差 ≦ 10 cm'],['完成','']]]];
+const TOL=[['底版','墊塊間距','#3 ≦ 60、#4 ≦ 80、#5↑ ≦ 100 cm','7-3-1'],['底版／壁體','保護層（場鑄）','受海水、沖刷、飛沫 10.0 cm；其他 7.5 cm','7-5-1'],['底版／壁體','搭接錯開','≧ 25D','7-5-1'],['底版','鋼筋裁切','長度、彎轉 ±25 mm','7-5-1'],['底版／壁體','混凝土','氯離子 ≦ 0.15 kg/m³；13–32 °C；落下 < 1.5 m；中斷 ≦ 45 min','7-5-3'],['滑模','上下模差','內壁 4 mm；外壁內模 2 mm','7-5-2'],['牆身','每次澆置／昇模','40 cm（大底完成後開始）','7-5-10-3'],['滑模','混凝土開始澆置至脫模','升高 1.2 m（模板高）使該層出模時，須超過初凝時間（夏約 1–1.5 h／冬約 4–4.5 h）','7-5-10-3'],['滑模','斷面尺寸','±0.6 cm','7-5-2'],['完成','四角高程／高度','±2 cm','7-5-10-1'],['完成','長度、寬度','+3／−1 cm','7-5-10-1'],['完成','外牆、隔牆厚','±1 cm','7-5-10-1'],['完成','養護','≧ 7 天；澆置後 24 h 內禁止荷載','7-5-3'],['製作場','消波孔封口鋼板','外牆 10 處／座；PL10 mm＋10 mm 橡膠墊片；頂層結構混凝土完成後始可拆除','CC-39／DD-57'],['出塢','強度','7 日或 ≧ 0.8 fc′','施工計畫'],['坐底','鄰艙水位差','≦ 1.0 m','施工計畫'],['坐底','沉降速度','8–10 cm/min','施工計畫'],['拖航','拋石面整平','±10 cm','7-5-11'],['拖航','航道水深','≧ 吃水 + 1.0 m','施工計畫'],['安放','法線方向','±20 cm','7-5-11'],['安放','沉箱間隙','≦ 20 cm','7-5-11'],['安放','四角不均勻沉陷','≦ 20 cm','7-5-11'],['安放','相鄰法線差','≦ 10 cm','7-5-11']];
+const esc=x=>String(x).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const $=id=>document.getElementById(id);
+$('tol').innerHTML=TOL.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="v">${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+$('chips').innerHTML=ST.map((s,i)=>`<button class="chip" data-i="${i}"><i>${i+1}</i>${esc(s.t.split('（')[0])}</button>`).join('');
+
+// ---------- 3D ----------
+const T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
+const L=24.9,W=18,H=20,TS=0.96,TW=0.6,TP=0.25,NX=5,NZ=4;
+const ZW=[[-4.275,.25],[-0.025,.25],[4.3,.4]];
+const cv=$('cv'),stage=$('stage');
+const R=new T.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(2,devicePixelRatio));
+const S=new T.Scene();S.background=new T.Color(0xcfe3ea);S.fog=new T.Fog(0xcfe3ea,350,1300);
+const cam=new T.PerspectiveCamera(42,1,0.5,3000);cam.position.set(60,45,75);
+const ctl=new T.OrbitControls(cam,cv);ctl.enableDamping=true;ctl.maxPolarAngle=Math.PI*0.62;
+S.add(new T.HemisphereLight(0xffffff,0x6b7f7a,0.85));
+const sun=new T.DirectionalLight(0xffffff,0.75);sun.position.set(120,200,90);S.add(sun);
+const M=(c,o={})=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.85,metalness:.05},o));
+const mConc=M(0xcfcac0),mConc2=M(0xb9b4aa),mSteel=M(0x7b8a90,{metalness:.4,roughness:.5}),mYel=M(0xf2c230),mRed=M(0xc8322b),mDark=M(0x37474c);
+const box=(w,h,d,m,x=0,y=0,z=0,p=S)=>{const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);p.add(o);return o};
+const edges=(mesh,col=0x5d625f)=>{mesh.add(new T.LineSegments(new T.EdgesGeometry(mesh.geometry),new T.LineBasicMaterial({color:col})));return mesh};
+const lineMat=c=>new T.LineBasicMaterial({color:c});
+function segs(pts,col){const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(pts,3));return new T.LineSegments(g,lineMat(col))}
+
+// sea, seabed, quay, land
+const water=new T.Mesh(new T.PlaneGeometry(3000,3000),new T.MeshStandardMaterial({color:0x1d7480,transparent:true,opacity:.55,depthWrite:false,roughness:.3,metalness:.1}));
+water.rotation.x=-Math.PI/2;water.renderOrder=10;S.add(water);
+const bed=new T.Mesh(new T.PlaneGeometry(3000,3000),M(0x8c826b));bed.rotation.x=-Math.PI/2;bed.position.y=-18;S.add(bed);
+edges(box(180,21,50,mConc2,0,-7.5,-46));
+box(120,2,110,M(0x9a8f76),150,-17,115);
+edges(box(150,21,70,mConc2,470,-7.5,-45));
+box(120,2.5,32,M(0x5f625e),435,-16.75,0);
+// existing caissons
+function solid(x,y,z){const g=new T.Group();edges(box(L,H,W,mConc,0,H/2,0,g));const p=[];for(let i=1;i<NX;i++){const xx=-L/2+i*L/NX;p.push(xx,H+.02,-W/2,xx,H+.02,W/2)}for(let j=1;j<NZ;j++){const zz=-W/2+j*W/NZ;p.push(-L/2,H+.02,zz,L/2,H+.02,zz)}g.add(segs(p,0x5d625f));g.position.set(x,y,z);S.add(g);return g}
+solid(120,-16,135);solid(180,-16,135);
+for(let k=1;k<=3;k++)solid(390+25.05*k,-15.5,0);
+
+// pontoon
+const pont=new T.Group();S.add(pont);
+edges(box(78,4.25,38,M(0x7a2f2a),0,2.125,0,pont),0x3a1715);
+box(78,.05,38,M(0x5c6b6e),0,4.26,0,pont);
+const pe=box(L+3,.03,W+3,new T.MeshStandardMaterial({color:0xf5f7f7,transparent:true,opacity:0}),0,4.3,0,pont);
+// tower crane on pontoon
+const crane=new T.Group();pont.add(crane);crane.position.set(-30,4.25,-14);
+const mast=new T.Mesh(new T.BoxGeometry(2,34,2),new T.MeshBasicMaterial({color:0xd9a91e,wireframe:true}));mast.position.y=17;crane.add(mast);
+const jib=new T.Group();jib.position.y=34;crane.add(jib);
+const jb=new T.Mesh(new T.BoxGeometry(44,1.6,1.6),new T.MeshBasicMaterial({color:0xd9a91e,wireframe:true}));jb.position.x=16;jib.add(jb);
+box(6,2,2,mDark,-8,0,0,jib);
+jib.rotation.y=-Math.atan2(14,30);
+const hook=new T.Line(new T.BufferGeometry().setFromPoints([V(0,0,0),V(0,1,0)]),lineMat(0x222222));S.add(hook);
+// pump truck on quay
+const truck=new T.Group();S.add(truck);truck.position.set(-14,3,-30);
+box(12,3,3.2,M(0xe8e8e8),0,1.7,0,truck);box(3,3.4,3.2,M(0x2f6db3),6.6,1.9,0,truck);
+const cyl=new T.CylinderGeometry(.35,.35,1,8);
+const boomA=new T.Mesh(cyl,mYel),boomB=new T.Mesh(cyl,mYel),hose=new T.Mesh(new T.CylinderGeometry(.2,.2,1,6),mDark);S.add(boomA,boomB,hose);
+function seg(m,a,b){const d=b.clone().sub(a);m.position.copy(a).addScaledVector(d,.5);m.scale.set(1,d.length(),1);m.quaternion.setFromUnitVectors(V(0,1,0),d.normalize())}
+
+// caisson
+const cg=new T.Group();S.add(cg);
+const slab=edges(new T.Mesh(new T.BoxGeometry(L,1,W).translate(0,.5,0),mConc));cg.add(slab);
+const walls=[];
+function wall(x,z,sx,sz){const m=edges(new T.Mesh(new T.BoxGeometry(sx,1,sz).translate(0,.5,0),mConc));m.position.set(x,TS,z);cg.add(m);walls.push(m)}
+wall(0,W/2-TW/2,L,TW);wall(0,-W/2+TW/2,L,TW);wall(L/2-TW/2,0,TW,W-2*TW);wall(-L/2+TW/2,0,TW,W-2*TW);
+const XP=[],ZP=[];for(let i=1;i<NX;i++){XP.push(-L/2+i*L/NX);wall(XP[i-1],0,TP,W-2*TW)}ZW.forEach(([z,t])=>{ZP.push(z);wall(0,z,L-2*TW,t)})
+// bottom form plates
+const bform=new T.Group();cg.add(bform);
+[[0,W/2+.1,L+.4,.12],[0,-W/2-.1,L+.4,.12],[L/2+.1,0,.12,W],[-L/2-.1,0,.12,W]].forEach(([x,z,a,b])=>{box(a,1.1,b,mSteel,x,.55,z,bform);});
+for(let i=-L/2;i<=L/2;i+=3){[[i,W/2+1.2],[i,-W/2-1.2]].forEach(([x,z])=>{const s=new T.Mesh(cyl,mSteel);seg(s,V(x,0,z),V(x,1,z+(z>0?-1.1:1.1)));bform.add(s)})}
+// slab rebar
+const rp=[];for(const y of [.18,.8]){for(let x=-L/2+.4;x<=L/2-.4;x+=.5)rp.push(x,y,-W/2+.4,x,y,W/2-.4);for(let z=-W/2+.4;z<=W/2-.4;z+=.5)rp.push(-L/2+.4,y,z,L/2-.4,y,z)}
+const rebar=segs(rp,0x8a3b1e);cg.add(rebar);const rebarN=rp.length/3;
+// vertical wall bars
+const vp=[];const addBars=(x0,z0,x1,z1,off)=>{const n=Math.round(Math.hypot(x1-x0,z1-z0)/.6);for(let k=0;k<=n;k++){const x=x0+(x1-x0)*k/n,z=z0+(z1-z0)*k/n;for(const o of off)vp.push(x+o[0],0,z+o[1],x+o[0],1,z+o[1])}};
+addBars(-L/2,W/2-.12,L/2,W/2-.12,[[0,0],[0,-.22]]);addBars(-L/2,-W/2+.12,L/2,-W/2+.12,[[0,0],[0,.22]]);
+addBars(L/2-.12,-W/2,L/2-.12,W/2,[[0,0],[-.22,0]]);addBars(-L/2+.12,-W/2,-L/2+.12,W/2,[[0,0],[.22,0]]);
+XP.forEach(x=>addBars(x,-W/2,x,W/2,[[0,0]]));ZP.forEach(z=>addBars(-L/2,z,L/2,z,[[0,0]]));
+const vbars=segs(vp,0x8a3b1e);vbars.position.y=.1;cg.add(vbars);
+// water gauge ticks
+const ticks=[];for(let m=1;m<=20;m++){for(const [x,z,ry] of [[-L/2+1,W/2+.02,0],[L/2-1,W/2+.02,0],[L/2+.02,W/2-1,Math.PI/2],[L/2+.02,-W/2+1,Math.PI/2]]){const t=box(m%5?1:1.8,.1,.03,mRed,x,m,z,cg);t.rotation.y=ry;t.userData.y=m;ticks.push(t)}}
+// top: rails, net, valves, interior water, warning pole
+const top=new T.Group();cg.add(top);
+for(let x=-L/2;x<=L/2+.01;x+=L/10)for(const z of [-W/2+.2,W/2-.2])box(.08,1.1,.08,mYel,x,H+.55,z,top);
+for(let z=-W/2;z<=W/2+.01;z+=W/6)for(const x of [-L/2+.2,L/2-.2])box(.08,1.1,.08,mYel,x,H+.55,z,top);
+for(const y of [H+.55,H+1.1]){box(L,.07,.07,mYel,0,y,W/2-.2,top);box(L,.07,.07,mYel,0,y,-W/2+.2,top);box(.07,.07,W,mYel,L/2-.2,y,0,top);box(.07,.07,W,mYel,-L/2+.2,y,0,top)}
+const netP=[];for(let x=-L/2;x<=L/2;x+=1)netP.push(x,H+.05,-W/2,x,H+.05,W/2);for(let z=-W/2;z<=W/2;z+=1)netP.push(-L/2,H+.05,z,L/2,H+.05,z);top.add(segs(netP,0x2e7d4f));
+box(4,.12,1.2,mYel,0,H+.1,-W/2+3,top);box(1.2,.12,W-2,mYel,0,H+.12,0,top);
+const mValve=M(0xf2c230,{emissive:0x000000});const valves=[];
+[[-2,1],[0,1],[2,1],[-2,-1],[0,-1],[2,-1]].forEach(([i,j])=>{const v=new T.Mesh(new T.CylinderGeometry(.35,.35,1.4,10),mValve);v.position.set(i*L/NX+(i?0:1),H+.7,j*(W/2-1.2));cg.add(v);valves.push(v)});
+const iw=new T.Mesh(new T.BoxGeometry(L-2*TW-.05,1,W-2*TW-.05).translate(0,.5,0),new T.MeshStandardMaterial({color:0x2b8fa0,transparent:true,opacity:.6}));iw.position.y=TS;cg.add(iw);
+// 消波孔（外牆靠海側 +z，每艙 2 孔共 10 孔）與封口鋼板（CC-39／DD-57）
+const cxa=[-L/2+TW,...XP.flatMap(x=>[x-TP/2,x+TP/2]),L/2-TW],HX=[];for(let i=0;i<NX;i++){const m=(cxa[2*i]+cxa[2*i+1])/2;HX.push(m-1.15,m+1.15)}
+const HB=15.85,HH=3.3,mHole=new T.MeshBasicMaterial({color:0x10181b});
+const holes=HX.map(x=>{const o=new T.Mesh(new T.BoxGeometry(.8,1,TW+.04).translate(0,.5,0),mHole);o.position.set(x,HB,W/2-TW/2);cg.add(o);return o});
+const plates=new T.Group();cg.add(plates);const mPl=M(0xa7b6be,{metalness:.25,roughness:.5}),mRub=M(0x161616),mBolt=M(0xd0d4d6,{metalness:.7});
+HX.forEach(x=>{const g=new T.Group();g.position.set(x,HB+HH/2,W/2);plates.add(g);box(1.32,3.82,.02,mRub,0,0,.012,g);box(1.3,3.8,.03,mPl,0,0,.04,g);
+ for(const y of [-1.2,0,1.2])box(1.1,.1,.1,mPl,0,y,.1,g);for(let k=0;k<7;k++){const y=-1.8+k*.6;box(.06,.06,.12,mBolt,-.55,y,.1,g);box(.06,.06,.12,mBolt,.55,y,.1,g)}box(.06,.06,.12,mBolt,0,1.8,.1,g);box(.06,.06,.12,mBolt,0,-1.8,.1,g)});
+const pole=new T.Group();cg.add(pole);pole.position.set(0,H,W/2-1);box(.15,4,.15,mSteel,0,2,0,pole);box(.6,.6,.6,M(0xff5533,{emissive:0xff3311}),0,4.3,0,pole);
+
+// slipform rig
+const rig=new T.Group();cg.add(rig);
+const inner=new T.Group(),outerF=[],full=new T.Group();rig.add(inner,full);
+const mPan=M(0x4f6e7c,{metalness:.3,transparent:true,opacity:1}),mPlat=new T.MeshStandardMaterial({color:0xb08a52,transparent:true,opacity:.45,depthWrite:false});
+const cx=[-L/2+TW,...XP.flatMap(x=>[x-TP/2,x+TP/2]),L/2-TW],cz=[-W/2+TW,...ZW.flatMap(([z,t])=>[z-t/2,z+t/2]),W/2-TW];
+for(let i=0;i<NX;i++)for(let j=0;j<NZ;j++){const x0=cx[2*i],x1=cx[2*i+1],z0=cz[2*j],z1=cz[2*j+1],mx=(x0+x1)/2,mz=(z0+z1)/2,a=x1-x0,b=z1-z0;
+ box(a,1.05,.05,mPan,mx,.6,z0+.03,inner);box(a,1.05,.05,mPan,mx,.6,z1-.03,inner);box(.05,1.05,b,mPan,x0+.03,.6,mz,inner);box(.05,1.05,b,mPan,x1-.03,.6,mz,inner);
+ box(a,.1,.1,mSteel,mx,.2,z0+.1,inner);box(a,.1,.1,mSteel,mx,1.0,z0+.1,inner)}
+[[0,W/2+.03,L+.1,.05,0,1],[0,-W/2-.03,L+.1,.05,0,-1],[L/2+.03,0,.05,W+.1,1,0],[-L/2-.03,0,.05,W+.1,-1,0]].forEach(([x,z,a,b,dx,dz])=>{const g=new T.Group();g.userData.d=[dx,dz];rig.add(g);outerF.push(g);
+ box(a,1.2,b,mPan,x,.6,z,g);const pw=dx?[1.1,W+2.2]:[L+2.2,1.1];
+ box(pw[0],.08,pw[1],mPlat,x+dx*.6,1.35,z+dz*.6,g);box(dx?.07:L+2.2,.07,dx?W+2.2:.07,mYel,x+dx*1.15,2.45,z+dz*1.15,g);
+ box(pw[0]*.9||.9,.08,pw[1]*.9||.9,mPlat,x+dx*.5,-2.1,z+dz*.5,g);box(dx?.07:L+2,.07,dx?W+2:.07,mYel,x+dx*.95,-1.1,z+dz*.95,g);
+ for(let k=-1;k<=1;k+=.25){const px=dx?x+dx*.95:x+k*L/2,pz=dx?z+k*W/2:z+dz*.95;box(.06,3.6,.06,mSteel,px,-.3,pz,g)}});
+// yokes, jacks, jackrods, platform
+const yokeAt=[];for(let x=-L/2+1.5;x<L/2;x+=2.6){yokeAt.push([x,W/2-TW/2,0],[x,-W/2+TW/2,0])}for(let z=-W/2+1.8;z<W/2;z+=2.6){yokeAt.push([L/2-TW/2,z,1],[-L/2+TW/2,z,1])}
+XP.forEach(x=>{for(let z=-W/2+2.2;z<W/2-1;z+=3.2)yokeAt.push([x,z,1])});ZP.forEach(z=>{for(let x=-L/2+2.6;x<L/2-1;x+=3.4)yokeAt.push([x,z,0])});
+const gPost=new T.BoxGeometry(.12,2.6,.12),gRod=new T.CylinderGeometry(.06,.06,5,6),gJack=new T.BoxGeometry(.3,.4,.3);
+yokeAt.forEach(([x,z,r])=>{const g=new T.Group();g.position.set(x,0,z);g.rotation.y=r?Math.PI/2:0;full.add(g);
+ const p1=new T.Mesh(gPost,mDark);p1.position.set(0,1.3,.55);const p2=new T.Mesh(gPost,mDark);p2.position.set(0,1.3,-.55);g.add(p1,p2);
+ box(.14,.14,1.3,mDark,0,2.6,0,g);const j=new T.Mesh(gJack,mRed);j.position.y=2.85;const rod=new T.Mesh(gRod,mSteel);rod.position.y=2.4;g.add(j,rod)});
+const plat=box(L+.2,.06,W+.2,mPlat,0,2.05,0,full);
+box(1.6,1,1,M(0x2f6db3),-L/2+3,2.6,-W/2+2,full);
+for(const [x,z] of [[-L/2+1,-W/2+1],[L/2-1,W/2-1],[L/2-1,-W/2+1],[-L/2+1,W/2-1]]){box(.1,3,.1,mSteel,x,3.5,z,full);box(.6,.3,.3,M(0xffffff,{emissive:0xfff3c4}),x,5,z,full)}
+
+// concrete layer bands inside forms (age)
+const bands=[0x55707a,0x8b9a94,0xd9b648].map(col=>{const g=new T.Group();const m=M(col,{emissive:col,emissiveIntensity:.25});box(L+.06,.38,.04,m,0,.2,W/2+.01,g);box(L+.06,.38,.04,m,0,.2,-W/2-.01,g);box(.04,.38,W+.06,m,L/2+.01,.2,0,g);box(.04,.38,W+.06,m,-L/2-.01,.2,0,g);cg.add(g);return g});
+// tugs
+function tug(col){const g=new T.Group();const sh=new T.Shape();sh.moveTo(-5.5,-2.1);sh.lineTo(3.4,-2.1);sh.lineTo(5.8,0);sh.lineTo(3.4,2.1);sh.lineTo(-5.5,2.1);sh.closePath();
+ const h=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:2.6,bevelEnabled:false}),M(col));h.rotation.x=-Math.PI/2;h.position.y=-1.2;g.add(h);
+ box(4,2.4,3,M(0xf4f4f4),-.5,2.6,0,g);box(.3,3,.3,mDark,-.5,5,0,g);box(1.2,.8,1.2,M(0x222222),-2.8,1.8,0,g);S.add(g);return g}
+const tA=tug(0xc8462e),tB=tug(0x2f6db3),tC=tug(0xe0e0e0);
+const tl=[0,1].map(()=>{const l=new T.Line(new T.BufferGeometry().setFromPoints([V(0,0,0),V(1,0,0)]),new T.LineBasicMaterial({color:0x111111}));S.add(l);return l});
+// RTK base station on land + design footprint outline
+const surv=new T.Group();S.add(surv);surv.position.set(432,3,-34);
+[[.7,0],[-.35,.6],[-.35,-.6]].forEach(([x,z])=>{const l=new T.Mesh(cyl,mDark);seg(l,V(x,0,z),V(0,1.7,0));surv.add(l)});
+box(.08,.8,.08,mSteel,0,2.1,0,surv);const disc=new T.Mesh(new T.CylinderGeometry(.35,.35,.12,16),M(0xf4f4f4));disc.position.y=2.55;surv.add(disc);box(.4,.3,.25,mYel,.35,1.2,0,surv);
+const fp=new T.LineLoop(new T.BufferGeometry().setFromPoints([V(390-L/2,.08,-W/2),V(390+L/2,.08,-W/2),V(390+L/2,.08,W/2),V(390-L/2,.08,W/2)]),new T.LineDashedMaterial({color:0x22d07a,dashSize:1.2,gapSize:.8}));fp.computeLineDistances();S.add(fp);
+const rovers=new T.Group();cg.add(rovers);[[-L/2+1.2,W/2-1.2],[L/2-1.2,-W/2+1.2]].forEach(([x,z])=>{box(.08,1.6,.08,mSteel,x,H+.8,z,rovers);const d=new T.Mesh(new T.CylinderGeometry(.3,.3,.1,16),M(0xf4f4f4));d.position.set(x,H+1.65,z);rovers.add(d)});
+const curve6=new T.CatmullRomCurve3([V(0,0,0),V(60,0,30),V(150,0,80)]);
+const curve8=new T.CatmullRomCurve3([V(150,0,178),V(235,0,172),V(325,0,105),V(390,0,40)]);
+const c=x=>Math.min(1,Math.max(0,x)),E=x=>x*x*(3-2*x),sg=(p,a,b)=>c((p-a)/(b-a));
+function placeTug(t,pos,dir){t.position.set(pos.x,0,pos.z);t.rotation.y=Math.atan2(-dir.z,dir.x)}
+function attach(center,hx,hz,to,y){const d=to.clone().sub(center);d.y=0;const k=Math.min(hx/Math.abs(d.x||1e-6),hz/Math.abs(d.z||1e-6));return V(center.x+d.x*k,y,center.z+d.z*k)}
+function setLine(l,a,b){const p=l.geometry.attributes.position;p.setXYZ(0,a.x,a.y,a.z);p.setXYZ(1,b.x,b.y,b.z);p.needsUpdate=true;l.geometry.computeBoundingSphere();l.visible=true}
+const stern=t=>{const f=V(Math.cos(t.rotation.y),0,-Math.sin(t.rotation.y));return t.position.clone().addScaledVector(f,-5.5).setY(1.8)};
+
+let fbG=0,h=0,lift={k:0,n:0,f:0};
+function upd(s){
+ const p=i=>c(s-i),[p0,p1,p2,p3,p4,p5,p6,p7,p8,p9]=[0,1,2,3,4,5,6,7,8,9].map(p);
+ let px=0,pz=0,pdy=0;
+ if(s>=6){const q=curve6.getPoint(E(sg(p6,0,.35)));px=q.x;pz=q.z;pdy=-13.75*E(sg(p6,.35,.6))}
+ pont.position.set(px,-2.25+pdy,pz);const deck=2+pdy;
+ let X=px,Y=deck,Z=pz;
+ if(s>=6){Y=Math.max(deck,-11);Z=pz+55*E(sg(p6,.62,1))}
+ if(s>=7){X=150;Z=135;Y=-11-4.5*E(sg(p7,.1,.7))-.5*E(sg(p7,.8,.95))}
+ if(s>=8){Y=-16+5*E(sg(p8,0,.15));if(p8<.38){X=150;Z=135+43*E(sg(p8,.15,.38))}else{const q=curve8.getPoint(E(sg(p8,.38,1)));X=q.x;Z=q.z}}
+ if(s>=9){X=390;Z=40*(1-E(sg(p9,0,.25)));Y=-11-4*E(sg(p9,.25,.55))-.5*E(sg(p9,.65,.85))}
+ cg.position.set(X,Y,Z);
+ pe.material.opacity=s<6?.75*E(sg(p0,0,.35)):0;
+ bform.visible=s>=.35&&s<3.6;bform.scale.y=Math.max(.01,E(sg(p0,.35,.9)));
+ rebar.visible=s>=1&&s<3;rebar.geometry.setDrawRange(0,Math.floor(rebarN*E(sg(p1,0,.75))/2)*2);
+ slab.visible=s>=2;slab.scale.y=Math.max(.01,TS*E(p2));
+ const NL=Math.ceil((H-TS)/.4),q=p4<.5?p4/.5*5/NL:5/NL+(p4-.5)/.5*(1-5/NL),lk=Math.min(NL-1,Math.floor(q*NL)),lf=Math.min(1,q*NL-lk);
+ h=s<4?0:Math.min(H-TS,s>=5?H-TS:.4*(lk+E(sg(lf,0,.5))));const fb=s<4?0:s>=5?H-TS-.75:Math.max(0,.4*(lk+E(sg(lf,.5,1)))+.45-1.2);lift={k:lk+1,n:NL,f:lf};
+mPan.opacity=s>=4&&s<5?.3:1;mPan.depthWrite=!(s>=4&&s<5);
+ bands.forEach((g,j)=>{const m=lk-j,top=.4*(m+1),bt=.4*m;g.visible=s>=4&&s<5&&m>=0&&bt<h-.01&&top>fb-.05;g.position.y=TS+bt;g.scale.y=Math.max(.01,Math.min(1,(h-bt)/.4))});
+ holes.forEach(o=>{const v=TS+h-HB;o.visible=v>.02;o.scale.y=Math.max(.01,Math.min(HH,v))});
+ {const a=s>=5?E(sg(p5,.55,.85)):0;plates.visible=s>=5.55;plates.position.z=3*(1-a)}
+ walls.forEach(w=>{w.visible=h>.02;w.scale.y=Math.max(.01,h)});
+ vbars.visible=s>=1.6&&s<5.2;vbars.scale.y=s<4?TS+2.5*E(sg(p1,.6,1)):TS+h+2.2;
+ ticks.forEach(t=>t.visible=s>=4&&t.userData.y<TS+h);
+ rig.visible=s>=3&&s<5.5;
+ fbG=fb;rig.position.y=TS+fb+(s>=5?5*E(sg(p5,0,.5)):0);
+ inner.position.y=s<4?26*(1-E(sg(p3,0,.5))):0;
+ outerF.forEach(g=>{const o=s<4?8*(1-E(sg(p3,.45,.8))):0;g.position.set(g.userData.d[0]*o,0,g.userData.d[1]*o)});
+ full.visible=s>=3.8;
+ crane.visible=s<5.95;hook.visible=s>=3&&s<3.5;
+ if(hook.visible){const tip=jib.localToWorld(V(36,0,0));const hp=cg.localToWorld(V(0,TS+inner.position.y+1.2,0));setLine(hook,tip,hp)}
+ const pump=(s>=2&&s<3)||(s>=4&&s<5);boomA.visible=boomB.visible=hose.visible=pump;
+ if(pump){const a=V(-14,7.5,-30);let e;if(s<3){e=cg.localToWorld(V(-L/2+L*p2,TS+5,-W/2+W*((p2*5)%1)))}else{const t=(p4*12)%1;e=cg.localToWorld(V(-L/2+L*t,TS+h+4,(Math.floor(p4*12)%2?1:-1)*(W/2-.2)))}
+  const m=a.clone().lerp(e,.45);m.y=Math.max(a.y,e.y)+12;seg(boomA,a,m);seg(boomB,m,e);seg(hose,e,e.clone().setY(e.y-3))}
+ top.visible=s>=5.6;valves.forEach(v=>v.visible=s>=5.6&&s<9.86);pole.visible=s>=9.88;
+ const fill=(s>=7.1&&s<7.97)||(s>=9.25&&s<9.86);mValve.emissive.setHex(fill?0x996600:0);
+ const lv=c((-Y-11)/5)*(-Y-TS-.6);iw.visible=lv>.05;iw.scale.y=Math.max(.01,lv);
+ // tugs
+ tl.forEach(l=>l.visible=false);const cc=cg.position.clone();
+ if(s<6){placeTug(tA,V(70,0,-14),V(1,0,0));placeTug(tB,V(85,0,-4),V(1,0,.3));placeTug(tC,V(100,0,-12),V(1,0,0))}
+ else if(s<7){const pp=pont.position.clone().setY(0);
+  if(p6<.62){const tg=curve6.getTangent(E(sg(p6,0,.35))).setY(0).normalize();placeTug(tA,pp.clone().addScaledVector(tg,72),tg);placeTug(tB,pp.clone().addScaledVector(tg,-56).add(V(0,0,28)),tg);
+   setLine(tl[0],stern(tA),attach(pp,39,19,tA.position,2+pdy*0));setLine(tl[1],tB.position.clone().addScaledVector(tg,5.5).setY(1.8),attach(pp,39,19,tB.position,2))}
+  else{placeTug(tA,V(cc.x,0,cc.z+42),V(0,0,1));placeTug(tB,V(cc.x,0,cc.z-W/2-7),V(0,0,1));setLine(tl[0],stern(tA),attach(cc,L/2,W/2,tA.position,1))}
+  placeTug(tC,V(200,0,40),V(1,0,0))}
+ else if(s<8){placeTug(tA,V(150,0,180),V(0,0,1));placeTug(tB,V(150,0,100),V(0,0,-1));placeTug(tC,V(200,0,60),V(1,0,0));setLine(tl[0],stern(tA),attach(cc,L/2,W/2,tA.position,1));setLine(tl[1],stern(tB),attach(cc,L/2,W/2,tB.position,1))}
+ else if(s<9){const tg=p8<.38?V(0,0,1):curve8.getTangent(E(sg(p8,.38,1))).setY(0).normalize();const pc=cc.clone().setY(0);const kf=E(sg(p8,.8,1)),mix=(a,b)=>a.clone().lerp(b,kf);placeTug(tA,mix(pc.clone().addScaledVector(tg,48),V(392,0,cc.z+66)),kf>.5?V(0,0,1):tg);placeTug(tB,mix(pc.clone().addScaledVector(tg,-32),V(340,0,cc.z+2)),kf>.5?V(-1,0,0):tg);
+  placeTug(tC,pc.clone().add(V(-35,0,35)),tg);setLine(tl[0],stern(tA),attach(pc,L/2,W/2,tA.position,1));if(kf>0)setLine(tl[1],stern(tB),attach(pc,L/2,W/2,tB.position,1))}
+ else{placeTug(tA,V(392,0,cc.z+66),V(0,0,1));placeTug(tB,V(340,0,cc.z+2),V(-1,0,0));placeTug(tC,V(355,0,75),V(1,0,0));setLine(tl[0],stern(tA),attach(cc,L/2,W/2,tA.position,1));setLine(tl[1],stern(tB),attach(cc,L/2,W/2,tB.position,1))}
+ surv.visible=s>=7.9;fp.visible=s>=8.6&&s<9.9;rovers.visible=s>=7.9;
+}
+
+// labels & camera
+const lw=(o,x,y,z)=>()=>o.localToWorld(V(x,y,z));
+const LB=[
+ [['浮沉台船',lw(pont,25,4.3,15)],['PE 布隔離',lw(cg,8,.2,6)],['底模鋼板＋三角支撐',lw(cg,-L/2,1.2,W/2)],['塔式吊車',lw(crane,0,30,0)]],
+ [['底版上下層鋼筋',lw(cg,4,1,2)],['大底鋼模',lw(cg,L/2,1.2,-W/2)],['艙牆插筋',lw(cg,-L/2,3,W/2)]],
+ [['泵送車',()=>V(-14,7,-30)],['分區配合隔艙・每區上下 2 層',lw(cg,0,1.2,0)]],
+ [['內模 1.05 m（每艙預組）',()=>inner.localToWorld(V(-L/2+3,1.2,-W/2+3))],['外模 1.2 m',()=>outerF[0].localToWorld(V(-8,1.2,W/2))],['軛架＋油壓千斤頂',()=>full.localToWorld(V(-L/2+1.5,3.2,W/2-TW/2))],['爬升桿 ψ25 mm',()=>full.localToWorld(V(L/2-1.8,4.8,W/2-TW/2))],['工作吊架',()=>outerF[1].localToWorld(V(6,-1.1,-W/2-1))]],
+ [['最下層出模：澆置至今須 ≧ 初凝',()=>cg.localToWorld(V(-4,TS+fbG,W/2+.1))],['外牆每 1 m 紅漆高程',()=>cg.localToWorld(V(L/2,TS+h*.5,W/2))],['工作平台・照明',()=>full.localToWorld(V(0,2.2,0))],['A',()=>cg.localToWorld(V(-L/2,TS+h+.3,-W/2))],['B',()=>cg.localToWorld(V(L/2,TS+h+.3,-W/2))],['C',()=>cg.localToWorld(V(L/2,TS+h+.3,W/2))],['D',()=>cg.localToWorld(V(-L/2,TS+h+.3,W/2))]],
+ [['A',lw(cg,-L/2,H+.2,-W/2)],['B',lw(cg,L/2,H+.2,-W/2)],['C',lw(cg,L/2,H+.2,W/2)],['D 四角高程 ±2 cm',lw(cg,-L/2,H+.2,W/2)],['長寬 +3／−1 cm',lw(cg,0,H*.55,W/2)],['壁厚 ±1 cm',lw(cg,L/2,H,0)],['水尺標線',lw(cg,L/2,10,W/2)],['消波孔封口鋼板 PL10mm × 10 處（CC-39／DD-57）',lw(cg,HX[2],HB+HH,W/2+.1)],['消波室（靠海側第一排艙）',lw(cg,-L/2+4,H,6.4)]],
+ [['浮台船進水坐底',()=>pont.localToWorld(V(-25,4.25,-12))],['沉箱自然脫離浮台',lw(cg,0,H+1.5,0)],['拖船',()=>tA.localToWorld(V(0,6,0))]],
+ [['6 個進水閥（箱頂統一指揮）',lw(cg,0,H+1.6,W/2-1.2)],['鄰艙水位差 ≦ 1.0 m',lw(cg,-L/2,H*.5,W/2)],['沉降 8–10 cm/min',lw(cg,L/2,2,W/2)]],
+ [['主拖船',()=>tA.localToWorld(V(0,6,0))],['副拖船',()=>tB.localToWorld(V(0,6,0))],['輔助船',()=>tC.localToWorld(V(0,6,0))],['航道水深 ≧ 吃水 + 1.0 m',lw(cg,0,0,W/2+3)],['封口鋼板水密確認',lw(cg,HX[7],HB+HH,W/2+.1)]],
+ [['RTK 基準站（岸上控制點）',()=>V(432,6,-34)],['箱頂 RTK 移動站',lw(cg,-L/2+1.2,H+1.8,W/2-1.2)],['設計位置四角座標',()=>V(390-L/2,1,W/2)],['法線 ±20 cm',lw(cg,0,H,W/2)],['間隙 ≦ 20 cm',lw(cg,L/2,H+.5,0)],['四角沉陷差 ≦ 20 cm',lw(cg,-L/2,H,W/2)],['相鄰法線差 ≦ 10 cm',lw(cg,L/2,H,W/2)],['封口鋼板：頂層結構混凝土完成後始可拆除',lw(cg,HX[4],HB+1,W/2+.1)]]
+];
+const CAM=[[48,36,60,0,2],[26,24,32,0,1],[30,26,38,0,1],[46,36,50,0,8],[18,9,22,0,10],[40,20,50,0,10],[-65,80,120,0,0],[58,22,62,0,-5],[-75,85,125,0,0],[-38,40,50,0,14]];
+let follow=true;ctl.addEventListener('start',()=>follow=false);
+const lbl=$('lbls');let curStep=-1,lbEls=[];
+function setStep(i){if(i===curStep)return;curStep=i;follow=true;const st=ST[i];
+ $('capT').textContent=`${i+1}／10　${st.t}`;$('capD').textContent=st.c;$('pT').textContent=`${i+1}. ${st.t}`;
+ const fl=FL[st.fl[0]];$('flT').textContent='流程圖'+fl[0];$('flow').innerHTML=fl[1].map((n,j)=>`<li class="${st.fl[1].includes(j)?'on':''}"><b>${esc(n[0])}</b><span>${esc(n[1])}</span></li>`).join('');
+ $('rec').innerHTML=st.r.length?st.r.map(([f,t,xs])=>`<div class="rc"><em>${esc(f)}</em><b>${esc(t)}</b><ul>${xs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join(''):'<div class="rc">修訂七版未另訂暫存區坐底抽查表；依施工計畫要點（右欄）辦理，並以表 7-5-10 安衛查驗點勾選不定期抽查。</div>';
+ if(i===4)$('rec').insertAdjacentHTML('afterbegin','<div class="rc calc"><em>檢核</em><b>脫模時間是否超過初凝</b><div class="cg"><label>初凝時間（h）<input id="ci" type="number" step="0.25" min="0.25" value="4" inputmode="decimal"></label><label>昇模速度（cm/h）<input id="cv2" type="number" step="1" min="1" value="25" inputmode="decimal"></label></div><p id="cr"></p><small>出模時間 ≈ 模板高 ÷ 昇模速度。初凝時間：夏季（30–33 °C）約 1–1.5 h、冬季（10–15 °C）約 4–4.5 h；實際以配比試驗為準。</small></div>'),calc();
+ $('dsgW').style.display=st.d?'':'none';$('dsg').innerHTML=(st.d||[]).map(([f,t,xs])=>`<div class="rc dg"><em>${esc(f)}</em><b>${esc(t)}</b><ul>${xs.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');
+ $('insp').innerHTML=st.i.map(([k,t,d,m])=>`<div class="it">${k?k.split('').map(x=>`<span class="k${x==='★'?' s':''}">${x==='★'?'★ 安衛':'☆ 停留點'}</span>`).join(''):''}<b>${esc(t)}</b><p>${esc(d)}</p>${m?`<small>${esc(m)}</small>`:''}</div>`).join('');
+ $('plan').innerHTML=st.p.map(x=>`<li>${esc(x)}</li>`).join('');$('vid').textContent=st.v;
+ document.querySelectorAll('.chip').forEach((b,j)=>{b.classList.toggle('on',j===i);if(j===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+ lbl.innerHTML=LB[i].map((x,k)=>`<div class="lb${/≦|±|\+|cm/.test(x[0])?' r':''}" data-k="${k}"></div>`).join('');lbEls=[...lbl.children];lbEls.forEach((e,k)=>e.textContent=LB[i][k][0])}
+function labels(){const w=stage.clientWidth,hh=stage.clientHeight;LB[curStep].forEach((x,k)=>{const v=x[1]().project(cam);const e=lbEls[k];if(v.z>1||Math.abs(v.x)>1.05||Math.abs(v.y)>1.05){e.style.display='none';return}e.style.display='';e.style.left=((v.x+1)/2*w)+'px';e.style.top=((1-v.y)/2*hh-6)+'px'})}
+
+function calc(){const ci=$('ci'),cv2=$('cv2'),cr=$('cr');if(!ci||!cr)return;const t=+ci.value,v=+cv2.value;if(!(t>0&&v>0)){cr.textContent='請輸入正數';return}const o=120/v,inn=105/v,mx=120/t;cr.innerHTML=`外模 1.2 m 出模時間 <b>${o.toFixed(2)} h</b>　${o>=t?'<span class="ok">≧ 初凝，合格</span>':'<span class="ng">＜ 初凝，昇模過快</span>'}<br>內模 1.05 m 出模時間 ${inn.toFixed(2)} h　${inn>=t?'≧ 初凝':'<span class="ng">＜ 初凝，內側先脫模需注意</span>'}<br>此初凝時間下昇模速度上限 ≈ ${mx.toFixed(0)} cm/h（以 1.2 m 計）`}
+$('rec').addEventListener('input',calc);
+function size(){const w=stage.clientWidth,hh=stage.clientHeight;R.setSize(w,hh,false);cam.aspect=w/hh;cam.updateProjectionMatrix()}
+const ro=new ResizeObserver(size);ro.observe(stage);size();
+let s=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,last=performance.now();const DUR=[7,7,7,9,20,8,10,10,10,11];
+const seek=$('seek'),pb=$('play');
+const setPlay=v=>{playing=v;pb.textContent=v?'❚❚':'▶︎ 播放'};setPlay(playing);
+pb.onclick=()=>{if(s>=10)s=0;setPlay(!playing)};
+$('prev').onclick=()=>{s=s%1<.3?Math.max(0,Math.floor(s)-1):Math.floor(s);follow=true;curStep=-1};
+$('next').onclick=()=>{s=Math.min(9.999,Math.floor(s)+1);follow=true;curStep=-1};
+$('cam').onclick=()=>{follow=true};
+seek.oninput=()=>{s=+seek.value;setPlay(false)};
+$('chips').onclick=e=>{const b=e.target.closest('.chip');if(!b)return;s=+b.dataset.i;curStep=-1;setPlay(true)};
+addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')$('next').click();if(e.key==='ArrowLeft')$('prev').click();if(e.key===' '){e.preventDefault();pb.click()}});
+function loop(now){const dt=Math.max(0,Math.min(.1,(now-last)/1000));last=now;
+ if(playing){s+=dt/DUR[Math.min(9,Math.floor(s))]*(+$('spd').value);if(s>=10){s=10;setPlay(false)}}
+ seek.value=s;upd(s);S.updateMatrixWorld();setStep(Math.min(9,Math.floor(s)));
+ if(follow){const k=CAM[curStep];const tg=cg.position.clone().add(V(0,k[4]+(curStep===4?h*.5-8:0),0));const ds=tg.clone().add(V(k[0],k[1],k[2]));cam.position.lerp(ds,.05);ctl.target.lerp(tg,.07)}
+ const hu=$('hud');if(curStep===4&&s<5){hu.style.display='block';const ph=lift.f<.5?0:1;hu.innerHTML=`牆身第 <b>${lift.k}</b>／${lift.n} 次　每次 40 cm<br>牆高 ${(TS+h).toFixed(2)} m（含底版）<div class="ph">${['澆置 40 cm','昇模 40 cm'].map((x,j)=>`<span class="${j===ph?'on':''}">${x}</span>`).join('')}</div><div class="ag"><i style="background:#55707a"></i>新澆　<i style="background:#8b9a94"></i>前一層　<i style="background:#d9b648"></i>最下層</div>模板高 1.2 m ≈ 模內 3 層<br>最下層出模時須已超過初凝`}else hu.style.display='none';
+ ctl.update();R.render(S,cam);labels();requestAnimationFrame(loop)}
+requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
