@@ -60,6 +60,30 @@ th{font-size:13px;color:var(--mute);font-weight:500}
 td.v{font-weight:700;white-space:nowrap}
 .note{font-size:13px;color:var(--mute);margin-top:14px}
 @media(max-width:600px){.cap b{font-size:16px}.cap span{font-size:13px}.lb{font-size:12px}.bar{gap:6px;padding:8px}.bar select{display:none}table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:400}.stack td:empty{display:none}}
+
+/* 單畫面：左 3/4 動畫、右 1/4 捲動資訊 */
+@media(min-width:1001px){
+html,body{height:100%}
+body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+header{flex:none;padding:10px 16px 8px}
+header h1{font-size:clamp(20px,1.7vw,26px);margin:0 0 2px}
+header p{font-size:13px;line-height:1.45}
+.split{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr)}
+.lft{display:flex;flex-direction:column;min-height:0;min-width:0}
+.stage{flex:1;height:auto;min-height:300px}
+.chips{flex:none;padding:8px 12px}
+#side{overflow-y:auto;overscroll-behavior:contain;border-left:1px solid var(--line);scrollbar-gutter:stable;font-size:14px}
+#side .band{padding:14px 14px;max-width:none}
+#side .band+.band{padding-top:0}
+#side .cols{grid-template-columns:minmax(0,1fr);gap:14px}
+#side h2{font-size:18px}#side h3{font-size:13px}
+#side .flow li{grid-template-columns:minmax(0,1fr);gap:2px}
+#side table{font-size:12px}
+#side .stack thead{display:none}#side .stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}
+#side .stack td{display:flow-root;border:0;padding:2px 0;padding-inline-start:5em;text-align:start}
+#side .stack td::before{content:attr(data-l);float:inline-start;width:4.6em;margin-inline-start:-5em;color:var(--mute);font-weight:400}
+#side .stack td:empty{display:none}
+}
 </style>
 
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
@@ -69,6 +93,7 @@ td.v{font-weight:700;white-space:nowrap}
 <h1>臺北港南一碼頭 沉箱施工順序 3D 查驗動畫</h1>
 <p>依細部設計圖 ED-01「沉箱施工順序」施工順序－1～11（另依 EB-03 補列級配基層及底層鋪設），套入《臺北港南一碼頭新建工程 監造計畫 修訂二版》第七章施工抽查標準及作業流程</p>
 </header>
+<main class="split"><div class="lft">
 <section class="stage" id="stage">
 <canvas id="cv"></canvas>
 <div class="lbls" id="lbls"></div>
@@ -83,6 +108,7 @@ td.v{font-weight:700;white-space:nowrap}
 </div>
 </section>
 <nav class="chips" id="chips" aria-label="施工順序"></nav>
+</div><aside id="side">
 <section class="band">
 <div class="cols">
 <div><h2 id="pT"></h2><h3 id="flT"></h3><ol class="flow" id="flow"></ol><h3>抽查標準表（修訂二版 表 7-3）　☆ 檢驗停留點／★ 安衛查驗點</h3><div id="insp"></div></div>
@@ -94,6 +120,7 @@ td.v{font-weight:700;white-space:nowrap}
 <table class="stack"><thead><tr><th>階段</th><th>項目</th><th>允收標準</th><th>依據</th></tr></thead><tbody id="tol"></tbody></table>
 <p class="note">SC03 沉箱 25.00 × 15.12 × 12.00 m 共 9 座（#1～#9，EB-01、EB-03），隔艙 5 × 3 簡化；SC01（C 填區工程）及 S21、S22（他標）不屬本工程。高程依 EB-03、ED-01、ED-04；原海床、船機、地質改良樁位僅為示意。滑鼠拖曳可旋轉、滾輪縮放。</p>
 </section>
+</aside></main>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
@@ -372,7 +399,7 @@ const CAM=[[XB-25,-6,0,62,14,48],[XB-25,-8,0,62,12,46],[XB-25,-9,0,60,10,46],[nu
 function camT(i){const k=CAM[i];let x=k[0];if(x===null)x=i===3?(cur>=0?xi(cur):xi(N-1)):i===4?xi(fillI):i===10?grader.position.x:100;return [V(x,k[1],k[2]),V(k[3],k[4],k[5])]}
 let follow=true;ctl.addEventListener('start',()=>follow=false);
 const lbl=$('lbls');let curStep=-1,lbEls=[];
-function setStep(i){if(i===curStep)return;curStep=i;follow=true;const st=ST[i];
+function setStep(i){if(i===curStep)return;curStep=i;if(typeof playing!=='undefined'&&playing){const sd=document.getElementById('side');if(sd)sd.scrollTop=0}follow=true;const st=ST[i];
  const no=st.x||`施工順序－${i+1-ST.slice(0,i).filter(z=>z.x).length}`;$('capT').textContent=`${i+1}／${NS}　${no}（${st.t}）`;$('capD').textContent=st.c;$('pT').textContent=`${st.x?'監造補列':no}　${st.t}`;
  const fl=FL[st.fl[0]];$('flT').textContent='流程圖'+fl[0];$('flow').innerHTML=fl[1].map((n,j)=>`<li class="${st.fl[1].includes(j)?'on':''}"><b>${esc(n[0])}</b><span>${esc(n[1])}</span></li>`).join('');
  $('insp').innerHTML=st.i.map(([k,t,d,m])=>`<div class="it">${k?k.split('').map(x=>`<span class="k${x==='★'?' s':''}">${x==='★'?'★ 安衛':'☆ 停留點'}</span>`).join(''):''}<b>${esc(t)}</b><p>${esc(d)}</p>${m?`<small>${esc(m)}</small>`:''}</div>`).join('');
