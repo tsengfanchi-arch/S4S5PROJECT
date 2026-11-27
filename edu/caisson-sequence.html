@@ -18,104 +18,94 @@
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
-.band{padding:clamp(20px,3vw,40px) max(4vw,16px)}
-.wrap{max-width:1360px;margin:0 auto}
-h1{font-size:clamp(26px,3.4vw,40px);line-height:1.1;margin:0 0 8px;font-weight:900;text-wrap:balance}
-h2{font-size:22px;margin:0 0 12px}
-.sub{color:var(--mute);margin:0;max-width:72ch;font-size:15px}
-.top{padding-bottom:12px}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:20px;padding-top:8px}
 .fig{position:relative;height:min(66vh,620px);min-height:380px;border-radius:12px;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2));border:1px solid var(--line)}
 .fig canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .lbl{position:absolute;left:0;top:0;pointer-events:none;font-size:13px;line-height:1.3;white-space:nowrap;padding:3px 7px;border-radius:5px;background:light-dark(rgba(255,255,255,.9),rgba(15,22,26,.88));color:var(--ink);border:1px solid var(--line);transform:translate(-50%,calc(-100% - 8px))}
 .lbl::after{content:"";position:absolute;left:50%;bottom:calc(-1*var(--lh,8px));width:1px;height:var(--lh,8px);background:var(--ink)}
 .lbl.now{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
 .lbl.eq{border-color:var(--sea);color:var(--sea);font-weight:700}.lbl.el{background:transparent;border:0;color:var(--sea);font-weight:700}.lbl.el::after{display:none}
-.hud{position:absolute;left:12px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
-.hud button,.ctl button{font:inherit;font-size:14px;min-height:36px;padding:4px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
-.hud button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-button:focus-visible,label:focus-within{outline:2px solid var(--acc);outline-offset:2px}
-.hud label{display:flex;align-items:center;gap:6px;font-size:14px;padding:4px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg)}
-.hint{position:absolute;right:12px;bottom:8px;font-size:13px;color:var(--mute)}
-.ctl{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
-.ctl .main{min-height:44px;font-weight:700}
-.chips{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding:10px 0 4px;margin-top:4px}
-.chip{flex:none;scroll-snap-align:start;font:inherit;font-size:14px;min-height:44px;padding:4px 12px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;white-space:nowrap}
-.chip b{color:var(--sea);margin-right:4px}
-.chip.done{background:var(--bg)}
-.chip[aria-current=true]{background:var(--acc);border-color:var(--acc);color:#fff}.chip[aria-current=true] b{color:#fff}
-aside{background:var(--card);border-radius:12px;padding:20px;border:1px solid var(--line);align-self:start}
-.no{font-size:52px;font-weight:900;line-height:1;color:var(--acc)}
-.no small{font-size:16px;color:var(--mute);font-weight:500}
-aside h3{font-size:22px;line-height:1.25;margin:6px 0 12px}
-aside ol{margin:0 0 12px;padding-left:1.6em}aside li{margin:2px 0}
-.note{font-size:14px;color:var(--mute);border-left:3px solid var(--line);padding-left:10px;margin:0 0 14px}
-.k{font-size:13px;color:var(--mute);margin:14px 0 4px;font-weight:700}
-.dw{display:flex;flex-wrap:wrap;gap:6px}.dw span{font-size:13px;padding:2px 8px;border-radius:5px;background:var(--bg);border:1px solid var(--line)}
-.sch{display:grid;gap:6px}.sch div{font-size:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.bar{background:#0e5a63;color:#fff;padding:10px 18px 9px}
+.bar h1{font-size:clamp(20px,2.2vw,28px);margin:0;line-height:1.2;font-weight:900;color:#fff}
+.bar p{margin:2px 0 0;font-size:13px;color:#cfe6e8;font-weight:700}
+.app{display:grid;grid-template-columns:minmax(0,1fr) 470px;height:calc(100vh - 66px);min-height:560px}
+.stage{display:flex;flex-direction:column;min-height:0}
+.stage .fig{flex:1;height:auto;min-height:0;border-radius:0;border:0}
+.card{position:absolute;left:14px;top:14px;max-width:min(520px,calc(100% - 28px));background:light-dark(#fff,#13202a);border-radius:6px;padding:10px 14px;box-shadow:0 2px 10px rgba(0,0,0,.15);z-index:2}
+.card b{display:block;font-size:19px;line-height:1.3}.card span{display:block;font-size:14px;color:var(--mute);margin-top:2px}
+.hud{position:absolute;right:12px;top:14px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:46%;z-index:2}
+.hud button,.hud label{font:inherit;font-size:13px;min-height:32px;padding:3px 10px;border-radius:6px;border:1px solid var(--line);background:light-dark(rgba(255,255,255,.92),rgba(15,22,26,.9));color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.hud button[aria-pressed=true]{background:#0e5a63;color:#fff;border-color:#0e5a63}
+.dock{position:absolute;left:0;right:0;bottom:0;display:flex;gap:8px;align-items:center;padding:24px 14px 12px;background:linear-gradient(transparent,rgba(0,0,0,.28));z-index:2}
+.dock button,.dock select{font:inherit;font-size:15px;font-weight:700;min-height:44px;min-width:44px;padding:4px 12px;border-radius:6px;border:1px solid var(--line);background:light-dark(#fff,#13202a);color:var(--ink);cursor:pointer}
+.dock .wide{min-width:72px}
+.dock input{flex:1;accent-color:#f2b705;height:28px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:8px 10px;background:light-dark(#eef2f3,#101a20);border-top:1px solid var(--line);margin:0}
+.chip{flex:none;font:inherit;font-size:14px;min-height:44px;padding:4px 14px;border-radius:999px;border:1px solid var(--line);background:light-dark(#fff,#162027);color:var(--ink);cursor:pointer;white-space:nowrap}
+.chip b{margin-right:4px;color:var(--mute)}
+.chip[aria-current=true]{background:#f2b705;border-color:#f2b705;color:#111;font-weight:700}.chip[aria-current=true] b{color:#111}
+.side{overflow-y:auto;padding:16px;background:light-dark(#f6f8f9,#0f171c);border-left:1px solid var(--line)}
+.side h2{font-size:19px;margin:0;line-height:1.3}.side .st{font-size:13px;color:var(--sea);margin:2px 0 12px}
+.it{background:light-dark(#fff,#162027);border:1px solid var(--line);border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:15px}
+.it.on{border-color:#f2b705;box-shadow:inset 4px 0 0 #f2b705}
+.it small{display:block;color:var(--mute);font-size:13px;margin-top:3px}
+.sec{font-size:14px;color:var(--mute);margin:18px 0 8px;font-weight:700}
+.mut{font-size:13px;color:var(--mute);margin:4px 0 8px}
+.dw{display:flex;flex-wrap:wrap;gap:6px}.dw span{font-size:13px;padding:2px 8px;border-radius:5px;background:light-dark(#fff,#162027);border:1px solid var(--line)}
+.sch{display:grid;gap:6px}.sch div{font-size:14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;background:light-dark(#fff,#162027);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
 .sch em{font-style:normal;font-size:12px;padding:1px 8px;border-radius:999px;white-space:nowrap;align-self:start}
 .st0{background:var(--line);color:var(--mute)}.st1{background:var(--acc);color:#fff}.st2{background:var(--sea);color:#fff}
-.sch small{grid-column:1/-1;color:var(--mute);font-size:13px;margin-top:-4px}
-.gantt{display:grid;gap:4px}
-.row{display:grid;grid-template-columns:minmax(0,19em) minmax(0,1fr);gap:12px;align-items:center;font-size:14px;cursor:pointer;border-radius:6px;padding:2px 4px}
-.row:hover{background:var(--card)}
-.row.on{background:light-dark(#fff0ea,#2a1a12)}
-.trk{position:relative;height:16px;background:var(--card);border-radius:3px}
-.bar{position:absolute;top:2px;bottom:2px;border-radius:3px;background:var(--sea);opacity:.55}
-.row.on .bar{background:var(--acc);opacity:1}
-.axis{position:relative;height:22px;margin-left:calc(min(19em,40%) + 16px);font-size:12px;color:var(--mute)}
-.axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
-.today{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--acc)}
-.gwrap{position:relative}
-.tl{position:absolute;top:0;bottom:0;width:2px;background:var(--acc);pointer-events:none}
-.tlab{position:absolute;top:-22px;font-size:12px;color:var(--acc);font-weight:700;transform:translateX(-50%);white-space:nowrap}
-.foot{font-size:14px;color:var(--mute);max-width:90ch}
-details{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
-summary{cursor:pointer;font-weight:700;min-height:32px}
-details ol{font-size:15px;max-width:80ch}
-@media(max-width:980px){.grid{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:600px){.fig{height:440px}.row{grid-template-columns:minmax(0,1fr)}.axis{margin-left:0}.hint{display:none}.lbl{font-size:12px}}
-
+.sch small{grid-column:1/-1;color:var(--mute);font-size:13px}
+.gantt{display:grid;gap:3px}
+.row{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;font-size:13px;cursor:pointer;border-radius:4px;padding:2px 4px}
+.row:hover{background:var(--card)}.row.on{background:light-dark(#fff4d6,#2a2412)}
+.trk{position:relative;height:10px;background:light-dark(#e3e8ea,#1d2a32);border-radius:3px}
+.bar2{position:absolute;top:1px;bottom:1px;border-radius:2px;background:var(--sea);opacity:.55}.row.on .bar2{background:#f2b705;opacity:1}
+.axis{position:relative;height:18px;margin:0 4px;font-size:11px;color:var(--mute)}.axis span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.gwrap{position:relative}.tl{position:absolute;top:0;bottom:0;width:2px;background:var(--acc);pointer-events:none}
+details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;font-size:14px}summary{cursor:pointer;font-weight:700;min-height:32px}
+.ghost{margin-top:12px;font:inherit;font-size:14px;min-height:40px;padding:4px 12px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #f2b705;outline-offset:2px}
+@media(max-width:980px){.app{grid-template-columns:minmax(0,1fr);height:auto}.stage .fig{height:66vh;flex:none;min-height:420px}.side{border-left:0}.hud{max-width:60%}}
+@media(max-width:600px){.hud{left:14px;right:14px;top:auto;bottom:76px;max-width:none;justify-content:flex-start}.card b{font-size:16px}.dock{gap:5px}.dock button,.dock select{padding:4px 8px}.lbl{font-size:12px}}
 </style>
 </head>
 <body>
-<header class="band top wrap">
-  <h1>南一碼頭 SC03 沉箱施工順序 3D</h1>
-  <p class="sub">以 ED-01「沉箱施工順序」11 個階段為主體，沉箱與碼頭尺寸取自 EB-01、EB-03、EC-01，接縫與附屬設施對照 ED-02～ED-14，時程取自施工預定進度表修訂六版（南一碼頭核定版）。橘色是本階段新增的構件。</p>
+<header class="bar">
+  <h1>南一碼頭 SC03 沉箱施工順序 3D 動畫</h1>
+  <p>依 ED-01「沉箱施工順序」11 階段，尺寸取自 EB-01、EB-03、EC-01，接縫與附屬設施對照 ED-02～ED-14，時程取自施工預定進度表修訂六版（南一碼頭核定版）；橘色為本階段新增構件</p>
 </header>
-
-<main class="band wrap grid" style="padding-top:0">
-  <div>
+<div class="app">
+  <section class="stage">
     <div class="fig" id="v">
-      <div class="hud" role="group" aria-label="視角">
+      <div class="card" aria-live="polite"><b id="cardT"></b><span id="cardS"></span></div>
+      <div class="hud" role="group" aria-label="視角與顯示">
         <button data-view="iso" aria-pressed="true">斜視</button>
-        <button data-view="sec" aria-pressed="false">剖面（同 ED-01）</button>
+        <button data-view="sec" aria-pressed="false">剖面</button>
         <button data-view="sea" aria-pressed="false">海側立面</button>
         <button data-view="top" aria-pressed="false">俯視</button>
-        <label><input type="checkbox" id="water" checked> 海水面</label>
+        <label><input type="checkbox" id="water" checked> 海水</label>
         <label><input type="checkbox" id="cut" checked> 剖切</label>
         <label><input type="checkbox" id="anim" checked> 動畫</label>
       </div>
-      <div class="hint">拖曳旋轉・滾輪縮放・右鍵平移</div>
-    </div>
-    <div class="ctl">
-      <button class="main" id="prev" aria-label="上一步">‹ 上一步</button>
-      <button class="main" id="play">▶ 自動播放</button>
-      <button class="main" id="next" aria-label="下一步">下一步 ›</button>
-      <button id="replay">重播本階段動畫</button>
+      <div class="dock">
+        <button id="prev" aria-label="上一步">◀</button>
+        <button id="play" class="wide">▶ 播放</button>
+        <button id="next" aria-label="下一步">▶</button>
+        <input type="range" id="tl" min="0" max="11" step="0.01" value="0" aria-label="進度">
+        <select id="spd" aria-label="速度"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="4">4×</option></select>
+        <button id="vcyc">視角</button>
+      </div>
     </div>
     <div class="chips" id="chips" role="tablist" aria-label="施工順序"></div>
-  </div>
-  <aside id="info" aria-live="polite"></aside>
-</main>
-
-<section class="band wrap">
-  <h2>預定進度對照（修訂六版・南一碼頭核定版）</h2>
-  <p class="foot" style="margin-top:0">點選工項可跳到對應的施工順序。橘線為今日（115/11/25）；狀態依「預定」進度判斷，不是實際進度。</p>
-  <div class="axis" id="axis"></div>
-  <div class="gwrap"><div class="gantt" id="gantt"></div></div>
-  <p class="foot">開工 114/12/18（NTP+1151），預定工期 720 日曆天，預定完工 116/12/30（NTP+1870）；表下備註記載已核免計工期 81 天（春節 42、颱風 66、其他 11 天，原文合計如此）。另備註文字寫「主體工程 1251 日曆天」，與表內 1150／1151 不一致，建議與廠商確認。</p>
-  <details>
+  </section>
+  <aside class="side">
+    <div id="info"></div>
+    <h4 class="sec">預定進度對照（修訂六版・南一碼頭核定版）</h4>
+    <p class="mut">點選工項跳到對應施工順序；橘線為今日（115/11/25），狀態依預定進度判斷。</p>
+    <div class="axis" id="axis"></div>
+    <div class="gwrap"><div class="gantt" id="gantt"></div></div>
+    <p class="mut">開工 114/12/18（NTP+1151），預定工期 720 日曆天，預定完工 116/12/30（NTP+1870）；備註已核免計工期 81 天。備註文字「主體工程 1251 日曆天」與表內 1150／1151 不一致，建議與廠商確認。</p>
+    <details>
     <summary>ED-01 圖面說明</summary>
     <ol>
       <li>碼頭背側濾料施作詳見圖 EB-03 碼頭斷面圖。</li>
@@ -126,7 +116,9 @@ details ol{font-size:15px;max-width:80ch}
     </ol>
     <p class="foot">模型說明：沉箱、拋石基礎、高程與碼頭寬度依圖面尺寸建模；原海床高程圖面未標註，以 EL−8.0 m 示意。接縫寬僅 10 cm，榫槽、防砂板等接縫構件已放大顯示。地質改良以擠壓砂樁示意，實際配置詳 ED-11。施工船機外觀參考現場船機照片（起重作業平台船、PC1600 油壓抓斗浚挖平台、受泥船、無動力受泥船、拖船、交通測量船），各步驟的船機配置為示意，以核定之施工計畫為準。</p>
   </details>
-</section>
+    <button id="replay" class="ghost">重播本階段動畫</button>
+  </aside>
+</div>
 
 <script>
 {
@@ -264,7 +256,7 @@ const eq=(g,steps,o={})=>{scene.add(g);EQ.push(Object.assign({g,steps,delay:0,un
 const pipe=(pts,r,m)=>new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(p=>new THREE.Vector3(...p))),48,r,8),m);
 
 const lp=(a,b,k)=>a+(b-a)*k;
-const prog=(n,s0,d)=>cur>n?1:cur<n?0:RM?1:Math.min(1,Math.max(0,((performance.now()-stepT0)/1000-s0)/d));
+const prog=(n,s0,d)=>cur>n?1:cur<n?0:RM?1:Math.min(1,Math.max(0,((performance.now()-stepT0)/1000*SPD-s0)/d));
 const D2=20,D3a=16,D3b=12,D10s=2.5,D10=18;
 const FOL={};let fx=null;
 // 逐段施工用的局部剖切面
@@ -323,7 +315,7 @@ const eqTick=(now)=>{const t=now/1000;fx=null;
   const tz=tugP.z-7.56-28;tugA.position.set(tugP.x+6,0,tz);tugB.position.set(tugP.x+19,0,tz);
   [[ropeA,tugA],[ropeB,tugB]].forEach(([l,g])=>{const a=l.geometry.attributes.position;a.setXYZ(0,g.position.x,4.2,tz+11);a.setXYZ(1,g.position.x,2.4+tugP.y,tugP.z-7.56);a.needsUpdate=true})}
  ropeA.visible=ropeB.visible=cur===4;
- for(const q of EQ){const el=now-stepT0;const vis=q.steps.includes(cur)&&(RM||(el>=q.delay*1000&&el<q.until*1000));q.g.visible=vis;if(!vis)continue;
+ for(const q of EQ){const el=(now-stepT0)*SPD;const vis=q.steps.includes(cur)&&(RM||(el>=q.delay*1000&&el<q.until*1000));q.g.visible=vis;if(!vis)continue;
   if(q.bob&&!RM){q.g.position.y=q.by+Math.sin(t*1.1+q.ph)*.18;q.g.rotation.z=Math.sin(t*.9+q.ph)*.008}
   if(q.fn)q.fn(RM?0:t)}
  {const el=now-stepT0;for(const l of LB)if(l.s===10&&l.d.textContent.includes('振動錘'))l.d.style.display=cur===10&&(RM||el<D10s*1000)?'':'none'}
@@ -353,12 +345,16 @@ cam.position.set(...VIEWS.iso[0]);ctl.target.set(...VIEWS.iso[1]);
 let follow=true;ctl.addEventListener('start',()=>{goal=null;follow=false});
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>view(b.dataset.view)));
 const CUT=[new THREE.Plane(new THREE.Vector3(1,0,0),-3)];R.clippingPlanes=CUT;
+document.getElementById('spd').addEventListener('change',e=>{SPD=+e.target.value});
+{const tl=document.getElementById('tl');tl.addEventListener('input',()=>{stop();const n=Math.min(11,Math.floor(+tl.value)+1);if(n!==cur)go(n)});
+ const VK=['iso','sec','sea','top'];document.getElementById('vcyc').onclick=()=>view(VK[(VK.indexOf(lastV)+1)%4]);
+ setInterval(()=>{if(document.activeElement===tl)return;const D=(SD[cur]||4.2);tl.value=Math.min(cur,cur-1+((performance.now()-stepT0)/1000*SPD)/D)},100)}
 document.getElementById('anim').addEventListener('change',e=>{RM=!e.target.checked});
 document.getElementById('cut').addEventListener('change',e=>{R.clippingPlanes=e.target.checked?CUT:[]});
 document.getElementById('water').addEventListener('change',e=>{water.visible=wfront.visible=e.target.checked});
 
 /* ---------- 階段 ---------- */
-let RM=false;
+let RM=false,SPD=1;
 let cur=1,stepT0=0;
 const setOp=(e,o)=>e.mats.forEach(m=>{m.opacity=o;const tr=o<.999;if(m.transparent!==tr){m.transparent=tr;m.needsUpdate=true}m.depthWrite=o>.5});
 const scaleY=(e,k)=>e.obj.traverse(o=>{if(o.isMesh)o.scale.y=Math.max(.001,k)});
@@ -384,7 +380,8 @@ chips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){stop(
 const byId=Object.fromEntries(SCH.map(r=>[r[0],r]));
 const draw=()=>{const s=STEPS[cur-1];
  const sc=s.sc.map(id=>{if(id==='開工')return`<div><span>開工（NTP+1151）</span><em class="st2">114/12/18</em></div>`;const[,nm,a,b]=byId[id],[k,tx]=stat(a,b);return`<div><span>${id} ${nm}</span><em class="st${k}">${tx}</em><small>${roc(d2t(a))} → ${roc(d2t(b))}（第 ${a}～${b} 日，${b-a} 天）</small></div>`}).join('');
- info.innerHTML=`<div class="no">${cur}<small> / 11</small></div><h3>施工順序 − ${cur}（${s.t}）</h3>${s.it.length?`<ol>${s.it.map(x=>`<li>${x}</li>`).join('')}</ol>`:''}${s.n?`<p class="note">註：${s.n}</p>`:''}<div class="k">相關圖說</div><div class="dw">${s.dw.map(x=>`<span>${x}</span>`).join('')}</div><div class="k">施工船機（示意）</div><p class="note" style="border-color:var(--sea)">${EQT[cur]}</p><div class="k">對應進度工項（預定）</div><div class="sch">${sc}</div>`;
+ info.innerHTML=`<h2>${cur}. ${s.t}</h2><div class="st">ED-01 施工順序 − ${cur}</div>${s.it.map((x,k)=>`<div class="it ${k===0?'on':''}">${x}</div>`).join('')}${s.n?`<div class="it"><small>註：${s.n}</small></div>`:''}<h4 class="sec">施工船機（示意）</h4><div class="it on">${EQT[cur]}</div><h4 class="sec">相關圖說</h4><div class="dw">${s.dw.map(x=>`<span>${x}</span>`).join('')}</div><h4 class="sec">對應進度工項（預定）</h4><div class="sch">${sc}</div>`;
+ document.getElementById('cardT').textContent=`${cur}／11　${s.t}`;document.getElementById('cardS').textContent=EQT[cur];
  chips.querySelectorAll('.chip').forEach(c=>{const n=+c.dataset.n;c.setAttribute('aria-current',n===cur);c.classList.toggle('done',n<cur)});
  {const c=document.getElementById('c'+cur);chips.scrollLeft=c.offsetLeft-chips.offsetLeft-40}
  document.querySelectorAll('.row').forEach(r=>r.classList.toggle('on',s.sc.includes(r.dataset.id)));
@@ -394,13 +391,13 @@ document.getElementById('prev').onclick=()=>{stop();go(cur-1)};
 document.getElementById('next').onclick=()=>{stop();go(cur+1)};
 document.getElementById('replay').onclick=()=>go(cur);
 let timer=null;const pb=document.getElementById('play');
-const SD={2:21,3:29,10:21};const stop=()=>{clearTimeout(timer);timer=null;pb.textContent='▶ 自動播放'};const nextT=()=>{timer=setTimeout(()=>{if(cur>=11)return stop();go(cur+1);nextT()},(SD[cur]||4.2)*1000)};
+const SD={2:21,3:29,10:21};const stop=()=>{clearTimeout(timer);timer=null;pb.textContent='▶ 播放'};const nextT=()=>{timer=setTimeout(()=>{if(cur>=11)return stop();go(cur+1);nextT()},(SD[cur]||4.2)*1000/SPD)};
 pb.onclick=()=>{if(timer)return stop();if(cur===11)go(1);pb.textContent='❚❚ 暫停';nextT()};
 addEventListener('keydown',e=>{if(e.target.closest('input'))return;if(e.key==='ArrowRight'){stop();go(cur+1)}if(e.key==='ArrowLeft'){stop();go(cur-1)}});
 
 // 甘特
 const G=document.getElementById('gantt');
-G.innerHTML=SCH.map(([id,nm,a,b,st])=>`<div class="row" data-id="${id}" data-st="${st}" title="${roc(d2t(a))} → ${roc(d2t(b))}"><span>${id} ${nm}</span><div class="trk"><div class="bar" style="left:${pct(a)};width:calc(${pct(b)} - ${pct(a)})"></div></div></div>`).join('');
+G.innerHTML=SCH.map(([id,nm,a,b,st])=>`<div class="row" data-id="${id}" data-st="${st}" title="${roc(d2t(a))} → ${roc(d2t(b))}"><span>${id} ${nm}</span><div class="trk"><div class="bar2" style="left:${pct(a)};width:calc(${pct(b)} - ${pct(a)})"></div></div></div>`).join('');
 G.addEventListener('click',e=>{const r=e.target.closest('.row');if(r){stop();go(+r.dataset.st);document.getElementById('v').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})}});
 document.getElementById('axis').innerHTML=[[1150,'114/12'],[1290,'115/05'],[1440,'115/10'],[1590,'116/03'],[1740,'116/08'],[1870,'116/12']].map(([d,t])=>`<span style="left:${pct(d)}">${t}</span>`).join('');
 const gw=document.querySelector('.gwrap'),tl=document.createElement('div');tl.className='tl';gw.appendChild(tl);
@@ -408,7 +405,7 @@ const placeTL=()=>{const tr=G.querySelector('.trk');if(!tr)return;const gr=gw.ge
 const ro2=new ResizeObserver(placeTL);ro2.observe(gw);
 
 /* ---------- 迴圈 ---------- */
-const size=()=>{const w=fig.clientWidth,h=fig.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();render()};
+const size=()=>{if(!fig.clientWidth)return;const w=fig.clientWidth,h=fig.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix();render()};
 const ro=new ResizeObserver(size);ro.observe(fig);
 const pv=new THREE.Vector3();
 function render(){R.render(scene,cam);const w=fig.clientWidth,h=fig.clientHeight;
