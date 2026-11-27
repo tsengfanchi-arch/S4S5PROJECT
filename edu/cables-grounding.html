@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>電線電纜及接地 3D 規範查核</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造查核用的會動的施工詳圖，冷靜、精確
+   IDEA: 材料一鍵展開成層次與零件，每個部位掛上契約條文與送審數值
+   PICTURE: 大幅 3D 視窗，可播放施工／組裝動畫
+   COLOUR and TYPE: 深港藍 + 材料本色 + 琥珀標記；Noto Sans TC
+   LAYOUT: 標題 → 分頁 → 3D 視窗與規範面板並列 → 查核表 → 待確認事項 */
+:root{color-scheme:light dark;
+--bg:light-dark(#f2f4f5,#0a131c);--card:light-dark(#ffffff,#111e2a);--ink:light-dark(#0f1a22,#e8eef2);
+--mute:light-dark(#566470,#93a3b0);--line:light-dark(#d7dde1,#22313f);--acc:#ffb020;--acc2:light-dark(#a86a00,#ffc65a);
+--ok:light-dark(#0b6b57,#4fd1b0);--chk:light-dark(#9a5a00,#ffbf47);--na:light-dark(#4b5a66,#9fb0bd);--sel:light-dark(#1d5fd8,#6aa2ff)}
+
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,14px)}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.1;margin:0 0 8px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 12px;line-height:1.25}
+.sub{color:var(--mute);margin:0;max-width:80ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px}
+.tab{font:inherit;font-weight:700;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;line-height:1.25}
+.tab small{display:block;font-weight:400;color:var(--mute);font-size:13px}
+.tab[aria-selected=true]{background:#13283a;color:#fff;border-color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.tab[aria-selected=true] small{color:#ffd27a}
+.tab:focus-visible,.btn:focus-visible,.pin:focus-visible,.plist button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.viewer{position:relative;height:min(78vh,760px);min-height:460px;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#1d3347 0%,#0c1824 60%,#070e15 100%);border:1px solid #1c2d3c}
+.viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.pins,.lbls{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:26px;height:26px;padding:0 6px;border-radius:13px;border:1.5px solid #ffd27a;background:rgba(10,20,30,.82);color:#ffe3a6;font:700 13px/22px "Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
+.pin span{display:none;font-weight:500;margin-left:4px}
+.pin:hover span,.pin.on span{display:inline}
+.pin.on{background:var(--acc);color:#111;border-color:#fff;z-index:2}
+.pin.chk{border-color:#ff8a3d}
+.lb{position:absolute;transform:translate(-50%,-100%);background:rgba(255,255,255,.92);color:#0d1b26;border-radius:6px;padding:1px 6px;font:700 12px/18px "Noto Sans TC",sans-serif;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.lb.y{background:#ffd27a}.lb.c{background:#9fe3cf}
+.hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(8,16,24,.78);backdrop-filter:blur(6px);border:1px solid #24374a;border-radius:12px;padding:8px 10px;color:#dfe8ee}
+.hud label{display:flex;align-items:center;gap:8px;flex:1 1 220px;font-size:14px}
+.hud input[type=range]{flex:1;accent-color:var(--acc);height:28px}
+.btn{font:inherit;font-size:14px;font-weight:700;min-height:40px;padding:6px 12px;border-radius:9px;border:1px solid #35506a;background:#16293b;color:#eaf2f7;cursor:pointer}
+.btn[aria-pressed=true]{background:var(--acc);color:#141414;border-color:var(--acc)}
+.tag{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);background:rgba(8,16,24,.72);color:#cfdbe4;border:1px solid #24374a;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.45}
+.tag b{color:#ffd27a}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;max-height:min(78vh,760px);overflow:auto}
+.ph{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ph h2{margin:0}
+.no{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:15px;background:var(--acc);color:#141414;font-weight:900;margin-right:8px;font-size:15px;padding:0 6px}
+.chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;border:1.5px solid currentColor}
+.chip.ok{color:var(--ok)}.chip.chk{color:var(--chk)}.chip.na{color:var(--na)}
+.sec{margin-top:14px}
+.sec h3{font-size:14px;color:var(--mute);margin:0 0 6px;font-weight:700}
+.sec ul{margin:0;padding-left:1.1em}
+.sec li{margin:3px 0}
+.src{font-size:12px;color:var(--acc2);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.note{margin-top:14px;padding:10px 12px;border-radius:10px;background:light-dark(#fff6e3,#2a2110);border:1px solid light-dark(#f0d39a,#5a4519);font-size:15px}
+.plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.plist button{font:inherit;font-size:13px;min-height:34px;padding:3px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.plist button.on{border-color:var(--acc);background:light-dark(#fff3d6,#2b2412)}
+.sum{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 12px;color:var(--mute);font-size:15px}
+.sum b{color:var(--ink);font-size:20px;margin-right:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--mute);font-weight:700;background:light-dark(#f6f8f9,#0f1b26)}
+td:first-child{white-space:nowrap;font-weight:700}
+tr.rowsel td{background:light-dark(#fff6e3,#241e10)}
+tbody tr{cursor:pointer}
+.issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.issue{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--chk);border-radius:10px;padding:12px 14px;font-size:15px}
+.issue b{display:block;margin-bottom:4px}
+.foot{color:var(--mute);font-size:13px}
+.err{position:absolute;inset:0;display:none;place-items:center;color:#cfdbe4;padding:20px;text-align:center}
+.scroll{overflow-x:auto}
+
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.panel{max-height:none}.viewer{height:68vh}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:700}.stack td:empty{display:none}.pin span{display:none!important}.tag{font-size:12px}.lb{font-size:11px}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+<h1>電線電纜及接地系統 3D 規範查核</h1>
+<p class="sub">臺北港南碼頭 C 填區公共設施及永久護岸暨 S04～S05 碼頭工程（C 填區自來水及機電工程，展新綠能）。拖曳旋轉、滾輪縮放；拉「分解／施工」滑桿或按播放看動畫；點部位或編號，右側列出契約規範與送審資料的對照。</p>
+<div class="tabs" role="tablist" id="tabs"></div>
+</div></header>
+<main class="band" style="padding-top:0"><div class="wrap">
+<div class="grid">
+ <div class="viewer" id="viewer">
+  <div class="lbls" id="lbls"></div>
+  <div class="pins" id="pins"></div>
+  <div class="tag" id="tag"></div>
+  <div class="hud">
+   <label for="ex"><span id="exl">分解</span> <input id="ex" type="range" min="0" max="100" value="0"></label>
+   <button class="btn" id="play" aria-pressed="false">▶ 播放動畫</button>
+   <button class="btn" id="lbl" aria-pressed="true">標註</button>
+   <button class="btn" id="reset">重置視角</button>
+  </div>
+  <div class="err" id="err">3D 元件載入失敗，請重新整理頁面。下方查核表仍可使用。</div>
+ </div>
+ <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+<section style="margin-top:28px">
+ <h2 id="ttl">部位查核表</h2>
+ <div class="sum" id="sum"></div>
+ <div class="scroll"><table class="stack" id="tbl"><thead><tr><th>#</th><th>部位</th><th>契約規範要求</th><th>送審資料</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section style="margin-top:28px">
+ <h2>監造待確認事項</h2>
+ <div class="issues" id="issues"></div>
+</section>
+
+<p class="foot" style="margin-top:26px">依據：施工說明書技術條款第 16120 章電線及電纜、第 16122 章高電壓電纜、第 16061 章接地、第 16062 章電力設備接地與連接；特別條款附件 A6 材料檢試驗一覽表；監造計畫修訂七版表 7-3-21 岸電接地、表 7-3-22 電纜配線抽查標準；第一次變更設計 BH-03 C 填區電力系統昇位圖；契約價目表甲.壹.一.5.2。送審資料：展新綠能 工程合約（TPS-112-017）、旭振企業買賣合約、宏泰電工型錄與規格書（HTE-P312001/P312003/31210001/3129015）、ISO 9001 證書、規範比較表；萬昌電器 接地棒及止水銅板型錄、SGS HK-23-00457-1。3D 外形為示意，比例依規格書主要尺寸。</p>
+</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+/* ---------- 共用 3D 工具 ---------- */
+const ok3dLib=!!window.THREE;
+const V=(x,y,z)=>ok3dLib?new THREE.Vector3(x,y,z):{x,y,z};
+const SM=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7,metalness:0},o||{}));
+const MAT={
+ cu:()=>SM(0xc6834f,{metalness:.7,roughness:.32}),
+ cuB:()=>SM(0xd9905a,{metalness:.75,roughness:.28}),
+ galv:()=>SM(0xaab3b8,{metalness:.55,roughness:.38}),
+ conc:()=>SM(0xbab4a8,{roughness:.95}),
+ conc2:()=>SM(0x9d978c,{roughness:.95}),
+ mortar:()=>SM(0xd8d0bf,{roughness:1}),
+ grav:()=>SM(0x8c8476,{roughness:1}),
+ soil:()=>SM(0x6d5236,{roughness:1}),
+ soilT:()=>SM(0x6d5236,{roughness:1,transparent:true,opacity:.32,depthWrite:false}),
+ sand:()=>SM(0xd8c08a,{roughness:1}),
+ sandT:()=>SM(0xd8c08a,{roughness:1,transparent:true,opacity:.35,depthWrite:false}),
+ pvc:()=>SM(0x7b8790,{roughness:.6}),
+ black:()=>SM(0x202428,{roughness:.55}),
+ white:()=>SM(0xeeeeea,{roughness:.6}),
+ green:()=>SM(0x2f9a4a,{roughness:.5}),
+ semi:()=>SM(0x1a1a1a,{roughness:.4}),
+ xlpe:()=>SM(0xf1eee2,{roughness:.35,transparent:true,opacity:.96}),
+ rebar:()=>SM(0x8a4b2a,{metalness:.5,roughness:.6}),
+ water:()=>SM(0x2b6f96,{transparent:true,opacity:.18,depthWrite:false,roughness:.2}),
+ rubber:()=>SM(0x1d1f22,{roughness:.8}),
+ pe:()=>SM(0xf3f3f0,{roughness:.8}),
+};
+function mk(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);return m}
+const box=(w,h,d,m,x,y,z)=>mk(new THREE.BoxGeometry(w,h,d),m,x,y,z);
+const cyl=(rt,rb,h,m,x,y,z,s=24)=>mk(new THREE.CylinderGeometry(rt,rb,h,s),m,x,y,z);
+function cylX(r,L,m,x0,y,z,s=32,open){const c=mk(new THREE.CylinderGeometry(r,r,L,s,1,!!open),m,x0+L/2,y,z);c.rotation.z=Math.PI/2;return c}
+function rod(a,b,r,m,s=10){const d=b.clone().sub(a),L=d.length();const c=cyl(r,r,L,m,0,0,0,s);c.position.copy(a).add(b).multiplyScalar(.5);c.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return c}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hn=(x,y,z,s)=>{const v=Math.sin(x*12.9898+y*78.233+z*37.719+s*11.3)*43758.5453;return v-Math.floor(v)};
+/* 石頭幾何：block=塊石（稜角）；否則卵石（圓滑） */
+function stoneGeo(seed,block){
+ const g=block?new THREE.IcosahedronGeometry(.5,1):new THREE.SphereGeometry(.5,18,12);
+ const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+  const a=block?.78+hn(Math.round(x*40),Math.round(y*40),Math.round(z*40),seed)*.42:.93+hn(Math.round(x*30),Math.round(y*30),Math.round(z*30),seed)*.12;p.setXYZ(i,x*a,y*a,z*a)}
+ g.computeVertexNormals();return g}
+function textTex(lines,w,h,bg,fg,size){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=`700 ${size||h*.5}px "Noto Sans TC",sans-serif`;x.textBaseline='middle';
+ const L=[].concat(lines);L.forEach((t,i)=>x.fillText(t,10,h*(i+.5)/L.length));const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return tx}
+function weaveTex(c1,c2,n){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,64,64);x.fillStyle=c2;const s=64/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if((i+j)%2)x.fillRect(i*s,j*s,s,s*.55);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function feltTex(c1){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,128,128);const r=rng(7);for(let i=0;i<900;i++){x.strokeStyle=`rgba(120,120,110,${.08+r()*.12})`;x.beginPath();const a=r()*128,b=r()*128;x.moveTo(a,b);x.lineTo(a+(r()-.5)*14,b+(r()-.5)*14);x.stroke()}const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+
+/* ---------- 頁面資料 ---------- */
+const S20='第16120章',S22='第16122章',S61='第16061章',S62='第16062章',SM7='監造計畫 表7-3-21/22',SM5='監造計畫 5章',SBH='BH-03 單線圖',SQ='價目表 甲.壹.一.5.2';
+const HTE='宏泰電工 型錄/規格書',HTE25='HTE-3129015 25kV 規格書';
+
+/* ---------- 25kV XLPE 高壓電纜（單位：cm，100mm²） ---------- */
+function buildHV(){
+ const P=[],g=()=>new THREE.Group(),add=(o)=>P.push(o);
+ // 半徑（cm）：導體 11.8mm／導體遮蔽／XLPE 6.6mm／絕緣遮蔽／銅帶／PVC 2.8mm → OD≈34mm
+ const R={c:.59,cs:.67,ins:1.33,is:1.39,cu:1.42,sh:1.70};
+ const X0=-14;
+ // 1 導體（圓形壓縮絞線）
+ let c=g();const mc=MAT.cuB();c.add(cylX(.18,36,mc,X0,0,0,16));
+ for(let k=0;k<6;k++){const a=k*Math.PI/3;c.add(cylX(.19,36,mc,X0,Math.cos(a)*.37,Math.sin(a)*.37,12))}
+ for(let k=0;k<12;k++){const a=k*Math.PI/6+.26;c.add(cylX(.13,36,mc,X0,Math.cos(a)*.5,Math.sin(a)*.5,10))}
+ add({id:'cond',no:'1',obj:c,ex:[6,0,0],name:'導體（圓形壓縮軟銅絞線）',st:'ok',
+  spec:[['導體為鍍錫或不鍍錫軟銅線，符合 CNS 672 或 CNS 1365',S22+' 2.1.1(2)A'],['除圖說另有規定外，導線為 CNS 1365 絞線',S22+' 2.1.1(2)B'],['導線溫度不超過 90℃ 適用',S22+' 2.1.1(1)B'],['規格：交連聚乙烯絕緣電力電纜 25kV 1/C 38mm²（11,214m）、100mm²（3,960m）',SQ+'.2.1']],
+  sub:[['圓形壓縮導體，100mm² 外徑約 11.8mm；38mm² 約 7.1mm',HTE25],['最大導體電阻（20℃）：100mm² 0.184 Ω/km、38mm² 0.499 Ω/km',HTE25],['比較表：電力電纜依 CNS 2655，均附標檢局正字標記證書','規範比較表']],note:''});
+ // 2 導體遮蔽（內半導電層）
+ let cs=g();cs.add(cylX(R.cs,32,MAT.semi(),X0,0,0,40));
+ add({id:'cshield',no:'2',obj:cs,ex:[4.5,0,0],name:'導體遮蔽層（內部半導電層）',st:'ok',
+  spec:[['依 CNS 2655 做導線遮蔽，與絕緣體完全貼合密接不鬆脫',S22+' 2.1.1(3)'],['導體遮蔽、絕緣體、絕緣遮蔽三層一次押出',S22+' 2.1.1(5)A']],
+  sub:[['25kV XLPE-PVC 電力電纜（半導電層三層共押）',HTE25]],note:''});
+ // 3 XLPE 絕緣
+ let ins=g();ins.add(cylX(R.ins,29,MAT.xlpe(),X0,0,0,48));
+ add({id:'ins',no:'3',obj:ins,ex:[3,0,0],name:'XLPE 交連聚乙烯絕緣體',st:'ok',
+  spec:[['抗熱、抗濕、抗臭氧交連熱凝聚乙烯，符合 CNS 2655',S22+' 2.1.1(4)A-a'],['絕緣平均厚度符合 CNS 2655',S22+' 2.1.1(4)A-b'],['檢驗：抗拉、老化、加熱變形率、被覆耐油、絕緣電阻，檢附合格證明',S22+' 3.2.2']],
+  sub:[['最小平均絕緣厚度 6.6mm（25kV 級）',HTE25],['試驗電壓 52kV／5min',HTE25],['最小絕緣電阻（20℃）：100mm² 2,800 MΩ·km；38mm² 3,600 MΩ·km',HTE25]],note:''});
+ // 4 絕緣遮蔽（外半導電層）
+ let is=g();is.add(cylX(R.is,26,MAT.semi(),X0,0,0,48));
+ add({id:'ishield',no:'4',obj:is,ex:[1.5,0,0],name:'絕緣體遮蔽層（外部半導電層）',st:'ok',
+  spec:[['絕緣體表面覆以押出型半導電層，與絕緣體密切接觸',S22+' 2.1.1(5)A'],['三層一次押出',S22+' 2.1.1(5)A']],sub:[['三層共押構造',HTE25]],note:''});
+ // 5 銅遮蔽帶（螺旋）
+ let cu=g();const mt=MAT.cu();const N=80;
+ for(let k=0;k<N;k++){const x=X0+k*(23/N);const ring=mk(new THREE.TorusGeometry(R.cu,.03,4,40,Math.PI*1.4),mt,x,0,0);ring.rotation.y=Math.PI/2;ring.rotation.z=k*.35;cu.add(ring)}
+ add({id:'cutape',no:'5',obj:cu,ex:[0,0,0],name:'銅遮蔽帶',st:'na',
+  spec:[['電纜由導體、導體遮蔽、絕緣、絕緣遮蔽、銅遮蔽帶、被覆體構成',S22+' 2.1.1(1)D'],['每一電纜接續處，電纜遮蔽均應接於接地系統',S22+' 3.1.1(8)'],['終端／接續以熱縮式或滑入式接頭，絕緣等級不得低於電纜',S22+' 3.1.3、'+SM7]],
+  sub:[['構造含銅帶遮蔽',HTE25]],note:'接頭施工時查驗遮蔽銅帶確實引出接地。'});
+ // 6 PVC 被覆＋標示
+ const tex=textTex(['HONG TAI  25kV  XLPE/PVC  1C × 100mm²  CNS 2655  2023  ▶'],1024,64,'#26292c','#e8e8e2',34);tex.repeat.set(2,1);
+ const shm=SM(0xffffff,{map:tex,roughness:.55});let sh=g();const scyl=cylX(R.sh,20,shm,X0,0,0,64,false);sh.add(scyl);
+ add({id:'sheath',no:'6',obj:sh,ex:[-2,0,0],name:'PVC 被覆（外被）及標示',st:'ok',
+  spec:[['外被覆以不易消褪方式標明製造廠、製造年份、電壓等級、記號、導體大小',S22+' 3.1.4(4)'],['兩端熱縮封頭防潮；拉放完畢末端密封',S22+' 1.6.1、3.1.1(5)'],['捲軸標籤：種類、截面積、芯數、電壓、長度、重量、製造廠、年月、軸號',S22+' 1.6.2'],['進場外觀：線徑正確，廠牌符合送審（製造廠、年代、電壓、線徑）',SM7]],
+  sub:[['最小平均被覆厚度 2.80mm',HTE25],['單心完成外徑：100mm² 約 34.1mm、38mm² 約 28.8mm',HTE25]],note:''});
+ // 7 拉纜與彎曲（示意圓弧）
+ let bd=g();const arcR=5.12;const cv=new THREE.CurvePath();
+ const arc=new THREE.EllipseCurve(0,0,arcR,arcR,Math.PI*.5,Math.PI,false);const pts=arc.getPoints(40).map(p=>V(p.x-14,p.y-arcR-4.5,0));
+ bd.add(mk(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),60,R.sh,24,false),SM(0x2b2e31,{roughness:.55})));
+ const dash=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(-14,-4.5-arcR,0),V(-14-arcR*Math.cos(Math.PI*.25),-4.5-arcR+arcR*Math.sin(Math.PI*.25),0)]),new THREE.LineBasicMaterial({color:0xffd27a}));dash.userData.nosel=1;bd.add(dash);
+ add({id:'bend',no:'7',obj:bd,ex:[0,-2,0],name:'佈纜：最小彎曲半徑與拉力',st:'chk',pinAt:[-17,-6,0],
+  spec:[['拉力不得超過下列最小者：製造廠建議值；拉耳 7.2kg×導線 mm²；籃式緊線器 450kg',S22+' 3.1.1(6)'],['拉線機拉力 < 導線張力 1/4；彎頭及肘頭加設滾輪；絕緣體不得損傷',SM7+' 表7-3-22'],['拉纜前檢查清掃管路，去除稜角',S22+' 3.1.1(7)'],['三相電纜裝於同一導線管內',S22+' 3.1.1(8)'],['送審資料應含最小彎曲半徑、最大拉力、容許側壓、建議潤滑劑',S22+' 1.5.3(2)']],
+  sub:[['100mm²：最大拉力 154 kgf、最小彎曲半徑 0.512m、最大容許側壓 300kg',HTE25],['38mm²：最大拉力 128 kgf、最小彎曲半徑 0.432m',HTE25]],
+  note:'廠商容許拉力 154 kgf（100mm²）遠低於規範公式 7.2×100=720 kg，依「取最小者」應以 154 kgf 管制；施工計畫須寫明拉力計設定值。監造計畫表 7-3-22 寫「不得塗抹油脂」，16122 章則允許相容之潤滑劑，請於施工計畫統一（建議採原廠指定潤滑劑、禁用一般油脂）。'});
+ P.labels=[{p:[22,1.2,0],t:'導體 φ11.8',k:'y',part:'cond'},{p:[14.5,1.9,0],t:'XLPE 6.6mm',k:'y',part:'ins'},{p:[2,2.3,0],t:'外徑 ≈34.1mm',k:'y',part:'sheath'},{p:[-16.5,-7.2,0],t:'R ≥ 0.512 m（原廠）',k:'c',part:'bend'}];
+ return P;
+}
+
+/* ---------- 600V 電纜／電線／裸銅線（單位：cm） ---------- */
+function buildLV(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ // 3C 8mm² XLPE
+ const z0=0,X0=-12;let c3=g(),ins3=g(),fil=g(),sh3=g();
+ const cols=[0x222222,0xd8d8d0,0xc23a2a];const mc=MAT.cuB();
+ for(let k=0;k<3;k++){const a=k*2*Math.PI/3+Math.PI/2,y=Math.sin(a)*.3,z=Math.cos(a)*.3;
+  c3.add(cylX(.17,26,mc,X0,y,z0+z,16));ins3.add(cylX(.27,23,SM(cols[k],{roughness:.45}),X0,y,z0+z,24))}
+ fil.add(cylX(.6,20,SM(0xbfb8a8,{roughness:1}),X0,0,z0,32));
+ sh3.add(cylX(.72,17,SM(0x26292c,{map:(()=>{const t=textTex(['HTE 600V XLPE/PVC 3C×8mm² CNS 2655'],1024,64,'#26292c','#ddd',34);t.repeat.set(2,1);return t})(),roughness:.55}),X0,0,z0,48));
+ add({id:'c3cond',no:'1',obj:c3,ex:[4,0,0],name:'3C 電纜導體',st:'ok',
+  spec:[['600V 以下電力電線電纜；軟銅絞線依 CNS 1365',S20+' 1.4.1'],['600V XLPE 3/C 8.0mm² 8,748m（甲）＋1,173m（乙）',SQ+'.2.2.5']],
+  sub:[['電力電纜依 CNS 2655（600V/1C、600V/3C）','規範比較表'],['交連聚乙烯絕緣聚氯乙烯被覆電力電纜 600V，HTE-P312003',HTE]],note:''});
+ add({id:'c3ins',no:'2',obj:ins3,ex:[2.4,0,0],name:'XLPE 芯線絕緣（相色）',st:'ok',
+  spec:[['XLPE 絕緣符合 CNS 2655',S20+' 1.4.1(7)'],['迴路識別：各迴路導線以絕緣標籤標示相位、線數、線徑',SM7+' 表7-3-22'],['新設絕緣電阻，建議 1MΩ 以上（完工檢查）',SM7+' 表7-3-22']],
+  sub:[['HTE-P312003 構造性能表',HTE]],note:''});
+ add({id:'c3fill',no:'3',obj:fil,ex:[1,0,0],name:'介在物及紮帶',st:'ok',spec:[['送審須說明絕緣、外被及紮帶材料一般化學名稱及厚度',S20+' 1.5.3(2)A']],sub:[['規格書列構造',HTE]],note:''});
+ add({id:'c3sh',no:'4',obj:sh3,ex:[-1,0,0],name:'PVC 外被',st:'ok',
+  spec:[['送審：外徑 mm、重量 kg/m、最小彎曲半徑、最大拉力、容許側壓、潤滑劑',S20+' 1.5.3(2)'],['捲軸或包裝標示：種類、截面積、長度、重量、製造廠、年月、採購單號',S20+' 1.7.3'],['特別條款：電線及電纜檢附檢驗合格證明文件，免抽驗','特別條款 附件A6 (二十三)']],
+  sub:[['ISO 9001:2015 證書（金屬中心 MIRDC）',HTE],['經濟部標檢局正字標記證書','規範比較表']],note:''});
+ // 綠色接地線（IV）
+ let gw=g();gw.add(cylX(.2,24,MAT.cuB(),X0,0,3,16),cylX(.32,21,MAT.green(),X0,0,3,24));
+ add({id:'gw',no:'5',obj:gw,ex:[0,2,0],name:'接地電線（600V PVC 絕緣，綠色）',st:'ok',
+  spec:[['接地導線 5.5mm² 及更大者應為絞線',S61+' 2.1.2(3)'],['接地纜線均應有 PVC 綠色絕緣；色別依 CNS 5202',S61+' 2.1.3、'+S62+' 1.4.1'],['引上線須有 PVC 綠色絕緣包覆',SM7+' 表7-3-21'],['接地電線 5.5～100mm²（8mm² 1,332m、22mm² 618m…）',SQ+'.2.4']],
+  sub:[['IV 600V PVC 絕緣電線 CNS 679、HIV CNS 8379（HTE-P312001）','規範比較表']],note:''});
+ // 600V PVC 電線（黑）
+ let iv=g();iv.add(cylX(.3,24,MAT.cuB(),X0,0,-3,16),cylX(.44,21,MAT.black(),X0,0,-3,24));
+ add({id:'iv',no:'6',obj:iv,ex:[0,-2,0],name:'600V PVC 絕緣電線（IV）',st:'ok',
+  spec:[['CNS 679 600V 聚氯乙烯絕緣電線',S20+' 1.4.1(3)'],['600V PVC 1/C 14mm² 72m、30mm² 216m',SQ+'.2.3']],
+  sub:[['LF 無鉛絕緣電線 IV／HIV，HTE-P312001','宏泰 型錄']],note:''});
+ // 裸硬銅絞線
+ let bc=g();const mb=MAT.cu();bc.add(cylX(.22,24,mb,X0,0,6,12));for(let k=0;k<6;k++){const a=k*Math.PI/3;bc.add(cylX(.2,24,mb,X0,Math.cos(a)*.42,6+Math.sin(a)*.42,10))}
+ for(let k=0;k<12;k++){const a=k*Math.PI/6+.2;bc.add(cylX(.19,24,mb,X0,Math.cos(a)*.8,6+Math.sin(a)*.8,10))}
+ add({id:'bare',no:'7',obj:bc,ex:[0,4,0],name:'裸硬銅絞線（接地網）',st:'ok',
+  spec:[['裸軟銅絞線 CNS 1365；接地網裸銅絞線詳設計圖',S62+' 1.4.1、2.1.2'],['硬裸銅絞線 1/C 80mm²、100mm² 各 1,400m',SQ+'.2.6.3/.2.7.3'],['地面下接地棒與裸銅線、裸銅線與裸銅線均以銲粉熔接',S62+' 3.2.1(3)']],
+  sub:[['裸軟銅絞電線 規格書 31210001（CNS 1365）',HTE],['比較表寫「裸硬／軟銅絞電線（CNS 668、CNS 1365）」','規範比較表']],
+  note:'價目表為「硬」裸銅絞線，比較表寫硬／軟，附件規格書為「裸軟銅絞電線 CNS 1365」。請廠商確認實際供貨為硬抽（CNS 668）或軟銅（CNS 1365），並與工程司確認何者符合設計。'});
+ P.labels=[{p:[12,.6,3],t:'綠色接地線',k:'c',part:'gw'},{p:[12,.9,-3],t:'IV 600V',k:'y',part:'iv'},{p:[12,1.2,6],t:'裸銅絞線',k:'y',part:'bare'},{p:[5,1.1,0],t:'3C×8mm² XLPE',k:'y',part:'c3sh'}];
+ return P;
+}
+
+/* ---------- 接地系統（單位：m） ---------- */
+function buildGND(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ // 土壤剖面
+ let so=g();so.add(box(7,3.6,2.4,MAT.soilT(),0,-1.8,0));const top=box(7,.02,2.4,SM(0x8a8f86,{roughness:1}),0,0,0);so.add(top);
+ add({id:'soil',no:'1',obj:so,ex:[0,0,0],name:'埋設深度與佈置',st:'na',
+  spec:[['接地導線依圖示位置安裝，道路下應埋地面下最少 1.0m',S61+' 3.1.1'],['地極頂部埋設深度：地面下至少 3m 或地下水位以下（除註明者外）',S61+' 2.1.4(5)D'],['接地材料設於與地下管線、基礎不衝突且未來不致開挖處',S61+' 3.3.1'],['接地導線不應連接至地下管線或地下箱槽',S61+' 3.3.1']],
+  sub:[['施工圖依 BH-03 各變電站高壓／低壓接地系統',SBH]],note:'C 填區為填築地，地下水位淺；放樣前確認接地極頂部高程以「地下水位以下」為準，並記錄。'});
+ // 接地棒 ×3（間距 2.4m）
+ let rd=g();const xs=[-2.4,0,2.4];xs.forEach(x=>{rd.add(cyl(.0095,.0095,2.4,MAT.cu(),x,-1.0-1.2,0,12),cyl(.016,.0095,.06,MAT.cu(),x,-3.43,0,12))});
+ add({id:'rod',no:'2',obj:rd,ex:[0,2.6,0],name:'銅包鋼接地棒 3/4"×8\'',st:'ok',
+  spec:[['接地棒及接地測試棒須為銅包鋼棒，直徑 ≧19mm、長度 ≧0.9m',S61+' 2.1.1'],['岸電接地：接地棒須為銅包鋼棒，直徑 19mm 長 2.4m',SM7+' 表7-3-21'],['高壓／低壓接地系統 3/4"×8\'×10 支（含 2 根測試棒），R≦10Ω',SBH],['使用兩支以上接地棒，棒間隔 2m 以上',S61+' 2.1.4(5)D'],['材料進場須墊高防污染',SM7+' 表7-3-21']],
+  sub:[['萬昌電器 型號 1924：3/4"×8\'（19×2400mm）','萬昌 型錄'],['SGS HK-23-00457-1：鋼芯抗拉 52 kgf/mm²、伸長 18%；銅皮 Cu 99.96%','SGS 112.02.20']],note:''});
+ // 5/8 棒（另列）
+ let r58=g();r58.add(cyl(.008,.008,2.4,MAT.cu(),3.2,-2.2,.8,10));
+ add({id:'rod58',no:'3',obj:r58,ex:[0,2.6,0],name:'5/8"×8\' 接地棒（型錄另勾選）',st:'chk',
+  spec:[['一般接地：直徑 ≧19mm',S61+' 2.1.1'],['照明燈柱 BH9-02：5/8"∮×8 呎銅包鋼棒，R<50Ω','BH9-02'],['導航燈：接地棒 5/8"×8 支，接地電阻 <10Ω','監造計畫 表7-3-20']],
+  sub:[['萬昌 型號 1624：5/8"×8\'（16×2400mm）一併勾選','萬昌 型錄']],
+  note:'型錄同時勾選 1924（19mm）與 1624（16mm）。16mm 只可用於圖說明列 5/8" 的照明燈柱及導航燈；變電站、岸電接地網必須用 19mm。進場時依使用位置分批點收，避免混用。'});
+ // 裸銅線
+ let bc=g();bc.add(rod(V(-3.2,-1.0,0),V(3.2,-1.0,0),.0065,MAT.cu()),rod(V(0,-1.0,0),V(0,-1.0,1.0),.0065,MAT.cu()));
+ add({id:'cond',no:'4',obj:bc,ex:[0,1.8,0],name:'接地導線（裸銅絞線）',st:'ok',
+  spec:[['兩支以上接地棒間之連接導線 ≧30mm² 銅導線，熱熔接續',S61+' 2.1.4(5)C'],['接地導線 ∮≧5.5mm²',SM7+' 表7-3-21'],['通過道路之埋設深度 ≧1m',SM7+' 表7-3-21']],
+  sub:[['硬裸銅絞線 80／100mm²',SQ+'.2.6'],['裸軟銅絞電線 CNS 1365','宏泰 31210001']],note:''});
+ // 熱熔接點
+ let wd=g();const wm=SM(0x9a8a70,{metalness:.4,roughness:.5,emissive:0xff6a00,emissiveIntensity:0});xs.forEach(x=>wd.add(mk(new THREE.SphereGeometry(.045,16,12),wm,x,-1.0,0)));wd.add(mk(new THREE.SphereGeometry(.045,16,12),wm,0,-1.0,1.0));wd.userData.wm=wm;
+ add({id:'weld',no:'5',obj:wd,ex:[0,1.8,0],name:'熱熔接（Cadweld / Thermoweld）',st:'na',
+  spec:[['銅粉鑄焊 CADWELD、熱融焊 THERMOWELD 或相當熔接法',SM7+' 表7-3-21'],['熔接頭牢固，不得龜裂、凹陷、剝落、氣孔（2mm∮以上），剖面亦同；否則重作',S62+' 3.2.3(12)'],['熔接前：油污溶劑清洗、鏽以鋼絲刷除、含水銅線噴燈烤乾、棒端鎚打變形須切平',S62+' 3.2.3(1)-(6)'],['接觸面清理乾淨，經檢查認可後方可回填',S61+' 3.3.2']],
+  sub:[['焊粉依線徑選用（100mm² 用 #90）','萬昌 止水銅板表']],note:'熔接完成拆模後立即清渣，抽一個做剖面檢查氣孔。'});
+ // 引上線＋止水銅板＋設備基座
+ let ru=g();ru.add(rod(V(0,-1.0,1.0),V(0,.55,1.0),.011,MAT.green()));ru.add(box(.1,.1,.002,SM(0xb5653a,{metalness:.7,roughness:.35}),0,.15,1.0).rotateX(Math.PI/2));
+ ru.add(cyl(.02,.02,.6,SM(0x7b8790,{transparent:true,opacity:.55}),0,-.3,1.0,16));
+ add({id:'riser',no:'6',obj:ru,ex:[0,.9,.6],name:'引上線、PVC 保護管、止水銅板',st:'ok',pinAt:[0,.3,1.0],
+  spec:[['引上線須有 PVC 綠色絕緣包覆',SM7+' 表7-3-21'],['預留線通過混凝土或地板須設套管及止水設施',S61+' 3.3.4、'+SM7],['屋外接地導線近地面以 PVC 管保護：地上 2.5m、地下 0.6m',S61+' 3.4.3'],['地下接地線之引上線應做適當止水設施',S62+' 3.2.2(11)']],
+  sub:[['止水銅板 100×100mm、厚 2mm、銅棒總長 150mm、紅銅','萬昌 型錄'],['適用線徑 14～325mm²，焊粉 #45～#150','萬昌 型錄']],note:''});
+ let pad=g();pad.add(box(1.2,.3,.9,MAT.conc(),0,.15,1.0));
+ add({id:'pad',no:'7',obj:pad,ex:[0,1.8,.6],name:'設備基座（變電站／岸電箱）',st:'na',spec:[['所有配電盤及控制箱均應接地，使用接線端子',S62+' 3.2.2(9)'],['設備外部接地前清除油漆，塗防氧油脂',S62+' 3.2.2(10)']],sub:[['依設計圖','—']],note:''});
+ // 測試手孔＋儀錶
+ let hh=g();const hm=MAT.conc2();hh.add(box(.45,.04,.45,hm,-2.4,0,0));hh.add(box(.45,.4,.03,hm,-2.4,-.2,.21),box(.45,.4,.03,hm,-2.4,-.2,-.21),box(.03,.4,.45,hm,-2.62,-.2,0),box(.03,.4,.45,hm,-2.18,-.2,0));
+ hh.add(box(.2,.1,.12,SM(0xffb020,{roughness:.5}),-2.4,.35,.5));
+ add({id:'test',no:'8',obj:hh,ex:[0,1.0,0],name:'接地測試手孔與電阻量測',st:'na',pinAt:[-2.4,.3,.3],
+  spec:[['接地電阻應在 10Ω 以下',S61+' 2.1.4(5)E'],['澆置前量測及澆置後每個人手孔量測，<10Ω；未達加打接地棒或用土壤改良劑',SM7+' 表7-3-21、'+S61+' 3.3.5'],['測試須於一般乾燥天氣，雨後一星期後測試',S61+' 3.5.2'],['竣工驗收時再測並記錄',S62+' 3.3.3'],['適當地方加裝接地測試裝置',S61+' 3.3.6']],
+  sub:[['現場量測紀錄（表 7-5-21）','—']],note:''});
+ P.labels=[{p:[2.4,-3.5,0],t:'19mm × 2.4m',k:'y',part:'rod'},{p:[1.2,-2.0,0],t:'間距 ≧2m',k:'c',part:'rod'},{p:[-3.0,-1.0,0],t:'≧30mm² 熱熔接',k:'y',part:'cond'},{p:[-2.4,.6,.5],t:'R ≦ 10Ω',k:'c',part:'test'},{p:[0,.32,1.3],t:'止水銅板 100×100×2',k:'y',part:'riser'}];
+ return P;
+}
+
+const PAGE={models:[
+ {key:'hv',tab:'25kV 高壓電纜',sm:'XLPE 1/C 38・100mm²',title:'25kV XLPE 高壓電力電纜（1/C 100mm² 剖切）',fit:{c:[5,-2,0],r:21},grid:[60,60],gy:-11,fog:[60,140],minZoom:6,dir:[.35,.38,.86],build:buildHV,
+  tag:'<b>剖切展示</b>：拉「分解」或按播放，各層依押出順序展開。比例依宏泰 HTE-3129015 規格書 100mm² 尺寸（單位 cm）',
+  tick:(P,tm,e)=>{}},
+ {key:'lv',tab:'600V 電纜・電線',sm:'XLPE 3C・IV・接地線・裸銅',title:'600V 電纜、PVC 電線、接地線與裸銅絞線',fit:{c:[0,0,1.5],r:11},grid:[60,60],gy:-6,fog:[60,140],minZoom:4,dir:[.45,.55,.7],build:buildLV,
+  tag:'<b>低壓線材</b>：3C×8mm² XLPE 電纜剖切、綠色接地線、IV 電線、裸銅絞線（單位 cm）'},
+ {key:'gnd',tab:'接地系統',sm:'接地棒・熱熔接・R≦10Ω',title:'接地系統（接地棒、裸銅導線、熱熔接、引上線）',fit:{c:[0,-1.2,.3],r:3.6},grid:[20,20],gy:-3.6,fog:[20,60],minZoom:1,dir:[.55,.3,.8],build:buildGND,slider:'施工',
+  tag:'<b>施工動畫</b>：播放時由空中打設接地棒、佈設裸銅線、熱熔接點發光、立引上線。接地棒為 3 支示意（BH-03 每系統 10 支）',
+  tick:(P,tm,e,sel)=>{const w=P.find(p=>p.id=='weld');if(!w||sel==w)return;const m=w.obj.userData.wm;m.emissiveIntensity=e>.02?0:(Math.sin(tm*3)*.5+.5)*1.2}}
+]};
+
+
+/* ---------- 介面 ---------- */
+const MODELS=PAGE.models,ST={ok:'符合',chk:'待確認',na:'現場查驗'};
+const $=s=>document.querySelector(s);
+const tabs=$('#tabs'),pinsEl=$('#pins'),lblsEl=$('#lbls'),panel=$('#panel');
+tabs.innerHTML=MODELS.map((m,i)=>`<button class="tab" role="tab" id="t-${m.key}" aria-selected="${i==0}">${m.tab}<small>${m.sm}</small></button>`).join('');
+let cur=null,parts=[],labels=[],sel=null,t=0,playing=false,showLbl=true,ok3d=ok3dLib;
+const li=a=>`<li>${a[0]}${a[1]&&a[1]!='—'?`<span class="src">${a[1]}</span>`:''}</li>`;
+function renderPanel(){
+ const p=sel;const list=parts.map(q=>`<button data-id="${q.id}" class="${p&&q.id==p.id?'on':''}">${q.no} ${q.name}</button>`).join('');
+ if(!p)panel.innerHTML=`<h2>${cur.title}</h2><p class="sub" style="margin-top:6px">${cur.intro||'點選 3D 視窗中的部位或下方名稱，查看契約規範要求與送審資料。黃色編號對應查核表編號。'}</p><div class="plist">${list}</div>`;
+ else panel.innerHTML=`<div class="ph"><h2><span class="no">${p.no}</span>${p.name}</h2><span class="chip ${p.st}">${ST[p.st]}</span></div>
+ <div class="sec"><h3>契約規範要求</h3><ul>${p.spec.map(li).join('')}</ul></div>
+ <div class="sec"><h3>送審資料</h3><ul>${p.sub.map(li).join('')}</ul></div>
+ ${p.note?`<div class="note">${p.note}</div>`:''}
+ <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="fc">聚焦此部位</button><button class="btn" id="clr">回到全覽</button></div>
+ <div class="plist">${list}</div>`;
+ panel.querySelectorAll('.plist button').forEach(b=>b.onclick=()=>select(b.dataset.id,true));
+ const fc=$('#fc');if(fc)fc.onclick=()=>focusPart(p);const cl=$('#clr');if(cl)cl.onclick=()=>{select(null);resetView()};
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.classList.toggle('rowsel',!!p&&r.dataset.id==p.id));
+}
+function renderTable(){
+ $('#ttl').textContent=cur.title+'：部位查核表';
+ const c={ok:0,chk:0,na:0};parts.forEach(p=>c[p.st]++);
+ $('#sum').innerHTML=`<span><b>${parts.length}</b>部位</span><span><b style="color:var(--ok)">${c.ok}</b>符合</span><span><b style="color:var(--chk)">${c.chk}</b>待確認</span><span><b style="color:var(--na)">${c.na}</b>現場查驗</span>`;
+ $('#tbl tbody').innerHTML=parts.map(p=>`<tr data-id="${p.id}"><td>${p.no}</td><td>${p.name}</td><td>${p.spec.map(s=>s[0]).join('<br>')}</td><td>${p.sub.map(s=>s[0]).join('<br>')}</td><td><span class="chip ${p.st}">${ST[p.st]}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.onclick=()=>{select(r.dataset.id,true);$('#viewer').scrollIntoView({behavior:'smooth',block:'start'})});
+ const seen=new Set();
+ $('#issues').innerHTML=parts.filter(p=>p.st=='chk'&&p.note&&!seen.has(p.note)&&seen.add(p.note)).map(p=>`<div class="issue"><b>${p.no} ${p.name}</b>${p.note}</div>`).join('')||'<p class="sub">無。</p>';
+}
+/* ---------- 3D ---------- */
+let renderer,scene,camera,controls,root,clock,grid,gnd;
+const viewer=$('#viewer');
+if(ok3d){try{
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.outputEncoding=THREE.sRGBEncoding;viewer.prepend(renderer.domElement);
+ scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0c1824,30,70);
+ camera=new THREE.PerspectiveCamera(38,1,.01,400);
+ controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.95;
+ scene.add(new THREE.HemisphereLight(0xcfe2ff,0x2a2218,.85));
+ const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(6,12,8);scene.add(dl);
+ const dl2=new THREE.DirectionalLight(0x88aaff,.35);dl2.position.set(-8,4,-6);scene.add(dl2);
+ clock=new THREE.Clock();
+ const ro=new ResizeObserver(()=>{const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()});ro.observe(viewer);
+}catch(e){ok3d=false}}
+if(!ok3d)$('#err').style.display='grid';
+let tween=null;
+const ease=x=>x<.5?2*x*x:1-(-2*x+2)**2/2;
+function flyTo(target,dist,dir){if(!ok3d)return;const d=(dir||camera.position.clone().sub(controls.target).normalize());tween={t0:performance.now(),ft:controls.target.clone(),fp:camera.position.clone(),tt:target.clone(),tp:target.clone().add(d.multiplyScalar(dist))}}
+const fit=()=>{const f=cur.fit,asp=camera.aspect||1;return{c:V(...f.c),d:f.r/Math.tan(19*Math.PI/180)/Math.min(1,Math.max(.5,asp))*.92}};
+function resetView(){const f=fit();flyTo(f.c,f.d,V(...(cur.dir||[.62,.32,.75])).normalize())}
+function partCenter(p){return p.c.clone().add(p.ex.clone().multiplyScalar(ease(t)))}
+function focusPart(p){flyTo(partCenter(p),Math.max(cur.minZoom||1.2,p.sz*1.6))}
+function load(key){
+ cur=MODELS.find(m=>m.key==key);
+ tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.id=='t-'+key));
+ $('#tag').innerHTML=cur.tag;$('#exl').textContent=cur.slider||'分解';
+ const B=cur.build();parts=B.map(p=>Object.assign({},p,{ex:V(...(p.ex||[0,0,0]))}));labels=B.labels||[];sel=null;t=0;$('#ex').value=0;
+ if(ok3d){
+  if(root)scene.remove(root);root=new THREE.Group();scene.add(root);
+  if(grid)scene.remove(grid);if(gnd)scene.remove(gnd);
+  const G=cur.grid||[40,40];grid=new THREE.GridHelper(G[0],G[1],0x4d6276,0x26384a);grid.material.transparent=true;grid.material.opacity=.45;grid.position.y=cur.gy||0;scene.add(grid);
+  scene.fog.near=(cur.fog||[30,70])[0];scene.fog.far=(cur.fog||[30,70])[1];
+  parts.forEach(p=>root.add(p.obj));(B.extra||[]).forEach(o=>root.add(o));root.updateMatrixWorld(true);
+  parts.forEach(p=>{const bb=new THREE.Box3();p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){o.userData.part=p;bb.expandByObject(o)}});
+   p.c=bb.getCenter(V(0,0,0));p.sz=bb.getSize(V(0,0,0)).length();
+   p.mats=[];p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){const m=o.material;if(!p.mats.includes(m)){p.mats.push(m);m.userData.e0=m.emissive.clone();m.userData.ei=m.emissiveIntensity}}})});
+  pinsEl.innerHTML=parts.map(p=>`<button class="pin ${p.st=='chk'?'chk':''}" data-id="${p.id}" aria-label="${p.no} ${p.name}">${p.no}<span>${p.name}</span></button>`).join('');
+  pinsEl.querySelectorAll('.pin').forEach(b=>{const p=parts.find(q=>q.id==b.dataset.id);p.pin=b;b.onclick=()=>select(b.dataset.id,true)});
+  lblsEl.innerHTML=labels.map((l,i)=>`<div class="lb ${l.k||''}" data-i="${i}">${l.t}</div>`).join('');
+  lblsEl.querySelectorAll('.lb').forEach(d=>labels[d.dataset.i].el=d);
+  labels.forEach(l=>{l.pp=l.part?parts.find(p=>p.id==l.part):null});
+  const f=fit();controls.target.copy(f.c);camera.position.copy(V(...(cur.dir||[.62,.32,.75])).normalize().multiplyScalar(f.d).add(f.c));
+ }
+ renderTable();renderPanel();
+}
+function select(id,focus){
+ sel=id?parts.find(p=>p.id==id):null;
+ parts.forEach(p=>{const on=p==sel;p.pin&&p.pin.classList.toggle('on',on);
+  (p.mats||[]).forEach(m=>{if(on){m.emissive.setHex(0x2f6bff);m.emissiveIntensity=.55}else{m.emissive.copy(m.userData.e0);m.emissiveIntensity=m.userData.ei}})});
+ renderPanel();if(sel&&focus&&ok3d)focusPart(sel);
+}
+tabs.onclick=e=>{const b=e.target.closest('.tab');if(b)load(b.id.slice(2))};
+tabs.onkeydown=e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const i=MODELS.indexOf(cur),n=(i+(e.key=='ArrowRight'?1:MODELS.length-1))%MODELS.length;load(MODELS[n].key);$('#t-'+MODELS[n].key).focus()};
+const ex=$('#ex'),play=$('#play');
+ex.oninput=()=>{t=ex.value/100;playing=false;play.setAttribute('aria-pressed','false');play.textContent='▶ 播放動畫'};
+let ph=0;play.onclick=()=>{playing=!playing;play.setAttribute('aria-pressed',playing);play.textContent=playing?'❚❚ 暫停':'▶ 播放動畫';ph=t<.5?0:2.2};
+$('#lbl').onclick=e=>{showLbl=!showLbl;e.currentTarget.setAttribute('aria-pressed',showLbl);pinsEl.style.display=lblsEl.style.display=showLbl?'':'none'};
+$('#reset').onclick=()=>{select(null);resetView()};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(ok3d){
+ const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down=null;
+ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
+  const r=renderer.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);rc.setFromCamera(mv,camera);
+  const hit=rc.intersectObjects(root.children,true).find(h=>h.object.userData.part&&h.object.visible);select(hit?hit.object.userData.part.id:null,false)});
+ const pv=V(0,0,0);
+ (function loop(now){requestAnimationFrame(loop);if(!cur)return;const dt=Math.min(clock.getDelta(),.05);
+  if(playing){ph=(ph+dt)%4.4;const k=ph<.4?0:ph<2?(ph-.4)/1.6:ph<2.6?1:ph<4.2?1-(ph-2.6)/1.6:0;t=reduce?(ph<2.2?1:0):k;ex.value=Math.round(t*100)}
+  const e=ease(t);parts.forEach(p=>p.obj.position.copy(p.ex).multiplyScalar(e));
+  if(cur.tick)cur.tick(parts,clock.elapsedTime,e,sel);
+  if(tween){const k=Math.min(1,(now-tween.t0)/(reduce?1:650)),s=ease(k);controls.target.lerpVectors(tween.ft,tween.tt,s);camera.position.lerpVectors(tween.fp,tween.tp,s);if(k>=1)tween=null}
+  controls.update();renderer.render(scene,camera);
+  if(showLbl){const w=viewer.clientWidth,h=viewer.clientHeight;
+   const place=(el,v)=>{v.project(camera);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;el.style.display=vis?'':'none';if(vis){el.style.left=((v.x+1)/2*w)+'px';el.style.top=((1-v.y)/2*h)+'px'}};
+   parts.forEach(p=>{if(p.pin)place(p.pin,pv.copy(p.pinAt?V(...p.pinAt):p.c).add(p.ex.clone().multiplyScalar(e)))});
+   labels.forEach(l=>{if(!l.el)return;pv.set(...l.p);if(l.pp)pv.add(l.pp.ex.clone().multiplyScalar(e));if(l.show&&!l.show(e)){l.el.style.display='none';return}place(l.el,pv)})}
+ })(performance.now());
+}
+load(MODELS[0].key);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地磚・緣石・樹穴・止水帶 3D 規範查核</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造查核用的會動的施工詳圖，冷靜、精確
+   IDEA: 材料一鍵展開成層次與零件，每個部位掛上契約條文與送審數值
+   PICTURE: 大幅 3D 視窗，可播放施工／組裝動畫
+   COLOUR and TYPE: 深港藍 + 材料本色 + 琥珀標記；Noto Sans TC
+   LAYOUT: 標題 → 分頁 → 3D 視窗與規範面板並列 → 查核表 → 待確認事項 */
+:root{color-scheme:light dark;
+--bg:light-dark(#f2f4f5,#0a131c);--card:light-dark(#ffffff,#111e2a);--ink:light-dark(#0f1a22,#e8eef2);
+--mute:light-dark(#566470,#93a3b0);--line:light-dark(#d7dde1,#22313f);--acc:#ffb020;--acc2:light-dark(#a86a00,#ffc65a);
+--ok:light-dark(#0b6b57,#4fd1b0);--chk:light-dark(#9a5a00,#ffbf47);--na:light-dark(#4b5a66,#9fb0bd);--sel:light-dark(#1d5fd8,#6aa2ff)}
+
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,14px)}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.1;margin:0 0 8px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 12px;line-height:1.25}
+.sub{color:var(--mute);margin:0;max-width:80ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px}
+.tab{font:inherit;font-weight:700;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;line-height:1.25}
+.tab small{display:block;font-weight:400;color:var(--mute);font-size:13px}
+.tab[aria-selected=true]{background:#13283a;color:#fff;border-color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.tab[aria-selected=true] small{color:#ffd27a}
+.tab:focus-visible,.btn:focus-visible,.pin:focus-visible,.plist button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.viewer{position:relative;height:min(78vh,760px);min-height:460px;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#1d3347 0%,#0c1824 60%,#070e15 100%);border:1px solid #1c2d3c}
+.viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.pins,.lbls{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:26px;height:26px;padding:0 6px;border-radius:13px;border:1.5px solid #ffd27a;background:rgba(10,20,30,.82);color:#ffe3a6;font:700 13px/22px "Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
+.pin span{display:none;font-weight:500;margin-left:4px}
+.pin:hover span,.pin.on span{display:inline}
+.pin.on{background:var(--acc);color:#111;border-color:#fff;z-index:2}
+.pin.chk{border-color:#ff8a3d}
+.lb{position:absolute;transform:translate(-50%,-100%);background:rgba(255,255,255,.92);color:#0d1b26;border-radius:6px;padding:1px 6px;font:700 12px/18px "Noto Sans TC",sans-serif;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.lb.y{background:#ffd27a}.lb.c{background:#9fe3cf}
+.hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(8,16,24,.78);backdrop-filter:blur(6px);border:1px solid #24374a;border-radius:12px;padding:8px 10px;color:#dfe8ee}
+.hud label{display:flex;align-items:center;gap:8px;flex:1 1 220px;font-size:14px}
+.hud input[type=range]{flex:1;accent-color:var(--acc);height:28px}
+.btn{font:inherit;font-size:14px;font-weight:700;min-height:40px;padding:6px 12px;border-radius:9px;border:1px solid #35506a;background:#16293b;color:#eaf2f7;cursor:pointer}
+.btn[aria-pressed=true]{background:var(--acc);color:#141414;border-color:var(--acc)}
+.tag{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);background:rgba(8,16,24,.72);color:#cfdbe4;border:1px solid #24374a;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.45}
+.tag b{color:#ffd27a}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;max-height:min(78vh,760px);overflow:auto}
+.ph{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ph h2{margin:0}
+.no{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:15px;background:var(--acc);color:#141414;font-weight:900;margin-right:8px;font-size:15px;padding:0 6px}
+.chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;border:1.5px solid currentColor}
+.chip.ok{color:var(--ok)}.chip.chk{color:var(--chk)}.chip.na{color:var(--na)}
+.sec{margin-top:14px}
+.sec h3{font-size:14px;color:var(--mute);margin:0 0 6px;font-weight:700}
+.sec ul{margin:0;padding-left:1.1em}
+.sec li{margin:3px 0}
+.src{font-size:12px;color:var(--acc2);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.note{margin-top:14px;padding:10px 12px;border-radius:10px;background:light-dark(#fff6e3,#2a2110);border:1px solid light-dark(#f0d39a,#5a4519);font-size:15px}
+.plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.plist button{font:inherit;font-size:13px;min-height:34px;padding:3px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.plist button.on{border-color:var(--acc);background:light-dark(#fff3d6,#2b2412)}
+.sum{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 12px;color:var(--mute);font-size:15px}
+.sum b{color:var(--ink);font-size:20px;margin-right:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--mute);font-weight:700;background:light-dark(#f6f8f9,#0f1b26)}
+td:first-child{white-space:nowrap;font-weight:700}
+tr.rowsel td{background:light-dark(#fff6e3,#241e10)}
+tbody tr{cursor:pointer}
+.issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.issue{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--chk);border-radius:10px;padding:12px 14px;font-size:15px}
+.issue b{display:block;margin-bottom:4px}
+.foot{color:var(--mute);font-size:13px}
+.err{position:absolute;inset:0;display:none;place-items:center;color:#cfdbe4;padding:20px;text-align:center}
+.scroll{overflow-x:auto}
+
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.panel{max-height:none}.viewer{height:68vh}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:700}.stack td:empty{display:none}.pin span{display:none!important}.tag{font-size:12px}.lb{font-size:11px}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+<h1>地磚・緣石・樹穴・止水帶 3D 規範查核</h1>
+<p class="sub">臺北港南碼頭 C 填區公共設施及永久護岸暨 S04～S05 碼頭工程。人行道頁籤播放分層構造；止水帶頁籤拉開伸縮縫看止水帶。點部位或編號，右側列出契約規範與送審資料對照。</p>
+<div class="tabs" role="tablist" id="tabs"></div>
+</div></header>
+<main class="band" style="padding-top:0"><div class="wrap">
+<div class="grid">
+ <div class="viewer" id="viewer">
+  <div class="lbls" id="lbls"></div>
+  <div class="pins" id="pins"></div>
+  <div class="tag" id="tag"></div>
+  <div class="hud">
+   <label for="ex"><span id="exl">分解</span> <input id="ex" type="range" min="0" max="100" value="0"></label>
+   <button class="btn" id="play" aria-pressed="false">▶ 播放動畫</button>
+   <button class="btn" id="lbl" aria-pressed="true">標註</button>
+   <button class="btn" id="reset">重置視角</button>
+  </div>
+  <div class="err" id="err">3D 元件載入失敗，請重新整理頁面。下方查核表仍可使用。</div>
+ </div>
+ <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+<section style="margin-top:28px">
+ <h2 id="ttl">部位查核表</h2>
+ <div class="sum" id="sum"></div>
+ <div class="scroll"><table class="stack" id="tbl"><thead><tr><th>#</th><th>部位</th><th>契約規範要求</th><th>送審資料</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section style="margin-top:28px">
+ <h2>監造待確認事項</h2>
+ <div class="issues" id="issues"></div>
+</section>
+
+<p class="foot" style="margin-top:26px">依據：設計圖 BC-11 人行道及道路緣石詳圖（高壓混凝土磚、高壓緣石材料說明）、AG-04 永久護岸排水詳圖（橡膠止水帶詳圖、伸縮縫斷面）；施工說明書技術條款第 03150 章混凝土附屬品；特別條款附件 A6 (十六)；監造計畫修訂七版第五章（十八 橡膠止水帶、三十二 高壓混凝土磚）。送審資料：天九興業 高壓混凝土地磚與樹穴高壓緣石（(113)臺北港字第 11-005 號，正新嘉義試驗報告 M2404144、M2403112、M2401581）；北宜水泥製品 預鑄混凝土緣石（第 11-004 號，大欣檢測 11303257）；智發營造 橡膠止水帶採購證明（順發利實業，SGS HV-18-00019）。3D 外形為示意。</p>
+</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+/* ---------- 共用 3D 工具 ---------- */
+const ok3dLib=!!window.THREE;
+const V=(x,y,z)=>ok3dLib?new THREE.Vector3(x,y,z):{x,y,z};
+const SM=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7,metalness:0},o||{}));
+const MAT={
+ cu:()=>SM(0xc6834f,{metalness:.7,roughness:.32}),
+ cuB:()=>SM(0xd9905a,{metalness:.75,roughness:.28}),
+ galv:()=>SM(0xaab3b8,{metalness:.55,roughness:.38}),
+ conc:()=>SM(0xbab4a8,{roughness:.95}),
+ conc2:()=>SM(0x9d978c,{roughness:.95}),
+ mortar:()=>SM(0xd8d0bf,{roughness:1}),
+ grav:()=>SM(0x8c8476,{roughness:1}),
+ soil:()=>SM(0x6d5236,{roughness:1}),
+ soilT:()=>SM(0x6d5236,{roughness:1,transparent:true,opacity:.32,depthWrite:false}),
+ sand:()=>SM(0xd8c08a,{roughness:1}),
+ sandT:()=>SM(0xd8c08a,{roughness:1,transparent:true,opacity:.35,depthWrite:false}),
+ pvc:()=>SM(0x7b8790,{roughness:.6}),
+ black:()=>SM(0x202428,{roughness:.55}),
+ white:()=>SM(0xeeeeea,{roughness:.6}),
+ green:()=>SM(0x2f9a4a,{roughness:.5}),
+ semi:()=>SM(0x1a1a1a,{roughness:.4}),
+ xlpe:()=>SM(0xf1eee2,{roughness:.35,transparent:true,opacity:.96}),
+ rebar:()=>SM(0x8a4b2a,{metalness:.5,roughness:.6}),
+ water:()=>SM(0x2b6f96,{transparent:true,opacity:.18,depthWrite:false,roughness:.2}),
+ rubber:()=>SM(0x1d1f22,{roughness:.8}),
+ pe:()=>SM(0xf3f3f0,{roughness:.8}),
+};
+function mk(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);return m}
+const box=(w,h,d,m,x,y,z)=>mk(new THREE.BoxGeometry(w,h,d),m,x,y,z);
+const cyl=(rt,rb,h,m,x,y,z,s=24)=>mk(new THREE.CylinderGeometry(rt,rb,h,s),m,x,y,z);
+function cylX(r,L,m,x0,y,z,s=32,open){const c=mk(new THREE.CylinderGeometry(r,r,L,s,1,!!open),m,x0+L/2,y,z);c.rotation.z=Math.PI/2;return c}
+function rod(a,b,r,m,s=10){const d=b.clone().sub(a),L=d.length();const c=cyl(r,r,L,m,0,0,0,s);c.position.copy(a).add(b).multiplyScalar(.5);c.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return c}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hn=(x,y,z,s)=>{const v=Math.sin(x*12.9898+y*78.233+z*37.719+s*11.3)*43758.5453;return v-Math.floor(v)};
+/* 石頭幾何：block=塊石（稜角）；否則卵石（圓滑） */
+function stoneGeo(seed,block){
+ const g=block?new THREE.IcosahedronGeometry(.5,1):new THREE.SphereGeometry(.5,18,12);
+ const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+  const a=block?.78+hn(Math.round(x*40),Math.round(y*40),Math.round(z*40),seed)*.42:.93+hn(Math.round(x*30),Math.round(y*30),Math.round(z*30),seed)*.12;p.setXYZ(i,x*a,y*a,z*a)}
+ g.computeVertexNormals();return g}
+function textTex(lines,w,h,bg,fg,size){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=`700 ${size||h*.5}px "Noto Sans TC",sans-serif`;x.textBaseline='middle';
+ const L=[].concat(lines);L.forEach((t,i)=>x.fillText(t,10,h*(i+.5)/L.length));const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return tx}
+function weaveTex(c1,c2,n){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,64,64);x.fillStyle=c2;const s=64/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if((i+j)%2)x.fillRect(i*s,j*s,s,s*.55);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function feltTex(c1){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,128,128);const r=rng(7);for(let i=0;i<900;i++){x.strokeStyle=`rgba(120,120,110,${.08+r()*.12})`;x.beginPath();const a=r()*128,b=r()*128;x.moveTo(a,b);x.lineTo(a+(r()-.5)*14,b+(r()-.5)*14);x.stroke()}const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+
+/* ---------- 頁面資料 ---------- */
+const BC='BC-11 人行道及緣石詳圖',AG='AG-04 永久護岸排水詳圖',S50='第03150章',SM5='監造計畫 5章',SA6='特別條款 附件A6',TJ='天九興業',PV='天九 送審 (113)臺北港字第11-005號',KB='北宜水泥 送審 (113)臺北港字第11-004號';
+const SELF='天九的試驗報告都是「天九興業股份有限公司自試」（主辦、監造、承包欄均為 N/A），屬廠商自主送驗，只能證明產品能力。依監造計畫 5章 三十二，高壓混凝土磚進場後仍須取樣送驗 1 次，不合格加倍取樣。';
+
+function buildWalk(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ const LX=6.4,x0=-LX/2;// 示意段長
+ const z0=0,zW=2.0;// 人行道 A：20 + 160 + 20
+ // 原土
+ let so=g();so.add(box(LX,.25,zW+.6,MAT.soil(),0,-.39-.125,zW/2));
+ add({id:'soil',pinAt:[3.0,-.51,2.2],no:'1',obj:so,ex:[0,-1.2,0],name:'原土壓實整平',st:'na',spec:[['原土壓實整平',BC+' 施工大樣']],sub:[['—','—']],note:''});
+ // 碎石級配 15cm
+ let gv=g();gv.add(box(LX,.15,1.6,MAT.grav(),0,-.315,1.0));
+ add({id:'grav',pinAt:[2.6,-.31,1.75],no:'2',obj:gv,ex:[0,-.8,0],name:'15cm 碎石級配底層',st:'na',spec:[['15cm 厚碎石級配底層',BC]],sub:[['依第 02726 章級配粒料底層','—']],note:''});
+ // 混凝土 15cm + 鋼線網
+ let cc=g();cc.add(box(LX,.15,1.6,MAT.conc(),0,-.165,1.0));const wm=SM(0x6b6f73,{metalness:.5});
+ for(let i=0;i<=10;i++)cc.add(box(.006,.006,1.56,wm,x0+.2+i*.6,-.12,1.0));for(let k=0;k<=10;k++)cc.add(box(LX-.1,.006,.006,wm,0,-.12,.25+k*.15));
+ add({id:'conc',pinAt:[2.2,-.16,1.75],no:'3',obj:cc,ex:[0,-.45,0],name:'15cm 混凝土 210 kgf/cm² ＋銲接鋼線網',st:'na',spec:[['15cm 厚混凝土 210 kgf/cm²',BC],['銲接鋼線網 6mm@15 雙向',BC]],sub:[['預拌混凝土送審另案','—']],note:'澆置前查驗鋼線網位置與墊塊。'});
+ // 砂漿 3cm
+ let mo=g();mo.add(box(LX,.03,1.6,MAT.mortar(),0,-.075,1.0));
+ add({id:'mort',pinAt:[1.8,-.07,1.75],no:'4',obj:mo,ex:[0,-.2,0],name:'3cm 1:3 水泥砂漿',st:'na',spec:[['3cm 厚 1:3 水泥砂漿',BC]],sub:[['—','—']],note:''});
+ // 地磚 20x20x6
+ let pv=g();const pm=SM(0x8e3522,{roughness:.85}),pm2=SM(0x6a6660,{roughness:.85});
+ const pitX=0;
+ for(let i=0;i<32;i++)for(let k=0;k<8;k++){const x=x0+.1+i*.2,z=.2+.1+k*.2;if(Math.abs(x-pitX)<.6&&z>.4&&z<1.6)continue;pv.add(box(.195,.06,.195,(i+k)%5?pm:pm2,x,-.03,z))}
+ add({id:'paver',pinAt:[1.4,0,1.2],no:'5',obj:pv,ex:[0,.35,0],name:'人行道高壓混凝土地磚 20×20×6cm',st:'ok',
+  spec:[['尺寸 20×20×6cm',BC+'、'+PV],['抗壓強度 fc′ ≧400 kgf/cm²',BC+' 材料說明3、'+SM5+' 三十二'],['長、寬、厚誤差 ±5mm',BC+' 材料說明4'],['外觀整齊無缺，不得有裂痕、邊角不完整、破損',BC+' 材料說明2'],['不得添加資源回收再生料粒',BC+' 材料說明5'],['縫隙以水泥（或白水泥）勾縫；排水坡度 1%',BC],['施工前提送舖面大樣圖色卡、樣品、型錄及試驗報告影本，經工程司核可',BC+' 註'],['進場後取樣送驗 1 次，不合格加倍取樣',SM5+' 三十二']],
+  sub:[['正新嘉義 M2404144（CNS 13295）：200×199×59mm，無裂紋','天九 自試 113.05.13'],['抗壓 56.9 MPa ≈ 580 kgf/cm² ≧400','同上'],['正字標記證書、ISO 9001／14001','天九 證照']],note:SELF});
+ // 勾縫
+ let jt=g();for(let i=0;i<=8;i++){const b=box(LX,.004,.006,MAT.white(),0,.0005,.2+i*.2);jt.add(b)}
+ add({id:'joint',pinAt:[-1.6,0,.6],no:'6',obj:jt,ex:[0,.5,0],name:'勾縫與排水坡度',st:'na',spec:[['縫隙均以水泥（或白水泥）勾縫',BC+' 說明'],['人行道排水坡度 1%（向道路側）',BC+' 平面示意'],['無障礙坡道坡度 ≦1/12，可經核定用同材質小尺寸地磚',BC+' 無障礙坡道']],sub:[['—','—']],note:''});
+ // 道路側預鑄緣石 20x30, 每塊 150
+ let rc=g();const rcm=SM(0x9a958a,{roughness:.9});for(let i=0;i<LX/1.5-.01;i++){const b=box(1.49,.3,.2,rcm,x0+.75+i*1.5,-.13,.1);rc.add(b)}
+ rc.add(box(LX,.08,.8,SM(0x2d2f31,{roughness:1}),0,-.21,-.4));
+ add({id:'rcurb',no:'7',obj:rc,ex:[0,.2,-.8],name:'預鑄混凝土道路側緣石（30cm 高）',st:'chk',
+  spec:[['30cm 高預鑄混凝土緣石，fc′ = 280 kgf/cm²',BC+' 人行道C 平面示意'],['鋼筋 D10 SD280／SD280W；6-#3、#3@15',BC+' 預鑄緣石詳圖、'+KB],['採清水模板或鋼模施作',BC+' 說明2'],['每塊長 150cm（含接縫），3×3 截角、R=5',BC]],
+  sub:[['北宜水泥製品：承製證明（約 1,260 支），fc′≧280 kgf/cm²','北宜 承製證明'],['大欣檢測 11303257：28 天圓柱 410／408／412／410 kgf/cm²','大欣 113.07.31'],['鋼筋：羅東鋼鐵；混凝土：久屋預拌','規範比較表']],
+  note:'附件圓柱試驗（大欣 11303257）的工程名稱是「土城司法園區區段徵收公共工程」、結構部位為人孔，不是本案緣石，只能作為廠商能力證明。本案緣石製作時須依第 03050 章取樣試驗，進場核對尺寸與外觀。'});
+ // 人行道側緣石（場鑄）＋PE 伸縮縫
+ let sc=g();const scm=SM(0x8f897d,{roughness:.95});sc.add(box(LX/2-.005,.55,.2,scm,x0+LX/4,-.225,1.9),box(LX/2-.005,.55,.2,scm,LX/4,-.225,1.9));
+ const pe=box(.01,.55,.2,MAT.pe(),0,-.225,1.9);sc.add(pe);
+ add({id:'scurb',no:'8',obj:sc,ex:[0,.2,.8],name:'人行道側緣石＋1cm PE 伸縮縫',st:'na',
+  spec:[['人行道側緣石 fc′ ≧280 kgf/cm² 混凝土，#3@15，3×3 截角，底 5cm 140 PC',BC+' 人行道側緣石詳圖'],['伸縮縫 1cm 厚 PE 板，約 20m 設置一處',BC+' 伸縮縫詳圖'],['緣石高度配合回填區高程調整',BC+' 註']],sub:[['場鑄，依設計圖','—']],note:''});
+ // 樹穴緣石
+ const hm=SM(0xa8a397,{roughness:.8});let tc=g(),tk=g();
+ // 內淨 90×90，外 120×120；60×15×15 直段 + 30×30×15 轉角
+ const zc=1.0,h=.15,yc=-.075+.0;
+ [[-.15],[.15]].forEach(([dx])=>{});
+ tc.add(box(.6,h,.15,hm,pitX,yc,zc-.525),box(.6,h,.15,hm,pitX,yc,zc+.525),box(.15,h,.6,hm,pitX-.525,yc,zc),box(.15,h,.6,hm,pitX+.525,yc,zc));
+ [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([a,b])=>{const G=new THREE.Group();G.add(box(.3,h,.15,hm,a*.45,yc,zc+b*.525),box(.15,h,.15,hm,a*.525,yc,zc+b*.375));tk.add(G)});
+ add({id:'treec',no:'9',obj:tc,ex:[0,.9,0],name:'樹穴高壓緣石 60×15×15cm',st:'ok',
+  spec:[['60×15×15cm 高壓緣石（平板面）',BC+' 磚型大樣、'+PV],['抗壓強度 fc′ ≧400 kgf/cm²',BC+' 高壓緣石材料說明3'],['長、寬、厚誤差 ±1mm',BC+' 高壓緣石材料說明4'],['外觀整齊無缺，不得有裂痕、邊角破損；不得添加再生料粒',BC+' 材料說明2、5'],['樹穴每 5.2m 一處；內淨 90cm、底 3cm 1:3 砂漿',BC+' 人行道A 平面、植樹穴大樣']],
+  sub:[['正新嘉義 M2403112（CNS 3930）：60×15×15，抗壓 596 kgf/cm²（58.4 MPa）、抗彎破壞 1,637 kgf，外觀無瑕疵','天九 自試 113.04.10']],note:SELF});
+ add({id:'treek',no:'10',obj:tk,ex:[0,1.1,0],name:'樹穴轉角高壓緣石',st:'chk',
+  spec:[['設計圖：30×15×15cm 高壓緣石（平板面－轉角用）',BC+' 磚型大樣'],['抗壓 ≧400 kgf/cm²；誤差 ±1mm',BC]],
+  sub:[['比較表：樹穴高壓緣石（轉角）30×30×15cm',PV],['正新嘉義 M2401581：緣石類型 30×30×15cm，抗壓 494 kgf/cm²','天九 自試']],
+  note:'BC-11 磚型大樣寫轉角用 30×15×15cm，送審比較表與試驗報告卻是 30×30×15cm（L 型）。請廠商以製造圖說明轉角件實際形狀並與 BC-11 對齊。另該報告收件日期 113/02/20、試驗與報告日期卻寫 112/02/21，日期前後矛盾，請廠商向試驗室確認。'});
+ // 沃土＋樹
+ let tr=g();tr.add(box(.9,.3,.9,MAT.soil(),pitX,-.165,zc));tr.add(cyl(.04,.06,1.5,SM(0x5b4330),pitX,.75,zc,12));
+ [[0,1.6,0,.42],[.22,1.45,.12,.3],[-.2,1.5,-.08,.32],[0,1.85,.06,.3]].forEach(([x,y,z,r])=>tr.add(mk(new THREE.IcosahedronGeometry(r,1),SM(0x2e6b3a,{roughness:.9,flatShading:true}),pitX+x,y,zc+z)));
+ add({id:'tree',no:'11',obj:tr,ex:[0,1.6,0],name:'回填沃土及植栽（大葉山欖）',st:'na',spec:[['樹穴回填沃土',BC+' 植樹穴大樣'],['植栽：大葉山欖',' 價目表 植栽']],sub:[['—','—']],note:''});
+ P.labels=[{p:[-2.2,.03,1.0],t:'地磚 20×20×6・≧400',k:'y',part:'paver'},{p:[pitX,.03,zc+.62],t:'樹穴 60×15×15',k:'y',part:'treec'},{p:[-2.5,.05,.1],t:'道路側緣石 fc′280',k:'c',part:'rcurb'},{p:[0,.1,1.9],t:'PE 板 1cm',k:'c',part:'scurb'},{p:[3.3,-.35,1.0],t:'15cm 碎石級配',k:'y',part:'grav'},{p:[3.3,-.17,1.0],t:'15cm 混凝土＋鋼線網',k:'y',part:'conc'}];
+ return P;
+}
+
+function buildWS(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ // 5U 排水溝：內寬 50、壁厚 20、底厚 20、內高 50（示意）
+ const W=.5,T=.2,Hh=.5,L=1.2;
+ const seg=(x,m)=>{const G=g();G.add(box(L,T,W+2*T,m,x,-T/2,0),box(L,Hh,T,m,x,Hh/2,W/2+T/2),box(L,Hh,T,m,x,Hh/2,-W/2-T/2));return G};
+ let s1=g();s1.add(seg(-L/2-.005,MAT.conc()));
+ add({id:'ditch1',no:'1',obj:s1,ex:[-.6,0,0],name:'5U 型排水溝（左段）',st:'na',spec:[['排水溝及箱涵混凝土 fc′ ≧280 kgf/cm²，波特蘭Ⅱ型水泥',AG+' 說明3'],['伸縮縫於兩集水井間約 25m 設置一處',AG+' 註'],['內面工採清水模板',AG+' 說明4']],sub:[['—','—']],note:''});
+ let s2=g();s2.add(seg(L/2+.005,MAT.conc2()));
+ add({id:'ditch2',no:'2',obj:s2,ex:[.6,0,0],name:'5U 型排水溝（右段）',st:'na',spec:[['同左段',AG]],sub:[['—','—']],note:''});
+ // 止水帶（U 形，沿斷面中線）
+ const ws=g();const rm=MAT.rubber();const wsW=.15,wsT=.0095,bD=.019;
+ const strip=(len,ax,pos)=>{const m=box(ax=='z'?wsW:wsW,ax=='y'?len:wsT,ax=='z'?len:wsT,rm,...pos);return m};
+ // 底板內：水平沿 z；壁內：垂直沿 y。止水帶寬方向沿 x（跨縫）
+ const addStrip=(cx,cy,cz,len,dir)=>{const G=g();const sb=dir=='z'?box(wsW,wsT,len,rm,0,0,0):box(wsW,len,wsT,rm,0,0,0);G.add(sb);
+  [-1,1].forEach(k=>{const b=dir=='z'?mk(new THREE.CylinderGeometry(bD/2,bD/2,len,16),rm,k*.06,0,0):mk(new THREE.CylinderGeometry(bD/2,bD/2,len,16),rm,k*.06,0,0);if(dir=='z')b.rotation.x=Math.PI/2;G.add(b)});
+  const c=dir=='z'?mk(new THREE.CylinderGeometry(.0095,.0095,len,12,1,true),rm,0,0,0):mk(new THREE.CylinderGeometry(.0095,.0095,len,12,1,true),rm,0,0,0);if(dir=='z')c.rotation.x=Math.PI/2;G.add(c);
+  G.position.set(cx,cy,cz);ws.add(G)};
+ addStrip(0,-T/2,0,W+T,'z');addStrip(0,(Hh-.05)/2-.05,W/2+T/2,Hh+.05,'y');addStrip(0,(Hh-.05)/2-.05,-W/2-T/2,Hh+.05,'y');
+ add({id:'ws',no:'3',obj:ws,ex:[0,.0,0],name:'橡膠止水帶（二球式 15cm）',st:'chk',
+  spec:[['15cm 寬橡膠止水帶，厚 0.95cm，球徑 D=1.9cm',AG+' 止水帶詳圖'],['二球式，寬 15cm、厚 0.95cm',SM5+' 十八'],['合成橡膠：抗拉 ≧178 kgf/cm²、破壞伸長 ≧425%（ASTM D412），含量 ≧80%',S50+' 2.1.1(2)'],['天然橡膠：抗拉 ≧245 kgf/cm²、伸長 ≧550%、300% 應力 ≧175、硬度 60±5、含量 ≧72%',S50+' 2.1.1(1)'],['老化（ASTM D572，70℃×7 天）抗拉及伸長損失 ≦35%',S50+' 2.1.1'],['提出 1 年內試驗報告，施工前每品項各 1 次；材料進場現場取樣',SM5+' 十八'],['抗拉（D412）、伸展量硬度（D2240）各 1 次',SA6+' (十六)']],
+  sub:[['順發利實業 二球式橡膠止水帶，採購 1,420m（ASTM D412、D2240）','智發營造 採購證明 112.07.15'],['SGS HV-18-00019：硬度 58、抗拉 206 kgf/cm²、伸長 446%','SGS 107.02.26'],['老化 70℃×168h：抗拉損失 -12%、伸長損失 -10%；膠含量 88.4%','同上']],
+  note:'數值符合「合成橡膠」標準（206≧178、446%≧425%），但不符天然橡膠標準；請廠商聲明材質為合成橡膠。附件 SGS 報告是 107 年「臺北商港物流倉儲區第一期公共設施工程」取樣，已超過監造計畫要求的「1 年內試驗報告」，須補新報告，並於進場時現場取樣送驗 D412／D2240。'});
+ // 球體近看標籤用（中央跨縫示意已在 ws）
+ // PE 板
+ let pe=g();pe.add(box(.01,Hh+T-.02,W+2*T-.02,MAT.pe(),0,(Hh-T)/2,0));
+ add({id:'pe',no:'4',obj:pe,ex:[-.3,0,0],name:'1cm 厚 PE 板（伸縮縫填充）',st:'na',spec:[['伸縮縫 1cm 厚 PE 板',AG+' 伸縮縫斷面'],['伸縮縫填縫料：ASTM D1751／D1752 或 PU 填縫料 CNS 6985',S50+' 2.1.2']],sub:[['—','—']],note:''});
+ // 填縫料
+ let sl=g();const fm=SM(0x3b3f45,{roughness:.6});sl.add(box(.012,.015,W,fm,0,.0075,0),box(.012,Hh-.01,.015,fm,0,Hh/2,W/2+.0075),box(.012,Hh-.01,.015,fm,0,Hh/2,-W/2-.0075));
+ add({id:'seal',no:'5',obj:sl,ex:[.3,.25,0],name:'填縫料（內側 1.5cm）',st:'na',spec:[['內側以填縫料封縫，深 1.5cm',AG+' 伸縮縫斷面']],sub:[['—','—']],note:''});
+ // 施工查驗：搭接
+ let lp=g();lp.add(box(.3,.02,.02,SM(0xffd27a),0,-T-.03,0));
+ add({id:'lap',no:'6',obj:lp,ex:[0,-.2,0],name:'止水帶定位與搭接',st:'na',pinAt:[0,-T-.05,.3],
+  spec:[['澆置時確保止水帶定位，接合處形成不中斷之止水',S50+' 3.1.1(1)(2)'],['原則整條無搭接；搭接依製造廠建議，強度不得低於未搭接斷面',S50+' 3.1.1(3)'],['直角及 T 型接頭應模鑄成型或廠內組合成型',S50+' 2.1.1'],['儲存墊離地面 15cm 以上，不受天候影響',S50+' 1.5.2']],sub:[['現場查驗','—']],note:'U 型斷面兩個轉角屬直角接頭，須用模鑄或廠內組合件，禁止現場搭接。'});
+ P.labels=[{p:[0,-T/2+.03,.0],t:'二球式 15cm・t 0.95・D 1.9',k:'y',part:'ws'},{p:[0,Hh+.08,W/2],t:'PE 板 1cm',k:'c',part:'pe'},{p:[-1.1,Hh+.05,W/2+T/2],t:'伸縮縫 @≈25m',k:'c',part:'ditch1'}];
+ return P;
+}
+const PAGE={models:[
+ {key:'walk',tab:'人行道・緣石・樹穴',sm:'地磚 20×20×6・樹穴 60×15×15',title:'人行道鋪面、道路側緣石、樹穴（人行道 A）',fit:{c:[.3,.1,1],r:3.3},grid:[30,60],gy:-.65,fog:[20,60],minZoom:.9,dir:[.45,.6,.68],build:buildWalk,
+  tag:'<b>分層動畫</b>：播放時由原土、碎石級配、混凝土＋鋼線網、砂漿、地磚依序展開，緣石與樹穴緣石向外分離。段長 6.4m 示意'},
+ {key:'ws',tab:'橡膠止水帶',sm:'5U 排水溝伸縮縫',title:'橡膠止水帶（5U 排水溝伸縮縫）',fit:{c:[0,.15,0],r:1.35},grid:[10,40],gy:-.2,fog:[10,40],minZoom:.35,dir:[.55,.45,.7],build:buildWS,slider:'拉開',
+  tag:'<b>伸縮縫拉開</b>：拖動滑桿讓兩段排水溝分開，露出跨縫的二球式止水帶、PE 板與填縫料（亦用於 2.0×2.0m 排水箱涵）'}
+]};
+
+
+/* ---------- 介面 ---------- */
+const MODELS=PAGE.models,ST={ok:'符合',chk:'待確認',na:'現場查驗'};
+const $=s=>document.querySelector(s);
+const tabs=$('#tabs'),pinsEl=$('#pins'),lblsEl=$('#lbls'),panel=$('#panel');
+tabs.innerHTML=MODELS.map((m,i)=>`<button class="tab" role="tab" id="t-${m.key}" aria-selected="${i==0}">${m.tab}<small>${m.sm}</small></button>`).join('');
+let cur=null,parts=[],labels=[],sel=null,t=0,playing=false,showLbl=true,ok3d=ok3dLib;
+const li=a=>`<li>${a[0]}${a[1]&&a[1]!='—'?`<span class="src">${a[1]}</span>`:''}</li>`;
+function renderPanel(){
+ const p=sel;const list=parts.map(q=>`<button data-id="${q.id}" class="${p&&q.id==p.id?'on':''}">${q.no} ${q.name}</button>`).join('');
+ if(!p)panel.innerHTML=`<h2>${cur.title}</h2><p class="sub" style="margin-top:6px">${cur.intro||'點選 3D 視窗中的部位或下方名稱，查看契約規範要求與送審資料。黃色編號對應查核表編號。'}</p><div class="plist">${list}</div>`;
+ else panel.innerHTML=`<div class="ph"><h2><span class="no">${p.no}</span>${p.name}</h2><span class="chip ${p.st}">${ST[p.st]}</span></div>
+ <div class="sec"><h3>契約規範要求</h3><ul>${p.spec.map(li).join('')}</ul></div>
+ <div class="sec"><h3>送審資料</h3><ul>${p.sub.map(li).join('')}</ul></div>
+ ${p.note?`<div class="note">${p.note}</div>`:''}
+ <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="fc">聚焦此部位</button><button class="btn" id="clr">回到全覽</button></div>
+ <div class="plist">${list}</div>`;
+ panel.querySelectorAll('.plist button').forEach(b=>b.onclick=()=>select(b.dataset.id,true));
+ const fc=$('#fc');if(fc)fc.onclick=()=>focusPart(p);const cl=$('#clr');if(cl)cl.onclick=()=>{select(null);resetView()};
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.classList.toggle('rowsel',!!p&&r.dataset.id==p.id));
+}
+function renderTable(){
+ $('#ttl').textContent=cur.title+'：部位查核表';
+ const c={ok:0,chk:0,na:0};parts.forEach(p=>c[p.st]++);
+ $('#sum').innerHTML=`<span><b>${parts.length}</b>部位</span><span><b style="color:var(--ok)">${c.ok}</b>符合</span><span><b style="color:var(--chk)">${c.chk}</b>待確認</span><span><b style="color:var(--na)">${c.na}</b>現場查驗</span>`;
+ $('#tbl tbody').innerHTML=parts.map(p=>`<tr data-id="${p.id}"><td>${p.no}</td><td>${p.name}</td><td>${p.spec.map(s=>s[0]).join('<br>')}</td><td>${p.sub.map(s=>s[0]).join('<br>')}</td><td><span class="chip ${p.st}">${ST[p.st]}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.onclick=()=>{select(r.dataset.id,true);$('#viewer').scrollIntoView({behavior:'smooth',block:'start'})});
+ const seen=new Set();
+ $('#issues').innerHTML=parts.filter(p=>p.st=='chk'&&p.note&&!seen.has(p.note)&&seen.add(p.note)).map(p=>`<div class="issue"><b>${p.no} ${p.name}</b>${p.note}</div>`).join('')||'<p class="sub">無。</p>';
+}
+/* ---------- 3D ---------- */
+let renderer,scene,camera,controls,root,clock,grid,gnd;
+const viewer=$('#viewer');
+if(ok3d){try{
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.outputEncoding=THREE.sRGBEncoding;viewer.prepend(renderer.domElement);
+ scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0c1824,30,70);
+ camera=new THREE.PerspectiveCamera(38,1,.01,400);
+ controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.95;
+ scene.add(new THREE.HemisphereLight(0xcfe2ff,0x2a2218,.85));
+ const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(6,12,8);scene.add(dl);
+ const dl2=new THREE.DirectionalLight(0x88aaff,.35);dl2.position.set(-8,4,-6);scene.add(dl2);
+ clock=new THREE.Clock();
+ const ro=new ResizeObserver(()=>{const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()});ro.observe(viewer);
+}catch(e){ok3d=false}}
+if(!ok3d)$('#err').style.display='grid';
+let tween=null;
+const ease=x=>x<.5?2*x*x:1-(-2*x+2)**2/2;
+function flyTo(target,dist,dir){if(!ok3d)return;const d=(dir||camera.position.clone().sub(controls.target).normalize());tween={t0:performance.now(),ft:controls.target.clone(),fp:camera.position.clone(),tt:target.clone(),tp:target.clone().add(d.multiplyScalar(dist))}}
+const fit=()=>{const f=cur.fit,asp=camera.aspect||1;return{c:V(...f.c),d:f.r/Math.tan(19*Math.PI/180)/Math.min(1,Math.max(.5,asp))*.92}};
+function resetView(){const f=fit();flyTo(f.c,f.d,V(...(cur.dir||[.62,.32,.75])).normalize())}
+function partCenter(p){return p.c.clone().add(p.ex.clone().multiplyScalar(ease(t)))}
+function focusPart(p){flyTo(partCenter(p),Math.max(cur.minZoom||1.2,p.sz*1.6))}
+function load(key){
+ cur=MODELS.find(m=>m.key==key);
+ tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.id=='t-'+key));
+ $('#tag').innerHTML=cur.tag;$('#exl').textContent=cur.slider||'分解';
+ const B=cur.build();parts=B.map(p=>Object.assign({},p,{ex:V(...(p.ex||[0,0,0]))}));labels=B.labels||[];sel=null;t=0;$('#ex').value=0;
+ if(ok3d){
+  if(root)scene.remove(root);root=new THREE.Group();scene.add(root);
+  if(grid)scene.remove(grid);if(gnd)scene.remove(gnd);
+  const G=cur.grid||[40,40];grid=new THREE.GridHelper(G[0],G[1],0x4d6276,0x26384a);grid.material.transparent=true;grid.material.opacity=.45;grid.position.y=cur.gy||0;scene.add(grid);
+  scene.fog.near=(cur.fog||[30,70])[0];scene.fog.far=(cur.fog||[30,70])[1];
+  parts.forEach(p=>root.add(p.obj));(B.extra||[]).forEach(o=>root.add(o));root.updateMatrixWorld(true);
+  parts.forEach(p=>{const bb=new THREE.Box3();p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){o.userData.part=p;bb.expandByObject(o)}});
+   p.c=bb.getCenter(V(0,0,0));p.sz=bb.getSize(V(0,0,0)).length();
+   p.mats=[];p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){const m=o.material;if(!p.mats.includes(m)){p.mats.push(m);m.userData.e0=m.emissive.clone();m.userData.ei=m.emissiveIntensity}}})});
+  pinsEl.innerHTML=parts.map(p=>`<button class="pin ${p.st=='chk'?'chk':''}" data-id="${p.id}" aria-label="${p.no} ${p.name}">${p.no}<span>${p.name}</span></button>`).join('');
+  pinsEl.querySelectorAll('.pin').forEach(b=>{const p=parts.find(q=>q.id==b.dataset.id);p.pin=b;b.onclick=()=>select(b.dataset.id,true)});
+  lblsEl.innerHTML=labels.map((l,i)=>`<div class="lb ${l.k||''}" data-i="${i}">${l.t}</div>`).join('');
+  lblsEl.querySelectorAll('.lb').forEach(d=>labels[d.dataset.i].el=d);
+  labels.forEach(l=>{l.pp=l.part?parts.find(p=>p.id==l.part):null});
+  const f=fit();controls.target.copy(f.c);camera.position.copy(V(...(cur.dir||[.62,.32,.75])).normalize().multiplyScalar(f.d).add(f.c));
+ }
+ renderTable();renderPanel();
+}
+function select(id,focus){
+ sel=id?parts.find(p=>p.id==id):null;
+ parts.forEach(p=>{const on=p==sel;p.pin&&p.pin.classList.toggle('on',on);
+  (p.mats||[]).forEach(m=>{if(on){m.emissive.setHex(0x2f6bff);m.emissiveIntensity=.55}else{m.emissive.copy(m.userData.e0);m.emissiveIntensity=m.userData.ei}})});
+ renderPanel();if(sel&&focus&&ok3d)focusPart(sel);
+}
+tabs.onclick=e=>{const b=e.target.closest('.tab');if(b)load(b.id.slice(2))};
+tabs.onkeydown=e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const i=MODELS.indexOf(cur),n=(i+(e.key=='ArrowRight'?1:MODELS.length-1))%MODELS.length;load(MODELS[n].key);$('#t-'+MODELS[n].key).focus()};
+const ex=$('#ex'),play=$('#play');
+ex.oninput=()=>{t=ex.value/100;playing=false;play.setAttribute('aria-pressed','false');play.textContent='▶ 播放動畫'};
+let ph=0;play.onclick=()=>{playing=!playing;play.setAttribute('aria-pressed',playing);play.textContent=playing?'❚❚ 暫停':'▶ 播放動畫';ph=t<.5?0:2.2};
+$('#lbl').onclick=e=>{showLbl=!showLbl;e.currentTarget.setAttribute('aria-pressed',showLbl);pinsEl.style.display=lblsEl.style.display=showLbl?'':'none'};
+$('#reset').onclick=()=>{select(null);resetView()};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(ok3d){
+ const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down=null;
+ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
+  const r=renderer.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);rc.setFromCamera(mv,camera);
+  const hit=rc.intersectObjects(root.children,true).find(h=>h.object.userData.part&&h.object.visible);select(hit?hit.object.userData.part.id:null,false)});
+ const pv=V(0,0,0);
+ (function loop(now){requestAnimationFrame(loop);if(!cur)return;const dt=Math.min(clock.getDelta(),.05);
+  if(playing){ph=(ph+dt)%4.4;const k=ph<.4?0:ph<2?(ph-.4)/1.6:ph<2.6?1:ph<4.2?1-(ph-2.6)/1.6:0;t=reduce?(ph<2.2?1:0):k;ex.value=Math.round(t*100)}
+  const e=ease(t);parts.forEach(p=>p.obj.position.copy(p.ex).multiplyScalar(e));
+  if(cur.tick)cur.tick(parts,clock.elapsedTime,e,sel);
+  if(tween){const k=Math.min(1,(now-tween.t0)/(reduce?1:650)),s=ease(k);controls.target.lerpVectors(tween.ft,tween.tt,s);camera.position.lerpVectors(tween.fp,tween.tp,s);if(k>=1)tween=null}
+  controls.update();renderer.render(scene,camera);
+  if(showLbl){const w=viewer.clientWidth,h=viewer.clientHeight;
+   const place=(el,v)=>{v.project(camera);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;el.style.display=vis?'':'none';if(vis){el.style.left=((v.x+1)/2*w)+'px';el.style.top=((1-v.y)/2*h)+'px'}};
+   parts.forEach(p=>{if(p.pin)place(p.pin,pv.copy(p.pinAt?V(...p.pinAt):p.c).add(p.ex.clone().multiplyScalar(e)))});
+   labels.forEach(l=>{if(!l.el)return;pv.set(...l.p);if(l.pp)pv.add(l.pp.ex.clone().multiplyScalar(e));if(l.show&&!l.show(e)){l.el.style.display='none';return}place(l.el,pv)})}
+ })(performance.now());
+}
+load(MODELS[0].key);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>砂腸・濾布・地工砂袋 3D 規範查核</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 監造查核用的會動的施工詳圖，冷靜、精確
+   IDEA: 材料一鍵展開成層次與零件，每個部位掛上契約條文與送審數值
+   PICTURE: 大幅 3D 視窗，可播放施工／組裝動畫
+   COLOUR and TYPE: 深港藍 + 材料本色 + 琥珀標記；Noto Sans TC
+   LAYOUT: 標題 → 分頁 → 3D 視窗與規範面板並列 → 查核表 → 待確認事項 */
+:root{color-scheme:light dark;
+--bg:light-dark(#f2f4f5,#0a131c);--card:light-dark(#ffffff,#111e2a);--ink:light-dark(#0f1a22,#e8eef2);
+--mute:light-dark(#566470,#93a3b0);--line:light-dark(#d7dde1,#22313f);--acc:#ffb020;--acc2:light-dark(#a86a00,#ffc65a);
+--ok:light-dark(#0b6b57,#4fd1b0);--chk:light-dark(#9a5a00,#ffbf47);--na:light-dark(#4b5a66,#9fb0bd);--sel:light-dark(#1d5fd8,#6aa2ff)}
+
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,14px)}
+.wrap{max-width:1320px;margin:0 auto}
+h1{font-size:clamp(26px,3.6vw,42px);line-height:1.1;margin:0 0 8px;font-weight:900;text-wrap:balance}
+h2{font-size:22px;margin:0 0 12px;line-height:1.25}
+.sub{color:var(--mute);margin:0;max-width:80ch}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 14px}
+.tab{font:inherit;font-weight:700;min-height:44px;padding:8px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;text-align:left;line-height:1.25}
+.tab small{display:block;font-weight:400;color:var(--mute);font-size:13px}
+.tab[aria-selected=true]{background:#13283a;color:#fff;border-color:var(--acc);box-shadow:inset 0 -3px 0 var(--acc)}
+.tab[aria-selected=true] small{color:#ffd27a}
+.tab:focus-visible,.btn:focus-visible,.pin:focus-visible,.plist button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:16px;align-items:start}
+.viewer{position:relative;height:min(78vh,760px);min-height:460px;border-radius:14px;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#1d3347 0%,#0c1824 60%,#070e15 100%);border:1px solid #1c2d3c}
+.viewer canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.pins,.lbls{position:absolute;inset:0;pointer-events:none}
+.pin{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-width:26px;height:26px;padding:0 6px;border-radius:13px;border:1.5px solid #ffd27a;background:rgba(10,20,30,.82);color:#ffe3a6;font:700 13px/22px "Noto Sans TC",sans-serif;cursor:pointer;white-space:nowrap}
+.pin span{display:none;font-weight:500;margin-left:4px}
+.pin:hover span,.pin.on span{display:inline}
+.pin.on{background:var(--acc);color:#111;border-color:#fff;z-index:2}
+.pin.chk{border-color:#ff8a3d}
+.lb{position:absolute;transform:translate(-50%,-100%);background:rgba(255,255,255,.92);color:#0d1b26;border-radius:6px;padding:1px 6px;font:700 12px/18px "Noto Sans TC",sans-serif;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.lb.y{background:#ffd27a}.lb.c{background:#9fe3cf}
+.hud{position:absolute;left:12px;right:12px;bottom:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:rgba(8,16,24,.78);backdrop-filter:blur(6px);border:1px solid #24374a;border-radius:12px;padding:8px 10px;color:#dfe8ee}
+.hud label{display:flex;align-items:center;gap:8px;flex:1 1 220px;font-size:14px}
+.hud input[type=range]{flex:1;accent-color:var(--acc);height:28px}
+.btn{font:inherit;font-size:14px;font-weight:700;min-height:40px;padding:6px 12px;border-radius:9px;border:1px solid #35506a;background:#16293b;color:#eaf2f7;cursor:pointer}
+.btn[aria-pressed=true]{background:var(--acc);color:#141414;border-color:var(--acc)}
+.tag{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);background:rgba(8,16,24,.72);color:#cfdbe4;border:1px solid #24374a;border-radius:10px;padding:6px 10px;font-size:13px;line-height:1.45}
+.tag b{color:#ffd27a}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 16px 18px;max-height:min(78vh,760px);overflow:auto}
+.ph{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.ph h2{margin:0}
+.no{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:15px;background:var(--acc);color:#141414;font-weight:900;margin-right:8px;font-size:15px;padding:0 6px}
+.chip{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:20px;white-space:nowrap;border:1.5px solid currentColor}
+.chip.ok{color:var(--ok)}.chip.chk{color:var(--chk)}.chip.na{color:var(--na)}
+.sec{margin-top:14px}
+.sec h3{font-size:14px;color:var(--mute);margin:0 0 6px;font-weight:700}
+.sec ul{margin:0;padding-left:1.1em}
+.sec li{margin:3px 0}
+.src{font-size:12px;color:var(--acc2);border:1px solid var(--line);border-radius:6px;padding:0 5px;margin-left:4px;white-space:nowrap}
+.note{margin-top:14px;padding:10px 12px;border-radius:10px;background:light-dark(#fff6e3,#2a2110);border:1px solid light-dark(#f0d39a,#5a4519);font-size:15px}
+.plist{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.plist button{font:inherit;font-size:13px;min-height:34px;padding:3px 9px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.plist button.on{border-color:var(--acc);background:light-dark(#fff3d6,#2b2412)}
+.sum{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 12px;color:var(--mute);font-size:15px}
+.sum b{color:var(--ink);font-size:20px;margin-right:4px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;font-size:15px}
+th,td{text-align:left;vertical-align:top;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:13px;color:var(--mute);font-weight:700;background:light-dark(#f6f8f9,#0f1b26)}
+td:first-child{white-space:nowrap;font-weight:700}
+tr.rowsel td{background:light-dark(#fff6e3,#241e10)}
+tbody tr{cursor:pointer}
+.issues{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:10px}
+.issue{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--chk);border-radius:10px;padding:12px 14px;font-size:15px}
+.issue b{display:block;margin-bottom:4px}
+.foot{color:var(--mute);font-size:13px}
+.err{position:absolute;inset:0;display:none;place-items:center;color:#cfdbe4;padding:20px;text-align:center}
+.scroll{overflow-x:auto}
+
+@media(max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}.panel{max-height:none}.viewer{height:68vh}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:6.5em;text-align:start;white-space:normal}.stack td::before{content:attr(data-l);float:inline-start;width:6em;margin-inline-start:-6.5em;color:var(--mute);font-weight:700}.stack td:empty{display:none}.pin span{display:none!important}.tag{font-size:12px}.lb{font-size:11px}}
+</style>
+<script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
+</head>
+<body>
+<header class="band" style="padding-bottom:0"><div class="wrap">
+<h1>砂腸・濾布・地工砂袋 3D 規範查核</h1>
+<p class="sub">臺北港南碼頭 C 填區公共設施及永久護岸暨 S04～S05 碼頭工程。三個頁籤分別播放砂腸疊堆、砂袋吊放、濾布鋪設動畫；點部位或編號，右側列出契約規範與送審資料對照。</p>
+<div class="tabs" role="tablist" id="tabs"></div>
+</div></header>
+<main class="band" style="padding-top:0"><div class="wrap">
+<div class="grid">
+ <div class="viewer" id="viewer">
+  <div class="lbls" id="lbls"></div>
+  <div class="pins" id="pins"></div>
+  <div class="tag" id="tag"></div>
+  <div class="hud">
+   <label for="ex"><span id="exl">分解</span> <input id="ex" type="range" min="0" max="100" value="0"></label>
+   <button class="btn" id="play" aria-pressed="false">▶ 播放動畫</button>
+   <button class="btn" id="lbl" aria-pressed="true">標註</button>
+   <button class="btn" id="reset">重置視角</button>
+  </div>
+  <div class="err" id="err">3D 元件載入失敗，請重新整理頁面。下方查核表仍可使用。</div>
+ </div>
+ <aside class="panel" id="panel" aria-live="polite"></aside>
+</div>
+<section style="margin-top:28px">
+ <h2 id="ttl">部位查核表</h2>
+ <div class="sum" id="sum"></div>
+ <div class="scroll"><table class="stack" id="tbl"><thead><tr><th>#</th><th>部位</th><th>契約規範要求</th><th>送審資料</th><th>判定</th></tr></thead><tbody></tbody></table></div>
+</section>
+<section style="margin-top:28px">
+ <h2>監造待確認事項</h2>
+ <div class="issues" id="issues"></div>
+</section>
+
+<p class="foot" style="margin-top:26px">依據：第一次變更設計 AA-10 臨時擋土設施斷面圖（砂管堤規格及施工說明）、AI-06 永久護岸末端臨時圍堵示意圖（地工砂袋規格）；施工說明書技術條款第 02342 章地工織物、第 02392 章 2.1.2 濾布、3.5.2、3.6.1；特別條款附件 A6；監造計畫修訂七版第五章（三十五 地工砂腸）。送審資料：材料檢驗申請 M-0012 及石川工程／甲盟實業 砂腸管訂貨契約、TenCate Geotube 型錄；宇中興業 地工砂袋出廠證明、規格說明、吊裝計算；宇中興業 濾布材料訂購合約（TPS-112-014）、台科大試驗報告 1110913-2。3D 外形為示意。</p>
+</div></main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+/* ---------- 共用 3D 工具 ---------- */
+const ok3dLib=!!window.THREE;
+const V=(x,y,z)=>ok3dLib?new THREE.Vector3(x,y,z):{x,y,z};
+const SM=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.7,metalness:0},o||{}));
+const MAT={
+ cu:()=>SM(0xc6834f,{metalness:.7,roughness:.32}),
+ cuB:()=>SM(0xd9905a,{metalness:.75,roughness:.28}),
+ galv:()=>SM(0xaab3b8,{metalness:.55,roughness:.38}),
+ conc:()=>SM(0xbab4a8,{roughness:.95}),
+ conc2:()=>SM(0x9d978c,{roughness:.95}),
+ mortar:()=>SM(0xd8d0bf,{roughness:1}),
+ grav:()=>SM(0x8c8476,{roughness:1}),
+ soil:()=>SM(0x6d5236,{roughness:1}),
+ soilT:()=>SM(0x6d5236,{roughness:1,transparent:true,opacity:.32,depthWrite:false}),
+ sand:()=>SM(0xd8c08a,{roughness:1}),
+ sandT:()=>SM(0xd8c08a,{roughness:1,transparent:true,opacity:.35,depthWrite:false}),
+ pvc:()=>SM(0x7b8790,{roughness:.6}),
+ black:()=>SM(0x202428,{roughness:.55}),
+ white:()=>SM(0xeeeeea,{roughness:.6}),
+ green:()=>SM(0x2f9a4a,{roughness:.5}),
+ semi:()=>SM(0x1a1a1a,{roughness:.4}),
+ xlpe:()=>SM(0xf1eee2,{roughness:.35,transparent:true,opacity:.96}),
+ rebar:()=>SM(0x8a4b2a,{metalness:.5,roughness:.6}),
+ water:()=>SM(0x2b6f96,{transparent:true,opacity:.18,depthWrite:false,roughness:.2}),
+ rubber:()=>SM(0x1d1f22,{roughness:.8}),
+ pe:()=>SM(0xf3f3f0,{roughness:.8}),
+};
+function mk(geo,mat,x=0,y=0,z=0){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);return m}
+const box=(w,h,d,m,x,y,z)=>mk(new THREE.BoxGeometry(w,h,d),m,x,y,z);
+const cyl=(rt,rb,h,m,x,y,z,s=24)=>mk(new THREE.CylinderGeometry(rt,rb,h,s),m,x,y,z);
+function cylX(r,L,m,x0,y,z,s=32,open){const c=mk(new THREE.CylinderGeometry(r,r,L,s,1,!!open),m,x0+L/2,y,z);c.rotation.z=Math.PI/2;return c}
+function rod(a,b,r,m,s=10){const d=b.clone().sub(a),L=d.length();const c=cyl(r,r,L,m,0,0,0,s);c.position.copy(a).add(b).multiplyScalar(.5);c.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return c}
+function rng(seed){let a=seed>>>0;return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const hn=(x,y,z,s)=>{const v=Math.sin(x*12.9898+y*78.233+z*37.719+s*11.3)*43758.5453;return v-Math.floor(v)};
+/* 石頭幾何：block=塊石（稜角）；否則卵石（圓滑） */
+function stoneGeo(seed,block){
+ const g=block?new THREE.IcosahedronGeometry(.5,1):new THREE.SphereGeometry(.5,18,12);
+ const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+  const a=block?.78+hn(Math.round(x*40),Math.round(y*40),Math.round(z*40),seed)*.42:.93+hn(Math.round(x*30),Math.round(y*30),Math.round(z*30),seed)*.12;p.setXYZ(i,x*a,y*a,z*a)}
+ g.computeVertexNormals();return g}
+function textTex(lines,w,h,bg,fg,size){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,w,h);x.fillStyle=fg;x.font=`700 ${size||h*.5}px "Noto Sans TC",sans-serif`;x.textBaseline='middle';
+ const L=[].concat(lines);L.forEach((t,i)=>x.fillText(t,10,h*(i+.5)/L.length));const tx=new THREE.CanvasTexture(c);tx.encoding=THREE.sRGBEncoding;tx.wrapS=tx.wrapT=THREE.RepeatWrapping;return tx}
+function weaveTex(c1,c2,n){const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,64,64);x.fillStyle=c2;const s=64/n;for(let i=0;i<n;i++)for(let j=0;j<n;j++)if((i+j)%2)x.fillRect(i*s,j*s,s,s*.55);const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function feltTex(c1){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,128,128);const r=rng(7);for(let i=0;i<900;i++){x.strokeStyle=`rgba(120,120,110,${.08+r()*.12})`;x.beginPath();const a=r()*128,b=r()*128;x.moveTo(a,b);x.lineTo(a+(r()-.5)*14,b+(r()-.5)*14);x.stroke()}const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+
+/* ---------- 頁面資料 ---------- */
+const SAI10='AA-10 臨時擋土設施斷面圖',SAI06='AI-06 臨時圍堵示意圖',S42='第02342章',S92='第02392章',SM5='監造計畫 5章',SA6='特別條款 附件A6';
+const TUBE_NOTE='送審（M-0012，111.10）只有石川工程向甲盟實業訂購 TenCate Geotube 的簡式訂貨契約、公司證照與產品型錄，未附 TFA 或公立機構試驗報告，也未附 AA-10 要求的「施工計畫書＋地工織物強度計算書」。請補送強度計算書（外層所需極限強度＝工作強度×1.3×2.0×1.5）並依頻率取樣送驗後才可進場。';
+const FC_NOTE='附件試驗報告（台科大 1110913-2）的委託單位是台灣中油「台中液化天然氣廠第二席卸收碼頭」案，不是本工程取樣，只能當產品能力參考。本案進場後須由工程司會同隨機抽取邊幅 1m×1m 試樣送驗，每 10,000m² 一組、超過每 5,000m² 加一組。';
+
+/* ---------- 砂腸堤 ---------- */
+function buildTube(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ const W=5.2,H=2.0,Lg=14;// 示意段長 14m（實際 30.5／40.5m）
+ const woven=SM(0xffffff,{map:(()=>{const t=weaveTex('#9aa0a3','#7d8387',10);t.repeat.set(30,8);return t})(),roughness:.85});
+ const felt=SM(0xffffff,{map:(()=>{const t=feltTex('#d9d4c8');t.repeat.set(6,2);return t})(),roughness:1});
+ const sandM=MAT.sand();
+ const tube=(x,y,z0,L,cut)=>{const G=g();
+  const o=mk(new THREE.CylinderGeometry(.5,.5,L,48,1,!!cut,cut?-Math.PI*.25:0,cut?Math.PI*1.5:Math.PI*2),woven,x,y,z0+L/2);o.rotation.x=Math.PI/2;o.scale.set(W,1,H);o.userData.layer='out';G.add(o);
+  if(cut){const i=mk(new THREE.CylinderGeometry(.48,.48,L-.02,48,1,true,-Math.PI*.25,Math.PI*1.5),felt,x,y,z0+L/2);i.rotation.x=Math.PI/2;i.scale.set(W,1,H);i.material.side=THREE.DoubleSide;i.userData.layer='in';G.add(i);
+   const s=mk(new THREE.CylinderGeometry(.47,.47,L-.04,48),sandM,x,y,z0+L/2);s.rotation.x=Math.PI/2;s.scale.set(W,1,H);s.userData.layer='sand';G.add(s)}
+  for(let k=1;k<4;k++){const p=cyl(.12,.12,.35,woven,x,y+H/2+.12,z0+k*L/4,16);G.add(p)}
+  return G};
+ // 海床
+ let sb=g();sb.add(box(26,.6,Lg+6,SM(0x6b5a40,{roughness:1}),0,-.3,Lg/2-3));
+ add({id:'bed',no:'1',obj:sb,ex:[0,0,0],name:'海床整平（EL.-2.00m）',st:'na',pinAt:[-11,0,0],
+  spec:[['第一層砂管鋪放前先粗整平海床，移除可能損壞砂管之物體',SAI10+' 3.(1)'],['現有海床較 EL.-2.00m 深者，先以地工砂袋堆疊至 EL.-2.00m，再施作砂管',SAI10+' 註1-2']],sub:[['依施工前水深測量','—']],note:''});
+ // 地工砂袋基層（示意一列）
+ let bg=g();const bm=SM(0xffffff,{map:(()=>{const t=feltTex('#c9c2b0');return t})(),roughness:1});
+ for(let i=-2;i<=2;i++)for(let k=0;k<3;k++){const b=mk(new THREE.SphereGeometry(.5,20,12),bm,i*1.7,.0,k*4.6);b.scale.set(1.6,.7,4.25);bg.add(b)}
+ bg.position.y=0;
+ add({id:'bags',no:'2',obj:bg,ex:[0,-1.2,-6],name:'地工砂袋墊層（海床深於 EL.-2m 處）',st:'ok',
+  spec:[['地工砂袋規格見 AI-06（詳「地工砂袋」頁籤）',SAI10+' 註2']],sub:[['宇中興業 地工砂袋 250 袋（周長 5m、長 4.25m）','宇中 出廠證明 112.11.16']],note:''});
+ // 砂腸三層
+ const rows=[[-5.4,-0,1],[0,0,1],[5.4,0,1],[-2.7,1,1],[2.7,1,1],[0,2,1]];
+ const T1=g(),T2=g(),T3=g();
+ rows.forEach(([x,lv],i)=>{const y=.32+H/2+lv*(H*.82);const G=lv==0?T1:lv==1?T2:T3;
+  const off=(i%2)?3.5:0;// 錯開
+  const cut=(lv==2);
+  G.add(tube(x,y,off-3,Lg-off,cut));if(off)G.add(tube(x,y,-3-off+Lg,off,false))});
+ add({id:'t1',no:'3',obj:T1,ex:[0,0,0],name:'第一層砂腸（H=2.0m、C=12.6m）',st:'chk',pinAt:[-5.4,1.3,Lg-3],
+  spec:[['同一層頭尾相接緊密；同層不同列交接處應錯開',SAI10+' 3.(5)'],['以 100m 為單元繪製疊堆圖並編號，裝船前監造簽名；施工前及充填後對編號拍照，無照片不予計價',SAI10+' 3.(6)'],['上下寬及高程誤差 -50cm；計量範圍各尺寸 +50cm，實作計價',SAI10+' 2.']],
+  sub:[['砂腸管 H=2.0m、L=40.5m、C=12.6m 183 條；L=30.5m 6 條','石川／甲盟 訂貨契約 111.09.06'],['H=1.0m、C=6.3m：L=40.5m 5 條、L=30.5m 1 條','同上']],note:TUBE_NOTE});
+ add({id:'t2',no:'4',obj:T2,ex:[0,2.2,0],name:'第二層砂腸',st:'na',pinAt:[-2.7,3.0,Lg-3],
+  spec:[['充填壓力影響形狀；須有觀測及維持穩定填充壓力之裝置，避免高度不足或壓力過大損壞',SAI10+' 3.(3)'],['填充砂來源為碼頭預定區及航道浚挖土砂',SAI10+' 3.(2)']],sub:[['充填紀錄（壓力、完成高度）','—']],note:''});
+ add({id:'t3',no:'5',obj:T3,ex:[0,4.6,0],name:'頂層砂腸（剖切：外層織布／內層不織布）',st:'chk',pinAt:[0,4.9,Lg-3],
+  spec:[['雙層製成：內層不織布、外層織布，材質 PP 或 PET',SAI10+' 1.(1)'],['外層織布極限拉力（縱橫）≧70 kN/m、伸長率 ≦30%（CNS 13300／ASTM D4595）',SAI10+'、'+SM5+' 三十五'],['內層不織布極限拉力 ≧20 kN/m、伸長率 ≧30%',SAI10+'、'+SM5],['透水率 ≧0.01 s⁻¹（CNS 13298-1）',SAI10],['織布表觀開孔徑 AOS ≦0.425mm（CNS 14262）',SAI10],['織布耐紫外線 ≧90%（200 小時，CNS 9024）',SAI10],['縫接強度（縫接面垂直向）≧60%（ASTM D4884）',SAI10],['安全係數：施工 Fid 1.3、縫接 Fss 2.0、潛變 Fc 1.5',SAI10+' 1.(3)'],['頻率：強度等每 5,000m² 1 次；AOS、耐紫外線每 30,000m² 1 次',SAI10+'、'+SM5]],
+  sub:[['雙層砂腸管：內層不織布 ≧20 kN/m、外層 PP 織布 ≧120 kN/m','石川／甲盟 訂貨契約 第6條'],['TenCate Geotube 產品型錄','甲盟 型錄']],note:TUBE_NOTE});
+ // 充填口
+ let fp=g();fp.add(cyl(.13,.13,.6,SM(0xffb020,{roughness:.6}),0,.32+H/2+2*H*.82+H/2+.3,Lg*.5,16));
+ add({id:'port',no:'6',obj:fp,ex:[0,5.6,0],name:'充填口及破損修補',st:'na',
+  spec:[['施工中破損，經工程司指示修補或替換；修補以大於破損處四邊各 1.0m 之相同材質，費用不另給價',SAI10+' 3.(4)'],['估驗範圍砂管應於估驗測量前 10 天完成；頂層高程以每 10m 取點平均',SAI10+' 3.(7)']],sub:[['依施工計畫','—']],note:''});
+ // 回填砂
+ let bf=g();const sh=new THREE.Shape();sh.moveTo(8.1,.3);sh.lineTo(13,.3);sh.lineTo(13,5.6);sh.lineTo(2,5.6);sh.lineTo(8.1,.3);
+ bf.add(mk(new THREE.ExtrudeGeometry(sh,{depth:Lg,bevelEnabled:false}),MAT.sandT(),0,0,-3));
+ add({id:'fill',no:'7',obj:bf,ex:[4,0,0],name:'C 填區回填砂（EL.+4.30m）',st:'na',pinAt:[11,3,4],spec:[['臨時擋土：填地高程約 EL.+4.30m',SAI10],['他標開挖影響時依指示打設臨時板樁（長 16m 以上）',SAI10+' 4.']],sub:[['—','—']],note:''});
+ P.labels=[{p:[0,6.0,Lg-3],t:'外層織布 ≧70 kN/m',k:'y',part:'t3'},{p:[2.2,4.9,Lg-3],t:'內層不織布 ≧20 kN/m',k:'c',part:'t3'},{p:[5.4,2.5,-3],t:'H 2.0m・C 12.6m',k:'y',part:'t1'},{p:[3.6,1.3,0],t:'接頭錯開',k:'c',part:'t1'}];
+ return P;
+}
+
+/* ---------- 地工砂袋 ---------- */
+function buildBag(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ const felt=SM(0xffffff,{map:(()=>{const t=feltTex('#cfc8b6');t.repeat.set(3,3);return t})(),roughness:1});
+ const D=5/Math.PI;// 周長 5m → 直徑 1.59m
+ const bagGeo=()=>{const m=mk(new THREE.SphereGeometry(.5,32,20),felt);m.scale.set(D*1.12,D*.78,4.25);return m};
+ // 堆疊斷面（AI-06 斷面 C）
+ let st=g();const pos=[[-2.6,0],[-.9,0],[.8,0],[2.5,0],[-1.75,1],[-.05,1],[1.65,1],[-.9,2],[.8,2]];
+ pos.forEach(([x,l])=>{const b=bagGeo();b.position.set(x,.55+l*1.0,0);st.add(b)});
+ add({id:'stack',no:'1',obj:st,ex:[0,0,0],name:'砂袋堤堆疊（末端臨時圍堵）',st:'na',pinAt:[0,1.2,2.2],
+  spec:[['由下往上依序堆疊；每層符合設計寬度，最上層確認設計高程',SAI06+' 5.(5)'],['堆疊高度約 1.8m；頂寬 1.3～2.3m、底寬 4.5～5.5m（括弧為施工範圍）',SAI06+' 斷面C'],['超出斷面不予計價；以施工前後水深測量計算體積（m³）計價',SAI06+' 說明2']],
+  sub:[['依施工計畫','—']],note:''});
+ // 吊起的砂袋
+ let hb=g();const b=bagGeo();b.position.set(0,6,0);hb.add(b);
+ add({id:'bag',no:'2',obj:hb,ex:[0,0,0],name:'地工砂袋袋體（不織布）',st:'chk',
+  spec:[['材料：不織布，材質 PP 或 PET',SAI06+' 1.'],['拉力強度 ≧2,000 N（CNS 5610 抓式，縱橫）',SAI06],['伸長率 ≧30%',SAI06],['撕裂強度 ≧1,000 N',SAI06],['透砂率 ≦3%（通過 No.200，ASTM D4751）',SAI06],['透水率 ≧0.01 cm/s（CNS 10460 靜水壓 10cm）',SAI06],['單袋體積原則上 ≦10 m³；施工前提送尺寸、吊環強度及計算書',SAI06+' 說明1'],['供應商須提送 6 個月內 TFA 或公立機構試驗合格報告；運抵工地會同抽樣送驗，每 5,000m² 至少 1 次',SAI06+' 3-4、'+SM5]],
+  sub:[['宇中興業：拉力 ≧2,000N、伸長 ≧30%、撕裂 ≧1,000N、透砂 ≦3%、透水 ≧0.01 cm/s、材質 PET','出廠證明 112.11.16'],['尺寸：長 4.25m、周長 5m，250 袋；體積 4.25×π×(5/2π)²≈8.46 m³ ≦10 m³','規格說明＋計算'],['不織布工程使用實績表','宇中 實績']],
+  note:'規格說明與出廠證明數值都照抄設計值，未附「6 個月內 TFA 或公立機構試驗報告」（AI-06 說明3 明定進場前必備）。請補送，並於進場時會同抽樣送驗。'});
+ // 縫合
+ let sw=g();const sm=SM(0xff8a3d);for(let k=-1;k<=1;k+=2){const r=mk(new THREE.TorusGeometry(D*.39,.015,6,48),sm,0,6,k*2.05);r.scale.set(1.4,1,1);sw.add(r)}
+ add({id:'seam',no:'3',obj:sw,ex:[0,0,0],name:'縫合（廠內＋現場）',st:'ok',
+  spec:[['縫合強度：原材質強度 90% 以上（CNS 13300）',SAI06+' 砂袋製造說明'],['邊框與底部縫合為廠內縫合；袋口現場以手持式縫紉機車縫',SAI06+' 示意圖、5.(2)'],['填注時盡量張開，使材料灌注均勻；注意壓力避免損害袋體',SAI06+' 5.(1)(3)']],
+  sub:[['縫合強度 原材質強度 90% 以上','宇中 出廠證明']],note:''});
+ // 吊帶
+ let sl=g();const slm=SM(0x3f6fb5,{roughness:.7});const hook=V(0,9.2,0);
+ [[-1.6],[-.55],[.55],[1.6]].forEach(([z])=>{sl.add(rod(V(-.85,6.2,z),hook,.03,slm,6),rod(V(.85,6.2,z),hook,.03,slm,6))});
+ sl.add(mk(new THREE.TorusGeometry(.18,.05,8,24),MAT.galv(),0,9.35,0));
+ add({id:'sling',no:'4',obj:sl,ex:[0,0,0],name:'起重布吊帶 4 條',st:'ok',
+  spec:[['施工前提送吊環強度及計算書供業主審核同意',SAI06+' 說明1'],['機器吊放避免機具或重放損傷袋體',SAI06+' 5.(4)']],
+  sub:[['起重布吊帶 長 10m、寬 10cm、厚 9mm，安全工作荷重 8 ton','規格說明 五'],['砂袋重 4.25×π×(5/π/2)²×1.85 = 15.73 t；吊帶 8×4 = 32 t > 15.73 t OK','規格說明 七']],
+  note:'計算以 4 條垂直受力；實際吊帶與垂直夾角 θ 時每條受力 ÷cosθ，θ≦45° 仍有約 1.4 倍餘裕。'});
+ P.labels=[{p:[0,7.0,2.3],t:'L 4.25m・周長 5m',k:'y',part:'bag'},{p:[0,9.7,0],t:'8t × 4 = 32t > 15.73t',k:'c',part:'sling'},{p:[3.6,1.9,0],t:'高 ≈1.8m',k:'y',part:'stack'}];
+ return P;
+}
+
+/* ---------- 濾布 ---------- */
+function buildCloth(){
+ const P=[],g=()=>new THREE.Group(),add=o=>P.push(o);
+ const felt=SM(0xffffff,{map:(()=>{const t=feltTex('#d6d1c4');t.repeat.set(4,4);return t})(),roughness:1,side:THREE.DoubleSide});
+ let gr=g();gr.add(box(14,.4,10,SM(0x7a6646,{roughness:1}),0,-.2,0));
+ add({id:'base',no:'1',obj:gr,ex:[0,0,0],name:'鋪設面（貼地）',st:'na',pinAt:[-6,0,4],spec:[['濾布順水流或垂直水流方向貼地鋪設',S42+' 3.2'],['濾布鋪設面積不可小於設計圖說範圍',S92+' 3.5.2'],['計量以設計圖鋪設面積（m²），已含搭接及損耗',S92+' 4.1.2']],sub:[['—','—']],note:''});
+ const Wd=4.0;// 單幅寬
+ let sh=g();
+ [-1,0,1].forEach((k,i)=>{const m=mk(new THREE.PlaneGeometry(Wd,9),felt,k*(Wd-1.0),.01+i*.012,0);m.rotation.x=-Math.PI/2;sh.add(m)});
+ add({id:'sheet',no:'2',obj:sh,ex:[0,.6,0],name:'濾布（不織布 CNS 11228 第Ⅳ類）',st:'chk',
+  spec:[['聚乙烯、聚丙烯或聚酯纖維；具防紫外線處理；噴射交互針軋法非織物',S92+' 2.1.2(1)A、'+S42+' 2.1.1'],['CNS 11228 第Ⅳ類，厚度 ≧4.2mm',S92+' 2.1.2(1)B、'+S42],['抗拉強度（抓式，縱橫）≧1,600 N（163.3 kgf）',S42+' 表一'],['伸長率 40～100%',S42+' 表一'],['撕裂強度（梯形，縱橫）≧550 N（56.1 kgf）',S42+' 表一'],['瑕疵每公尺 ≦2 點；透水率 ≧0.1 s⁻¹',S42+' 表一'],['耐紫外線 200h：外觀無變化，抗拉不低於 90%',S42+' 表一'],['每批 ≦10,000m² 取樣 1 份；超過每增 5,000m² 加 1 份',S42+' 3.3、'+SA6]],
+  sub:[['厚度 4.3mm','台科大 1110913-2'],['抗拉 縱 235.8／橫 191.5 kgf','同上'],['伸長率 縱 57.2／橫 68.1%','同上'],['撕裂 縱 78.5／橫 63.2 kgf','同上'],['瑕疵 1 點/m；透水率 0.13 s⁻¹','同上'],['照光後抗拉 218.3／179.1 kgf（保留 92.6%／93.5%）','同上'],['宇中興業 土木工程用不織布 CNS Ⅳ 型錄','宇中 型錄']],note:FC_NOTE});
+ // 搭接示意
+ let ov=g();const om=SM(0xffd27a,{transparent:true,opacity:.35,depthWrite:false});[-1,1].forEach(k=>{const z=box(1.0,.03,9,om,k*(Wd-1.0)/2,.04,0);ov.add(z)});
+ add({id:'lap',no:'3',obj:ov,ex:[0,1.0,0],name:'搭接 ≧100cm',st:'na',spec:[['搭接施工至少 100cm 以上',S42+' 3.2'],['單價已含搭接損耗',S42+' 4.2.3']],sub:[['現場量測','—']],note:''});
+ // 縫接 4 線
+ let sw=g();const swm=SM(0xff8a3d);for(let j=0;j<4;j++){const x=(Wd-1.0)/2-.08-j*.05;sw.add(box(.012,.012,8.6,swm,x+.4,.06,0))}
+ add({id:'sew',no:'4',obj:sw,ex:[0,1.4,0],name:'縫接（如採縫接）',st:'na',spec:[['手提縫紉機以同質料縫線縫接',S42+' 3.2'],['縫接至少四線以上，縫線距離至少 5cm',S42+' 3.2']],sub:[['現場查驗','—']],note:''});
+ // 布捲
+ let rl=g();const r=cyl(.35,.35,9,felt,4.8,.36,0,32);r.rotation.x=Math.PI/2;rl.add(r);
+ add({id:'roll',no:'5',obj:rl,ex:[1.5,.5,0],name:'進場與保存',st:'na',spec:[['未使用前須遮蓋，不得長期日曬、雨淋',S92+' 3.6.1'],['檢驗確認合格後准予使用',S42+' 3.3']],sub:[['宇中興業 材料訂購合約 TPS-112-014','宇中 合約']],note:''});
+ // 上覆石料
+ let cv=g();const R=rng(3),gR=[1,2,3].map(s=>stoneGeo(s,false)),ms=SM(0x5a544b,{roughness:.85});
+ for(let i=0;i<120;i++){const d=.15+R()*.25;const s=mk(gR[i%3],ms,-6.5+R()*5,d*.4+.03,-4+R()*8);s.scale.set(d*1.2,d*.8,d);s.rotation.y=R()*6;s.userData.k=.5+R();s.userData.y0=s.position.y;cv.add(s)}
+ add({id:'cover',no:'6',obj:cv,ex:[0,2.2,0],name:'上覆濾料／石料',st:'na',drop:1,spec:[['舖設後覆蓋石料時不得刺破濾布；破損處補鋪','監造查驗'],['濾布為過濾排水、防止土料流失',S42+' 1.4']],sub:[['—','—']],note:''});
+ P.labels=[{p:[-(Wd-1.0)/2,.2,4.6],t:'搭接 ≧100cm',k:'y',part:'lap'},{p:[(Wd-1.0)/2+.3,.25,-4.4],t:'縫線 ≧4 線・間距 ≧5cm',k:'c',part:'sew'},{p:[0,.2,-4.6],t:'厚 ≧4.2mm（送審 4.3mm）',k:'y',part:'sheet'}];
+ return P;
+}
+const dropTick2=(P,tm,e)=>{P.forEach(p=>{if(!p.drop)return;p.obj.position.y=0;p.obj.children.forEach(s=>{if(s.userData.k)s.position.y=s.userData.y0+e*p.ex.y*s.userData.k})})};
+const PAGE={models:[
+ {key:'tube',tab:'砂腸（砂管）堤',sm:'雙層 Geotube・疊堆',title:'S01～S03 碼頭後線臨時砂管（腸）堤',fit:{c:[0,2.4,4],r:12.5},grid:[40,40],gy:-.6,fog:[40,110],minZoom:4,dir:[.55,.35,.78],build:buildTube,slider:'疊堆',
+  tag:'<b>疊堆動畫</b>：播放時三層砂腸依序就位；頂層剖切露出外層織布、內層不織布與充填砂。段長 14m 為示意（實際 30.5／40.5m）'},
+ {key:'bag',tab:'地工砂袋',sm:'L4.25m・周長 5m・吊裝',title:'地工砂袋（永久護岸末端臨時圍堵）',fit:{c:[0,4.2,0],r:6},grid:[30,30],gy:0,fog:[30,90],minZoom:3,dir:[.75,.25,.65],build:buildBag,slider:'吊放',
+  tag:'<b>吊裝動畫</b>：單袋 4 條起重布吊帶，播放時吊放至堆疊頂層',
+  tick:(P,tm,e)=>{const y=-e*3.2;['bag','seam','sling'].forEach(id=>{const p=P.find(q=>q.id==id);if(p)p.obj.position.y=y})}},
+ {key:'cloth',tab:'濾布',sm:'CNS 11228 第Ⅳ類・搭接',title:'濾布（不織布）鋪設、搭接與縫接',fit:{c:[0,.6,0],r:6.5},grid:[30,30],gy:-.4,fog:[30,90],minZoom:2,dir:[.5,.7,.6],build:buildCloth,slider:'鋪設',
+  tag:'<b>鋪設動畫</b>：三幅濾布搭接 ≧100cm，播放時濾布抬起、石料落下，看清搭接區（黃）與縫線（橘）',tick:dropTick2}
+]};
+
+
+/* ---------- 介面 ---------- */
+const MODELS=PAGE.models,ST={ok:'符合',chk:'待確認',na:'現場查驗'};
+const $=s=>document.querySelector(s);
+const tabs=$('#tabs'),pinsEl=$('#pins'),lblsEl=$('#lbls'),panel=$('#panel');
+tabs.innerHTML=MODELS.map((m,i)=>`<button class="tab" role="tab" id="t-${m.key}" aria-selected="${i==0}">${m.tab}<small>${m.sm}</small></button>`).join('');
+let cur=null,parts=[],labels=[],sel=null,t=0,playing=false,showLbl=true,ok3d=ok3dLib;
+const li=a=>`<li>${a[0]}${a[1]&&a[1]!='—'?`<span class="src">${a[1]}</span>`:''}</li>`;
+function renderPanel(){
+ const p=sel;const list=parts.map(q=>`<button data-id="${q.id}" class="${p&&q.id==p.id?'on':''}">${q.no} ${q.name}</button>`).join('');
+ if(!p)panel.innerHTML=`<h2>${cur.title}</h2><p class="sub" style="margin-top:6px">${cur.intro||'點選 3D 視窗中的部位或下方名稱，查看契約規範要求與送審資料。黃色編號對應查核表編號。'}</p><div class="plist">${list}</div>`;
+ else panel.innerHTML=`<div class="ph"><h2><span class="no">${p.no}</span>${p.name}</h2><span class="chip ${p.st}">${ST[p.st]}</span></div>
+ <div class="sec"><h3>契約規範要求</h3><ul>${p.spec.map(li).join('')}</ul></div>
+ <div class="sec"><h3>送審資料</h3><ul>${p.sub.map(li).join('')}</ul></div>
+ ${p.note?`<div class="note">${p.note}</div>`:''}
+ <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="fc">聚焦此部位</button><button class="btn" id="clr">回到全覽</button></div>
+ <div class="plist">${list}</div>`;
+ panel.querySelectorAll('.plist button').forEach(b=>b.onclick=()=>select(b.dataset.id,true));
+ const fc=$('#fc');if(fc)fc.onclick=()=>focusPart(p);const cl=$('#clr');if(cl)cl.onclick=()=>{select(null);resetView()};
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.classList.toggle('rowsel',!!p&&r.dataset.id==p.id));
+}
+function renderTable(){
+ $('#ttl').textContent=cur.title+'：部位查核表';
+ const c={ok:0,chk:0,na:0};parts.forEach(p=>c[p.st]++);
+ $('#sum').innerHTML=`<span><b>${parts.length}</b>部位</span><span><b style="color:var(--ok)">${c.ok}</b>符合</span><span><b style="color:var(--chk)">${c.chk}</b>待確認</span><span><b style="color:var(--na)">${c.na}</b>現場查驗</span>`;
+ $('#tbl tbody').innerHTML=parts.map(p=>`<tr data-id="${p.id}"><td>${p.no}</td><td>${p.name}</td><td>${p.spec.map(s=>s[0]).join('<br>')}</td><td>${p.sub.map(s=>s[0]).join('<br>')}</td><td><span class="chip ${p.st}">${ST[p.st]}</span></td></tr>`).join('');
+ document.querySelectorAll('#tbl tbody tr').forEach(r=>r.onclick=()=>{select(r.dataset.id,true);$('#viewer').scrollIntoView({behavior:'smooth',block:'start'})});
+ const seen=new Set();
+ $('#issues').innerHTML=parts.filter(p=>p.st=='chk'&&p.note&&!seen.has(p.note)&&seen.add(p.note)).map(p=>`<div class="issue"><b>${p.no} ${p.name}</b>${p.note}</div>`).join('')||'<p class="sub">無。</p>';
+}
+/* ---------- 3D ---------- */
+let renderer,scene,camera,controls,root,clock,grid,gnd;
+const viewer=$('#viewer');
+if(ok3d){try{
+ renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+ renderer.outputEncoding=THREE.sRGBEncoding;viewer.prepend(renderer.domElement);
+ scene=new THREE.Scene();scene.fog=new THREE.Fog(0x0c1824,30,70);
+ camera=new THREE.PerspectiveCamera(38,1,.01,400);
+ controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.maxPolarAngle=Math.PI*.95;
+ scene.add(new THREE.HemisphereLight(0xcfe2ff,0x2a2218,.85));
+ const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(6,12,8);scene.add(dl);
+ const dl2=new THREE.DirectionalLight(0x88aaff,.35);dl2.position.set(-8,4,-6);scene.add(dl2);
+ clock=new THREE.Clock();
+ const ro=new ResizeObserver(()=>{const w=viewer.clientWidth,h=viewer.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()});ro.observe(viewer);
+}catch(e){ok3d=false}}
+if(!ok3d)$('#err').style.display='grid';
+let tween=null;
+const ease=x=>x<.5?2*x*x:1-(-2*x+2)**2/2;
+function flyTo(target,dist,dir){if(!ok3d)return;const d=(dir||camera.position.clone().sub(controls.target).normalize());tween={t0:performance.now(),ft:controls.target.clone(),fp:camera.position.clone(),tt:target.clone(),tp:target.clone().add(d.multiplyScalar(dist))}}
+const fit=()=>{const f=cur.fit,asp=camera.aspect||1;return{c:V(...f.c),d:f.r/Math.tan(19*Math.PI/180)/Math.min(1,Math.max(.5,asp))*.92}};
+function resetView(){const f=fit();flyTo(f.c,f.d,V(...(cur.dir||[.62,.32,.75])).normalize())}
+function partCenter(p){return p.c.clone().add(p.ex.clone().multiplyScalar(ease(t)))}
+function focusPart(p){flyTo(partCenter(p),Math.max(cur.minZoom||1.2,p.sz*1.6))}
+function load(key){
+ cur=MODELS.find(m=>m.key==key);
+ tabs.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.id=='t-'+key));
+ $('#tag').innerHTML=cur.tag;$('#exl').textContent=cur.slider||'分解';
+ const B=cur.build();parts=B.map(p=>Object.assign({},p,{ex:V(...(p.ex||[0,0,0]))}));labels=B.labels||[];sel=null;t=0;$('#ex').value=0;
+ if(ok3d){
+  if(root)scene.remove(root);root=new THREE.Group();scene.add(root);
+  if(grid)scene.remove(grid);if(gnd)scene.remove(gnd);
+  const G=cur.grid||[40,40];grid=new THREE.GridHelper(G[0],G[1],0x4d6276,0x26384a);grid.material.transparent=true;grid.material.opacity=.45;grid.position.y=cur.gy||0;scene.add(grid);
+  scene.fog.near=(cur.fog||[30,70])[0];scene.fog.far=(cur.fog||[30,70])[1];
+  parts.forEach(p=>root.add(p.obj));(B.extra||[]).forEach(o=>root.add(o));root.updateMatrixWorld(true);
+  parts.forEach(p=>{const bb=new THREE.Box3();p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){o.userData.part=p;bb.expandByObject(o)}});
+   p.c=bb.getCenter(V(0,0,0));p.sz=bb.getSize(V(0,0,0)).length();
+   p.mats=[];p.obj.traverse(o=>{if(o.isMesh&&!o.userData.nosel){const m=o.material;if(!p.mats.includes(m)){p.mats.push(m);m.userData.e0=m.emissive.clone();m.userData.ei=m.emissiveIntensity}}})});
+  pinsEl.innerHTML=parts.map(p=>`<button class="pin ${p.st=='chk'?'chk':''}" data-id="${p.id}" aria-label="${p.no} ${p.name}">${p.no}<span>${p.name}</span></button>`).join('');
+  pinsEl.querySelectorAll('.pin').forEach(b=>{const p=parts.find(q=>q.id==b.dataset.id);p.pin=b;b.onclick=()=>select(b.dataset.id,true)});
+  lblsEl.innerHTML=labels.map((l,i)=>`<div class="lb ${l.k||''}" data-i="${i}">${l.t}</div>`).join('');
+  lblsEl.querySelectorAll('.lb').forEach(d=>labels[d.dataset.i].el=d);
+  labels.forEach(l=>{l.pp=l.part?parts.find(p=>p.id==l.part):null});
+  const f=fit();controls.target.copy(f.c);camera.position.copy(V(...(cur.dir||[.62,.32,.75])).normalize().multiplyScalar(f.d).add(f.c));
+ }
+ renderTable();renderPanel();
+}
+function select(id,focus){
+ sel=id?parts.find(p=>p.id==id):null;
+ parts.forEach(p=>{const on=p==sel;p.pin&&p.pin.classList.toggle('on',on);
+  (p.mats||[]).forEach(m=>{if(on){m.emissive.setHex(0x2f6bff);m.emissiveIntensity=.55}else{m.emissive.copy(m.userData.e0);m.emissiveIntensity=m.userData.ei}})});
+ renderPanel();if(sel&&focus&&ok3d)focusPart(sel);
+}
+tabs.onclick=e=>{const b=e.target.closest('.tab');if(b)load(b.id.slice(2))};
+tabs.onkeydown=e=>{if(!/Arrow(Left|Right)/.test(e.key))return;const i=MODELS.indexOf(cur),n=(i+(e.key=='ArrowRight'?1:MODELS.length-1))%MODELS.length;load(MODELS[n].key);$('#t-'+MODELS[n].key).focus()};
+const ex=$('#ex'),play=$('#play');
+ex.oninput=()=>{t=ex.value/100;playing=false;play.setAttribute('aria-pressed','false');play.textContent='▶ 播放動畫'};
+let ph=0;play.onclick=()=>{playing=!playing;play.setAttribute('aria-pressed',playing);play.textContent=playing?'❚❚ 暫停':'▶ 播放動畫';ph=t<.5?0:2.2};
+$('#lbl').onclick=e=>{showLbl=!showLbl;e.currentTarget.setAttribute('aria-pressed',showLbl);pinsEl.style.display=lblsEl.style.display=showLbl?'':'none'};
+$('#reset').onclick=()=>{select(null);resetView()};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(ok3d){
+ const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down=null;
+ renderer.domElement.addEventListener('pointerdown',e=>down=[e.clientX,e.clientY]);
+ renderer.domElement.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down[0],e.clientY-down[1])>5)return;
+  const r=renderer.domElement.getBoundingClientRect();mv.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);rc.setFromCamera(mv,camera);
+  const hit=rc.intersectObjects(root.children,true).find(h=>h.object.userData.part&&h.object.visible);select(hit?hit.object.userData.part.id:null,false)});
+ const pv=V(0,0,0);
+ (function loop(now){requestAnimationFrame(loop);if(!cur)return;const dt=Math.min(clock.getDelta(),.05);
+  if(playing){ph=(ph+dt)%4.4;const k=ph<.4?0:ph<2?(ph-.4)/1.6:ph<2.6?1:ph<4.2?1-(ph-2.6)/1.6:0;t=reduce?(ph<2.2?1:0):k;ex.value=Math.round(t*100)}
+  const e=ease(t);parts.forEach(p=>p.obj.position.copy(p.ex).multiplyScalar(e));
+  if(cur.tick)cur.tick(parts,clock.elapsedTime,e,sel);
+  if(tween){const k=Math.min(1,(now-tween.t0)/(reduce?1:650)),s=ease(k);controls.target.lerpVectors(tween.ft,tween.tt,s);camera.position.lerpVectors(tween.fp,tween.tp,s);if(k>=1)tween=null}
+  controls.update();renderer.render(scene,camera);
+  if(showLbl){const w=viewer.clientWidth,h=viewer.clientHeight;
+   const place=(el,v)=>{v.project(camera);const vis=v.z<1&&Math.abs(v.x)<1.05&&Math.abs(v.y)<1.05;el.style.display=vis?'':'none';if(vis){el.style.left=((v.x+1)/2*w)+'px';el.style.top=((1-v.y)/2*h)+'px'}};
+   parts.forEach(p=>{if(p.pin)place(p.pin,pv.copy(p.pinAt?V(...p.pinAt):p.c).add(p.ex.clone().multiplyScalar(e)))});
+   labels.forEach(l=>{if(!l.el)return;pv.set(...l.p);if(l.pp)pv.add(l.pp.ex.clone().multiplyScalar(e));if(l.show&&!l.show(e)){l.el.style.display='none';return}place(l.el,pv)})}
+ })(performance.now());
+}
+load(MODELS[0].key);
+}
+</script>
+</body>
+</html>
