@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>永久護岸施工3D動畫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* VOICE: 工地監造簡報，精確、冷靜，像施工說明圖會動起來
+   IDEA: 港工斷面圖的剖切模型——沿法線切開一段30m護岸，逐層長出來
+   PICTURE: 剖面3D場景佔滿首屏，海、拋石、方塊、背填、冠牆依工序出現
+   COLOUR and TYPE: 海水青 #0b6e78、混凝土灰、工程機具安全黃 #f2b705；Noto Sans TC
+   LAYOUT: 標題→大型3D視窗(疊工序說明卡)→播放列→10個工序卡→依據說明 */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1415);--ink:light-dark(#14201f,#e6eeee);--mute:light-dark(#566664,#9fb1b0);--line:light-dark(#d9e2e1,#26302f);--card:light-dark(rgba(255,255,255,.92),rgba(16,24,25,.9));--sea:#0b6e78;--acc:#f2b705;--chip:light-dark(#eef4f3,#182324)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "Noto Sans TC",system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,16px)}
+.top{padding-bottom:14px}
+h1{font-size:clamp(28px,4vw,44px);line-height:1.08;margin:0 0 6px;font-weight:900;text-wrap:balance}
+.sub{margin:0;color:var(--mute)}
+.viewer{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);height:min(78vh,760px);min-height:480px;border-block:1px solid var(--line)}
+.stage{position:relative;background:#cfdfe0;overflow:hidden}
+#view{position:absolute;inset:0}#view canvas{display:block;width:100%;height:100%;outline:none}
+#labels{position:absolute;inset:0;pointer-events:none}
+.lb{position:absolute;transform:translate(-50%,-100%);font-size:13px;font-weight:500;background:rgba(20,32,31,.82);color:#fff;padding:2px 8px;border-radius:4px;white-space:nowrap;transition:opacity .3s}
+.lb::after{content:"";position:absolute;left:50%;top:100%;width:1px;height:8px;background:rgba(20,32,31,.82)}
+.side{overflow-y:auto;border-left:1px solid var(--line);background:var(--bg)}
+.cap{padding:16px 18px;border-bottom:1px solid var(--line)}
+.cap .n{font-size:13px;color:var(--sea);font-weight:700}
+:root[data-theme=dark] .cap .n{color:#5cc3cc}
+.cap h2{font-size:21px;line-height:1.25;margin:2px 0 6px}
+.cap p{margin:0 0 8px;font-size:15px}
+.cap ul{margin:0;padding-left:1.1em;font-size:14px;color:var(--mute)}
+.cap li{margin:2px 0}
+.hint{position:absolute;right:12px;bottom:10px;font-size:13px;color:#fff;background:rgba(0,0,0,.35);padding:3px 8px;border-radius:4px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:12px max(4vw,16px);border-bottom:1px solid var(--line)}
+button,select{font:inherit;font-size:15px;min-height:44px;padding:0 14px;border-radius:8px;border:1px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#play{background:var(--sea);color:#fff;border-color:var(--sea);min-width:92px;font-weight:700}
+button[aria-pressed=false]{opacity:.6}
+.track{flex:1 1 260px;display:flex;align-items:center;gap:10px}
+input[type=range]{flex:1;accent-color:var(--sea);height:44px}
+#time{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--mute);font-size:14px}
+.steps{list-style:none;margin:0;padding:16px max(4vw,16px);display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.steps button{width:100%;text-align:left;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;height:100%;background:transparent}
+.steps b{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--chip);font-size:13px}
+.steps .on{border-color:var(--sea);background:var(--chip)}
+.steps .on b{background:var(--sea);color:#fff}
+.steps .done b{background:var(--acc);color:#14201f}
+.qc{padding:14px 18px 18px}
+.qh h3{margin:0;font-size:16px}.qh p{margin:2px 0 10px;color:var(--sea);font-weight:500;font-size:14px}
+:root[data-theme=dark] .qh p{color:#5cc3cc}
+.qg{display:grid;gap:8px}
+.qg div{background:var(--chip);border-radius:8px;padding:8px 12px}
+.qg h4{margin:0 0 2px;font-size:14px}.qg ul{margin:0;padding-left:1.1em;font-size:13.5px}.qg li{margin:3px 0}
+.qhz{margin:10px 0 0;font-size:13.5px}.qn{margin:6px 0 0;font-size:13.5px;border-left:3px solid var(--acc);padding-left:10px}.qn:empty{display:none}
+.lg{margin:8px 0 0;font-size:13px;color:var(--mute)}
+.notes{border-top:1px solid var(--line);color:var(--mute);font-size:14px}
+.notes h3{color:var(--ink);font-size:17px;margin:0 0 6px}
+.notes ul{margin:0;padding-left:1.2em}
+@media(max-width:800px){.viewer{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}.stage{height:58vh;min-height:340px}.side{overflow:visible;border-left:0;border-top:1px solid var(--line)}.hint{display:none}.lb{font-size:12px}}
+</style>
+</head>
+<body>
+<header class="band top">
+<h1>永久護岸施工 3D 動畫</h1>
+<p class="sub">臺北港南碼頭C填區公共設施及永久護岸暨S04～S05碼頭工程・第一部份永久護岸・標準斷面 F0k+040m～F0k+783m（第四次變更設計圖 AE-09）</p>
+</header>
+<section class="viewer">
+<div class="stage"><div id="view" aria-label="永久護岸施工三維動畫"></div>
+<div id="labels"></div>
+<div class="hint">拖曳旋轉・滾輪縮放・右鍵平移</div></div>
+<aside class="side"><div class="cap" aria-live="polite"><div class="n" id="sn"></div><h2 id="st"></h2><p id="sd"></p><ul id="ss"></ul></div>
+<div class="qc" aria-live="polite"><div class="qh"><h3 id="qt"></h3><p id="qtb"></p></div><div class="qg" id="qg"></div><p class="qhz" id="qhz"></p><p class="qn" id="qn"></p><p class="lg">☆ 檢驗停留點　★ 安衛查驗點（監造計畫修訂七版第七章）</p></div>
+</aside>
+</section>
+<div class="bar">
+<button id="prev" aria-label="上一工序">◀ 上一步</button>
+<button id="play">暫停</button>
+<button id="next" aria-label="下一工序">下一步 ▶</button>
+<div class="track"><input id="scrub" type="range" min="0" max="1000" value="0" aria-label="動畫進度"><span id="time"></span></div>
+<select id="speed" aria-label="播放速度"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select>
+<button id="follow" aria-pressed="true">鏡頭跟隨</button>
+<button id="lab" aria-pressed="true">標註</button>
+</div>
+
+<ol class="steps" id="steps"></ol>
+<section class="band notes">
+<h3>依據與說明</h3>
+<ul>
+<li>斷面：第四次變更設計「第一部份：永久護岸」AE-08～AE-10 斷面圖、AE-06 立面圖、AI-07 地質改良擠壓砂樁平面圖。</li>
+<li>抽查重點：監造計畫修訂七版第七章，表 7-3-5、7-3-7、7-3-8、7-3-14、7-3-16、7-3-18、7-3-28、7-3-29 及各抽查作業流程圖；冠牆與舖面兩工序未對照。</li>
+<li>模型取標準斷面沿法線 30m 一段剖切展示；方塊分層高度與寬度、背填坡度、海床與硬層高程為示意，實際以設計圖及現場測量為準。箱涵段、階梯段與 F0k+000～040m 銜接段未建模。</li>
+<li>背填順序：先填卵塊石及濾料至方塊頂 → 施作冠牆 → 續填至設計高程 → 鋪濾布 → 回填砂。</li>
+</ul>
+</section>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+{
+const $=s=>document.querySelector(s);
+const cl=v=>Math.max(0,Math.min(1,v)), lerp=(a,b,t)=>a+(b-a)*t, ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2;
+const L=30;
+const ST=[
+{d:5,t:'施工前測量放樣及警示浮燈標',p:'引測控制點、放樣法線，佈設警示浮燈標，並以測量船進行浚前水深測量。',s:['現有海床 EL.−2.00～−3.00m；硬層或岩盤 EL.−4.50～−8.20m（鑽探成果，僅供參考）','浚前水深測量成果作為浚挖及計量依據'],c:[[-38,16,40],[2,-3,0]],
+q:{tb:'表 7-3-5 施工測量（紀錄表 7-5-5）；表 7-3-8 槽溝浚前測量（紀錄表 7-5-8）',pre:['儀器 1 年內經合格廠商校正','☆ 確認引測控制點無誤；平面、高程控制點不得誤認','現場測量樁、臨時水準基點未移動或毀損；導線點間通視'],mid:['☆★ 放樣：經緯儀角度誤差 ≦±10″、距離誤差 ≦±10mm；水準儀高程誤差 ≦±10mm','☆ 水準測量最長視距不超過 60m；扶尺保持垂直穩定','☆ 浚前測量成果、範圍確認（錘測）'],post:['☆ 放樣成果位置及高程依施工圖，無遺漏錯誤或超過許可差'],hz:'墜落、被撞、溺水',n:'警示浮燈標佈設在監造計畫列於表 7-3-15（沉箱基礎浚挖），拋石段表 7-3-8 未列，動畫中保留作示意。'}},
+{d:6,t:'護岸基槽（槽溝）浚挖',p:'抓斗船沿法線浚挖基槽至硬層，移除軟弱海床土。',s:['基槽開挖至硬層，基底約 EL.−7.70m（示意）'],c:[[-30,10,34],[5,-5,0]],
+q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 槽溝浚挖：浚前測量成果、範圍確認、船機進場、填區確認及迴水設施（含污染防治），錘測','☆★ 浚後水深測量（錘測或聲納）：拋石範圍及浚挖深度確認'],mid:[],post:['基槽開挖 +0cm／−30cm；不符合者不得進行拋石'],hz:'溺水；浚後測量含潛水及溺水',n:''}},
+{d:6,t:'基礎拋石及整平',p:'拋放 5～100kg 卵塊石基礎，水下整平作為方塊座面。',s:['5～100kg 卵塊石，頂面 EL.−6.50m','頂寬約 9.5m（1.0＋7.5＋1.0m）'],c:[[-15,5,31],[3,-6.5,5]],
+q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示堆置'],mid:['☆★ 石料拋放整平：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、卵石粒料符合、拋石面整平'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','不同級石料界面 ±50cm；非構造物下整坡整平 ±30cm','護基方塊底面拋石基礎面整平 ±5cm','拋石堤面寬度：+ 不規定，−10cm'],hz:'墜落、物體飛落、溺水、被撞',n:'表 7-3-8 寫護基方塊拋石整平 ±5cm，但同章拋石段抽查作業流程圖寫 ±10cm（沉箱段剛好相反），建議釐清。'}},
+{d:12,t:'預鑄方塊製作及吊放',p:'預鑄方塊由起重船依 A→B→C→D 分層由下而上吊放，上下層錯縫交叉排列（接縫錯開半塊），形成護岸直立壁體。',s:['A、B、C、D 四型預鑄方塊','上下層錯縫交叉排列'],c:[[-24,11,30],[3,-3,0]],
+q:{tb:'表 7-3-14 預鑄方塊、預鑄板製作及吊放（紀錄表 7-5-14；鋼模 7-5-2）',pre:['☆ 鋼模製作及進場預組立符合模板計算書','☆ 吊放區整平合格後始得吊放'],mid:['☆★ 鋼模組立及吊件安裝：模板面清潔、斷面尺寸垂直度及接合精度、繫結材、開口尺寸、吊筋吊件預埋（每塊）','☆ 混凝土澆置：坍度及氯離子檢驗、試體製作、完成面刮平、成品許可差 +2／−1cm','☆ 拆模養護及編號'],post:['☆★ 吊放完成面（每區攝影）：方塊間距 ≦3cm','法線方向偏差 ≦5cm；相鄰方塊高低差 ≦5cm'],hz:'製作：墜落、跌倒、物體飛落、被撞；吊放：墜落、物體飛落、被撞、潛水及溺水',n:''}},
+{d:7,t:'背填卵塊石及濾料（至方塊頂）',p:'方塊背側先拋填卵塊石、10～20cm 卵石及 2～5cm 濾料，填至方塊頂高程，作為冠牆施工面。',s:['背填 5～30kg 卵塊石、10～20cm 卵石、2～5cm 濾料','先填至方塊頂（約 EL.−0.50m，示意）','冠牆完成後再續填至設計高程'],c:[[26,12,32],[9,-3,0]],
+q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示'],mid:['☆★ 石料拋放：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、粒料符合、拋石面整平'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','不同級石料界面 ±50cm；非構造物下整坡 ±30cm'],hz:'墜落、物體飛落、溺水、被撞',n:''}},
+{d:5,t:'前趾護腳拋石',p:'於方塊前趾拋放 5～100kg 卵塊石護腳，保護基礎免受淘刷。',s:['5～100kg 卵塊石，坡度約 1:1','計畫水深 EL.−6.00m'],c:[[-17,0,26],[-2,-6,5]],
+q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示'],mid:['☆★ 石料拋放整平：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、粒料符合'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','非構造物下水下整坡整平 ±30cm；不同級界面 ±50cm','堤面寬度：+ 不規定，−10cm'],hz:'墜落、物體飛落、溺水、被撞',n:''}},
+{d:7,t:'冠牆場鑄混凝土',p:'於方塊頂組立模板、排紮鋼筋，澆置 280kgf/cm² 場鑄混凝土冠牆。',s:['冠牆頂 EL.+4.00m','冠牆伸縮縫約 21m 一處（立面圖 2100 TYP.）','澆置前查鋼筋根數間距與模板尺寸；澆置中製作試體；拆模後濕治或噴養護劑'],c:[[-13,10,23],[1.5,1.5,5]]},
+{d:8,t:'續填濾料至設計高程及鋪濾布',p:'冠牆完成後，背側續填卵塊石及濾料至設計高程，再於濾料坡面鋪設雙層濾布，防止回填砂流失。',s:['續填卵塊石、卵石、濾料至設計高程 EL.+2.10m','濾料坡度約 1:1.5','鋪設濾布（雙層）'],c:[[24,13,30],[8,0,0]],
+q:{tb:'表 7-3-8 石料拋放（紀錄表 7-5-8）；表 7-3-7 襯墊／濾布鋪設（紀錄表 7-5-7）',pre:['☆★ 濾布材料：符合 CNS 11228，第四類不織布，作濾布時厚度 ≧4.2mm','施工計畫核定','☆ 進場石料分類標示'],mid:['☆★ 續填石料：禁止板車直接傾倒、拋石面整平','☆★ 濾布鋪設前場地整理，清除會損壞濾布之外露物','☆ 搭接至少 100cm 以上（水中攝影）','☆ 縫接：同質縫線、至少四線、縫線距離 ≧10cm；出水處縫接或熱銲接重疊 ≧10cm'],post:['☆ 石料：不同級界面 ±50cm；非構造物下整坡 ±30cm','☆★ 濾布表面平整、避免皺褶；水上及水下照片紀錄'],hz:'墜落、物體飛落、潛水及溺水',n:''}},
+{d:10,t:'回填砂及擠壓砂樁地質改良',p:'護岸後線回填砂後，以擠壓砂樁進行地質改良（模型中回填砂暫時半透明以顯示砂樁）。',s:['擠壓砂樁 ∅80cm（預鑽 ∅50cm 再擠壓），@2.7m','施作範圍 EL.+3.50～−6.50m（L=10m）','改良區平均 N 值 ≧15'],c:[[30,22,36],[14,-1,0]],
+q:{tb:'表 7-3-16 浚挖及回填（紀錄表 7-5-16）；表 7-3-18 擠壓砂樁（紀錄表 7-5-18）',pre:['☆ 回填前圍堤背填側濾層須施作完成，否則不得回填','☆ 污濁防治設施及沉澱池迴水口','☆ 砂源篩分析；地下物套繪；施工計畫審查'],mid:['☆ 回填：出水面覆蓋灑水防揚塵、不可污濁水域','☆ 機具：振動式機具（套管 40cm）、電力自動記錄器（KW 計）、投入砂量紀錄計（BM 計）、管理高程紀錄器（GL 計）','☆★ 樁位放樣 @2.7m×2.7m','☆ 投入砂量及拔（壓）管深度；打樁自動記錄紙收查'],post:['☆ 回填面高程 −0.0cm／+50.0cm','☆ 標準貫入試驗：每 500 根一組，每組 2 孔，每 1.5m 一次'],hz:'監造計畫抽查作業流程未標示此項之安衛查驗內容',n:'監造計畫寫「振動式機具（套管 40cm）」及「現地砂源篩分析」；AI-07 圖說寫預鑽 ∅50cm 擠壓至 ∅80cm、砂源採新購砂，兩者描述不同，建議以核定之施工計畫確認。'}},
+{d:6,t:'舖面及排水溝',p:'後線依序舖築碎石級配底層、基層及 AC 面層，並設置 5U 型排水溝。',s:['25cm 碎石級配底層＋60cm 碎石級配基層','15cm 厚 AC 面層','5U 型排水溝（EL.+3.70m）'],c:[[-6,17,31],[12,3,0]]},
+{d:6,t:'繫船柱、防舷材安裝及完成',p:'安裝曲柱、防舷材及輪擋，永久護岸完成。',s:['35T 曲柱 @7.0m','500H×2500L 防舷材','輪擋、階梯（@42m）'],c:[[-17,12,26],[3,2,3]],
+q:{tb:'表 7-3-28 繫船柱安裝（紀錄表 7-5-28）；表 7-3-29 防舷材安裝（紀錄表 7-5-29）',pre:['繫船柱鑄鋼本體及錨定螺栓檢（審）驗合格','☆★ 繫船柱成品：鑄鋼厚度 −0～+5mm、外型 −0～+8mm；螺栓螺紋段 +8mm、直徑 ±2mm、長度 ±10mm；無砂孔裂痕；紅丹及水柏油各一度','防舷材施工計畫審查、材料規格'],mid:['☆ 繫船柱支承架位置及高程放樣','☆★ 防舷材基座清理（刮除貝殼海生物），平整度 3m 內 ±3mm、3～12m ±6mm','☆ 螺栓預埋位置及 90° 角度（冠牆澆置前）；化學錨栓查鑽孔深度、膠材滿溢、拉拔','☆ 螺帽與墊圈密合'],post:['☆★ 繫船柱：柱頂混凝土封口抹平，高度及位置 ±2cm','☆ 防舷材：法線 ±5cm、高程 ±2cm、面板前後 ±3cm'],hz:'監造計畫抽查標準表未另列此項安衛查驗內容',n:''}}];
+
+const start=[];let tot=0;for(const s of ST){start.push(tot);tot+=s.d}
+let T=0,playing=!matchMedia('(prefers-reduced-motion: reduce)').matches,speed=1,follow=true,showLab=true;
+const cur=()=>{for(let i=ST.length-1;i>=0;i--)if(T>=start[i])return i;return 0};
+const prog=(i,a=0,b=1)=>cl((cl((T-start[i])/ST[i].d)-a)/(b-a));
+
+const view=$('#view');
+const R=new THREE.WebGLRenderer({antialias:true});
+R.setPixelRatio(Math.min(2,devicePixelRatio));R.localClippingEnabled=true;R.shadowMap.enabled=true;R.outputEncoding=THREE.sRGBEncoding;
+view.appendChild(R.domElement);
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(40,1,.5,600);
+cam.position.set(...ST[0].c[0]);
+const ctl=new THREE.OrbitControls(cam,R.domElement);ctl.enableDamping=true;ctl.target.set(...ST[0].c[1]);
+ctl.addEventListener('start',()=>{follow=false;$('#follow').setAttribute('aria-pressed','false')});
+scene.add(new THREE.HemisphereLight(0xffffff,0x556066,.8));
+const sun=new THREE.DirectionalLight(0xffffff,.85);sun.position.set(-30,50,45);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-45,right:45,top:35,bottom:-35});scene.add(sun);
+const isDark=()=>{const t=document.documentElement.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches};
+const sky=()=>{const c=new THREE.Color(isDark()?0x1b2a2e:0xd3e3e4);scene.background=c;scene.fog=new THREE.Fog(c,90,220)};sky();
+new MutationObserver(sky).observe(document.documentElement,{attributes:true});matchMedia('(prefers-color-scheme: dark)').addEventListener('change',sky);
+
+function tex(bg,cols,n,r0,r1,rep,seed){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle=bg;g.fillRect(0,0,256,256);let s=seed;const rn=()=>(s=(s*16807)%2147483647)/2147483647;
+for(let i=0;i<n;i++){const x=rn()*256,y=rn()*256,r=r0+rn()*(r1-r0),e=.6+rn()*.4,a=rn()*3,col=cols[i%cols.length];for(const dx of[-256,0,256])for(const dy of[-256,0,256]){g.fillStyle=col;g.beginPath();g.ellipse(x+dx,y+dy,r,r*e,a,0,7);g.fill();g.fillStyle='rgba(255,255,255,.14)';g.beginPath();g.ellipse(x+dx-r*.25,y+dy-r*.25,r*.4,r*.28,a,0,7);g.fill()}}
+const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(rep,rep);t.encoding=THREE.sRGBEncoding;return t}
+const M=(o)=>new THREE.MeshStandardMaterial(Object.assign({roughness:.92,metalness:0},o));
+const mat={
+hard:M({map:tex('#5b5048',['#4a413a','#6a5d52'],260,3,9,.12,3)}),
+soil:M({map:tex('#8a7a5c',['#7d6e52','#97876a'],500,1,3,.15,5)}),
+dredge:M({map:tex('#7a6d55',['#6c604a','#8b7d62'],500,1,3,.15,9),transparent:true,opacity:.9}),
+rock:M({map:tex('#6f6a63',['#8d867b','#5f5a54','#a39b8e','#77706a'],170,8,20,.3,11)}),
+rock2:M({map:tex('#7b746a',['#9a9185','#665f58','#b0a797'],320,5,12,.3,13)}),
+cobble:M({map:tex('#8f8576',['#a59a89','#7a7064','#bdb2a0'],700,2,6,.3,17)}),
+filter:M({map:tex('#a39888',['#b8ad9b','#8e8475','#c9bfae'],2200,1,2.5,.3,19)}),
+fabric:M({color:0xe8e4da}),
+sand:M({map:tex('#d6c08f',['#c9b27f','#e2cf9f'],1800,.6,1.6,.25,23)}),
+fill:M({map:tex('#c9b282',['#bba476','#d6c194'],1800,.6,1.6,.25,29)}),
+tube:M({color:0x5b6d78}),
+conc:M({color:0xb9b9b3,roughness:.8}),conc2:M({color:0xa9aaa4,roughness:.8}),
+crown:M({color:0xc8c7c0,roughness:.75}),
+sub:M({map:tex('#9d958a',['#8a8278','#b0a89c'],1500,.8,2,.3,31)}),
+base:M({map:tex('#8f887e',['#7d766d','#a39b90'],1500,1,2.4,.3,37)}),
+ac:M({color:0x2f3133,roughness:.95}),
+pile:M({color:0xd9822b,roughness:.8}),
+yel:M({color:0xf2b705,roughness:.55,metalness:.1}),hull:M({color:0x7f2f1d,roughness:.7}),deck:M({color:0x5f6566}),dark:M({color:0x2b2f31}),white:M({color:0xf2f2ee}),blk:M({color:0x1b1d1e,roughness:.6})};
+
+function prism(pts,m){const sh=new THREE.Shape(pts.map(p=>new THREE.Vector2(p[0],p[1])));const me=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:L,bevelEnabled:false,curveSegments:1}),m);me.position.z=-L/2;me.castShadow=me.receiveShadow=true;scene.add(me);return me}
+const layers=[];
+function layer(pts,m0,st,a=0,b=1,o={}){const m=m0.clone(),ax=o.axis||'y',k=ax==='y'?1:0;const P=new THREE.Plane(ax==='y'?new THREE.Vector3(0,-1,0):new THREE.Vector3(-1,0,0),0);m.clippingPlanes=[P];m.clipShadows=true;const me=prism(pts,m);const v=pts.map(q=>q[k]);layers.push({me,P,v0:Math.min(...v)-.05,v1:Math.max(...v)+.05,st,a,b,rev:o.rev,sp:o.split});return me}
+// 地層與既有設施
+prism([[-80,-16],[80,-16],[80,-7.7],[-80,-7.7]],mat.hard);
+prism([[-80,-7.7],[-4.5,-7.7],[-9.7,-2.5],[-80,-2.5]],mat.soil);
+prism([[17,-7.7],[80,-7.7],[80,-2.5],[22.2,-2.5]],mat.soil);
+prism([[24,-2.5],[30,-2.5],[30,3.7],[27,3.7]],mat.tube);
+prism([[30,-2.5],[80,-2.5],[80,3.7],[30,3.7]],mat.fill);
+layer([[-9.7,-2.5],[-4.5,-7.7],[17,-7.7],[22.2,-2.5]],mat.dredge,1,0,1,{rev:1});
+// 新建構造
+layer([[-2.2,-7.7],[-1,-6.5],[8.5,-6.5],[9.7,-7.7]],mat.rock,2,.05,.95);
+const C=[['A',7,-6.5],['B',6,-5],['C',4.6,-3.5],['D',3.2,-2]],U=6,blocks=[];
+C.forEach(([n,w,y0],ci)=>{const bl=L/U,cuts=[-L/2];for(let z=-L/2+(ci%2?bl/2:bl);z<L/2-.01;z+=bl)cuts.push(z);cuts.push(L/2);
+for(let u=0;u<cuts.length-1;u++){const len=cuts[u+1]-cuts[u],m=new THREE.Mesh(new THREE.BoxGeometry(w-.03,1.45,len-.12),ci%2?mat.conc2:mat.conc);const y=y0+.75,z=(cuts[u]+cuts[u+1])/2;m.castShadow=m.receiveShadow=true;m.visible=false;scene.add(m);blocks.push({m,x:w/2,y,z})}});
+layer([[3.2,2.1],[4.7,2.1],[13.5,-7.7],[9.7,-7.7],[8.5,-6.5],[7,-6.5],[7,-5],[6,-5],[6,-3.5],[4.6,-3.5],[4.6,-2],[3.2,-2]],mat.rock2,4,0,.4,{split:{y:-.5,st:7,a:0,b:.35}});
+layer([[4.7,2.1],[6.1,2.1],[14.9,-7.7],[13.5,-7.7]],mat.cobble,4,.4,.7,{split:{y:-.5,st:7,a:.35,b:.55}});
+layer([[6.1,2.1],[7.5,2.1],[16.3,-7.7],[14.9,-7.7]],mat.filter,4,.7,1,{split:{y:-.5,st:7,a:.55,b:.75}});
+layer([[7.5,2.1],[7.65,2.1],[16.45,-7.7],[16.3,-7.7]],mat.fabric,7,.75,1);
+layer([[0,-6.5],[0,-6],[-2,-6],[-3.7,-7.7],[-2.2,-7.7],[-1,-6.5]],mat.rock,5,.05,.95);
+layer([[0,-.5],[3.2,-.5],[3.2,4],[0,4]],mat.crown,6,.2,1);
+const sandMe=layer([[3.2,2.1],[7.65,2.1],[16.45,-7.7],[17,-7.7],[22.2,-2.5],[24,-2.5],[26.66,3],[3.2,3]],mat.sand,8,0,.33);
+layer([[3.2,3],[26.6,3],[26.6,3.25],[3.2,3.25]],mat.sub,9,0,.3,{axis:'x'});
+layer([[3.2,3.25],[26.6,3.25],[26.6,3.85],[3.2,3.85]],mat.base,9,.3,.6,{axis:'x'});
+layer([[3.2,3.85],[26.6,3.85],[26.6,4],[3.2,4]],mat.ac,9,.6,.88,{axis:'x'});
+const drain=new THREE.Mesh(new THREE.BoxGeometry(.5,.08,L),mat.blk);drain.position.set(3.55,4.01,0);scene.add(drain);
+// 鋼筋籠
+const rb=[];for(let z=-L/2;z<=L/2+.01;z+=.6)for(const x of[.15,3.05])rb.push(x,-.4,z,x,3.9,z);for(let y=-.3;y<4;y+=.5)for(const x of[.15,3.05])rb.push(x,y,-L/2,x,y,L/2);for(let z=-L/2;z<=L/2+.01;z+=.6)for(const y of[-.3,3.7])rb.push(.15,y,z,3.05,y,z);
+const rgeo=new THREE.BufferGeometry();rgeo.setAttribute('position',new THREE.Float32BufferAttribute(rb,3));const rebar=new THREE.LineSegments(rgeo,new THREE.LineBasicMaterial({color:0x8a4b2a}));scene.add(rebar);
+// 砂樁
+const piles=[],pg=new THREE.CylinderGeometry(.4,.4,1,10);pg.translate(0,-.5,0);
+for(let i=0;i<6;i++)for(let j=0;j<11;j++){const x=9.3+i*2.7,z=-L/2+1.5+j*2.7,yf=2.1-(x-7.65)*9.8/8.8,bot=Math.max(-6.5,yf+.3),m=new THREE.Mesh(pg,mat.pile);m.position.set(x,3.3,z);m.visible=false;scene.add(m);piles.push({m,len:3.3-bot})}
+// 繫靠設施
+const acc=[];
+for(const z of[-10.5,-3.5,3.5,10.5]){const g=new THREE.Group();const a=new THREE.Mesh(new THREE.CylinderGeometry(.28,.34,.55,16),mat.blk),b=new THREE.Mesh(new THREE.CylinderGeometry(.45,.3,.18,16),mat.blk);a.position.y=.28;b.position.y=.62;g.add(a,b);g.position.set(.9,4,z);scene.add(g);acc.push({g,k:'b',z})}
+for(const z of[-12,-4,4,12]){const m=new THREE.Mesh(new THREE.BoxGeometry(.5,2.5,.9),mat.blk);m.position.set(-.25,2.55,z);m.castShadow=true;scene.add(m);acc.push({g:m,k:'f'})}
+for(let z=-L/2+.5;z<L/2;z+=3.2){const m=new THREE.Mesh(new THREE.BoxGeometry(.3,.25,2.6),mat.yel);m.position.set(.35,4.12,z+1.3);scene.add(m);acc.push({g:m,k:'w'})}
+// 海水
+const wm=new THREE.MeshStandardMaterial({color:0x1f7f8a,transparent:true,opacity:.3,depthWrite:false,roughness:.2}),tm=new THREE.MeshStandardMaterial({color:0x2a93a0,transparent:true,opacity:.45,depthWrite:false,roughness:.15,metalness:.1});
+const water=new THREE.Mesh(new THREE.BoxGeometry(80,9.2,L-.2),wm);water.position.set(-40,-3.1,0);scene.add(water);
+const waterB=new THREE.Mesh(new THREE.BoxGeometry(24,9.2,L-.2),wm);waterB.position.set(12,-3.1,0);scene.add(waterB);
+const wg=new THREE.PlaneGeometry(104,L-.2,52,15);wg.rotateX(-Math.PI/2);wg.translate(-28,0,0);const wtop=new THREE.Mesh(wg,tm);wtop.position.y=1.5;scene.add(wtop);const wpos=wg.attributes.position;
+const wg2=new THREE.PlaneGeometry(80,L-.2,40,15);wg2.rotateX(-Math.PI/2);wg2.translate(-40,0,0);const wtop2=new THREE.Mesh(wg2,tm);wtop2.position.y=1.5;scene.add(wtop2);
+// 機具：起重/抓斗船
+const barge=new THREE.Group();const hl=new THREE.Mesh(new THREE.BoxGeometry(9,2.4,14),mat.hull);hl.position.y=1.5;const dk=new THREE.Mesh(new THREE.BoxGeometry(9,.2,14),mat.deck);dk.position.y=2.8;const cab=new THREE.Mesh(new THREE.BoxGeometry(3.4,2.6,3.4),mat.yel);cab.position.set(2,4.2,0);barge.add(hl,dk,cab);barge.traverse(o=>o.castShadow=true);scene.add(barge);
+const boom=new THREE.Mesh(new THREE.CylinderGeometry(.22,.32,1,8),mat.yel);boom.castShadow=true;scene.add(boom);
+const cable=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineBasicMaterial({color:0x222222}));scene.add(cable);
+const grab=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.1,1.4),mat.dark);grab.castShadow=true;scene.add(grab);
+function seg(m,a,b){const d=new THREE.Vector3().subVectors(b,a);m.position.copy(a).addScaledVector(d,.5);m.scale.set(1,d.length(),1);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())}
+// 測量船、浮燈標
+const boat=new THREE.Group();const bh=new THREE.Mesh(new THREE.BoxGeometry(2,1,5),mat.white);bh.position.y=1.8;const bc=new THREE.Mesh(new THREE.BoxGeometry(1.6,1,1.8),mat.sub);bc.position.set(0,2.8,-.6);boat.add(bh,bc);scene.add(boat);
+const sonar=new THREE.Mesh(new THREE.ConeGeometry(2.6,4,24,1,true),new THREE.MeshBasicMaterial({color:0xf2b705,transparent:true,opacity:.25,side:THREE.DoubleSide,depthWrite:false}));sonar.position.y=-.8;boat.add(sonar);
+const buoys=[];for(const [x,z] of[[-14,-14],[-14,14],[-24,-6],[-24,6]]){const g=new THREE.Group();const p=new THREE.Mesh(new THREE.CylinderGeometry(.5,.6,1.6,12),mat.yel);const l=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshBasicMaterial({color:0xffe066}));l.position.y=1.1;g.add(p,l);g.position.set(x,1.6,z);scene.add(g);buoys.push({g,l})}
+// 陸上機具
+const rig=new THREE.Group();const rb1=new THREE.Mesh(new THREE.BoxGeometry(3,1.2,4),mat.yel);rb1.position.y=.6;const ms=new THREE.Mesh(new THREE.BoxGeometry(.45,14,.45),mat.yel);ms.position.set(0,7,1.4);const tr=new THREE.Mesh(new THREE.BoxGeometry(3.4,.6,4.4),mat.dark);tr.position.y=.1;rig.add(tr,rb1,ms);rig.traverse(o=>o.castShadow=true);scene.add(rig);
+const pavers=[-10,0,10].map(z=>{const g=new THREE.Group();const a=new THREE.Mesh(new THREE.BoxGeometry(2.6,1.6,5.6),mat.yel);a.position.y=.8;const b=new THREE.Mesh(new THREE.BoxGeometry(1.2,1,1.2),mat.dark);b.position.set(0,2.1,1.6);g.add(a,b);g.position.z=z;g.traverse(o=>o.castShadow=true);scene.add(g);return g});
+// 標註
+const LB=[['現有海床 約EL.−2.5m',[-30,-2.5,15.2],0],['硬層或岩盤',[-30,-9.5,15.2],0],['臨時砂腸圍堤',[27,3.7,15.2],0],['M.H.W.L.+2.48m／M.L.W.L.+0.55m',[-26,1.6,15.2],0],['基礎拋石 5～100kg',[4,-6.6,15.3],2],['預鑄方塊 A～D',[1.6,-3.2,15.3],3],['背填卵塊石・濾料',[9,-3,15.3],4],['濾布（雙層）',[11.5,0,15.3],7],['前趾護腳石',[-2,-6.2,15.3],5],['冠牆 280kgf/cm²',[1.6,3.5,15.3],6],['擠壓砂樁 ∅80cm @2.7m',[17,1,15.3],8],['AC面層＋碎石級配',[16,4,15.3],9],['35T 曲柱',[.9,4.8,10.5],10],['防舷材 500H×2500L',[-.3,3.9,12],10]].map(([t,p,s])=>{const e=document.createElement('div');e.className='lb';e.textContent=t;$('#labels').appendChild(e);return{e,v:new THREE.Vector3(...p),s}});
+
+function update(time){
+const i=cur();
+for(const l of layers){const q=prog(l.st,l.a,l.b);let c;if(l.sp){const q2=prog(l.sp.st,l.sp.a,l.sp.b);c=q2>0?lerp(l.sp.y,l.v1,q2):lerp(l.v0,l.sp.y,q)}else c=lerp(l.v0,l.v1,l.rev?1-q:q);l.me.visible=c>l.v0+.001;l.P.constant=c}
+// 方塊
+const bp=prog(3,0,.95),N=blocks.length;let hook=null;
+blocks.forEach((b,k)=>{const s=bp*N-k;b.m.visible=s>0;const drop=s<.7?1-ease(cl(s/.7)):0;b.m.position.set(b.x,b.y+drop*11,b.z);if(i===3&&s>0&&s<=1.0001)hook={x:b.x,y:b.y+.75+drop*11+(s>.7?(s-.7)/.3*5:0),z:b.z}});
+// 起重船
+barge.visible=boom.visible=cable.visible=grab.visible=i>=1&&i<=7;
+let h={x:-6,y:9,z:0},showGrab=false;
+const cyc=(l,n,x0,x1,yt,yb)=>{const c=(l*n)%1;return{x:lerp(x0,x1,.5-.5*Math.cos(l*Math.PI*3)),z:11*Math.sin(l*Math.PI*5),y:c<.5?lerp(yt,yb,ease(c*2)):lerp(yb,yt,ease((c-.5)*2))}};
+if(i===1){h=cyc(prog(1),14,-7,15,6,-6.5);showGrab=true}
+else if(i===2){h=cyc(prog(2),14,-1,8.5,6,-5);showGrab=true}
+else if(i===3&&hook)h=hook;
+else if(i===4){h=cyc(prog(4),14,4,15,6,-2.5);showGrab=true}
+else if(i===5){h=cyc(prog(5),10,-3,-1,6,-5);showGrab=true}
+else if(i===7&&prog(7)<.75){h=cyc(prog(7),12,4,10,6,0);showGrab=true}
+grab.visible=grab.visible&&showGrab;
+barge.position.set(-17,0,h.z*.6);
+const piv=new THREE.Vector3(-15,4.6,h.z*.6),tip=new THREE.Vector3(h.x,Math.max(h.y+5,12),h.z);
+seg(boom,piv,tip);grab.position.set(h.x,h.y-.55,h.z);
+cable.geometry.setFromPoints([tip,new THREE.Vector3(h.x,h.y,h.z)]);
+// 測量船、浮燈標
+boat.visible=i===0;const sl=prog(0);boat.position.set(-5+Math.sin(sl*Math.PI)*-3,0,-13+26*(.5-.5*Math.cos(sl*Math.PI*2)));
+buoys.forEach((b,k)=>{b.g.visible=i<=5;b.l.material.color.setHex(Math.sin(time*4+k)>0?0xffe066:0x6b5a1c);b.g.position.y=1.6+Math.sin(time*1.5+k)*.12});
+// 鋼筋
+rebar.visible=i===6;
+// 砂樁、回填砂透明
+const pp=prog(8,.36,.94),PN=piles.length;piles.forEach((p,k)=>{const s=cl(pp*PN-k);p.m.visible=s>0;p.m.scale.y=p.len*s});
+const l7=prog(8);let op=1;if(i===8){op=l7<.33?1:l7<.38?1-(l7-.33)/.05*.62:l7<.94?.38:.38+(l7-.94)/.06*.62}
+const sm=sandMe.material,tr2=op<.999;if(sm.transparent!==tr2){sm.transparent=tr2;sm.depthWrite=!tr2;sm.needsUpdate=true}sm.opacity=op;
+rig.visible=i===8&&l7>.34&&l7<.97;{const k=Math.min(PN-1,Math.floor(pp*PN));rig.position.set(piles[k].m.position.x+1.8,3,piles[k].m.position.z)}
+// 舖面機
+const l8=prog(9);pavers.forEach(g=>{g.visible=i===9&&l8<.9;const ll=(l8%.3)/.3;g.position.x=lerp(3.2,26.6,l8<.9?ll:1)+1.3;g.position.y=l8<.3?3.25:l8<.6?3.85:4});
+drain.visible=T>=start[9]+ST[9].d*.88;
+// 繫靠設施
+const l9=T>=tot?1:i===10?prog(10):i>10?1:0;
+acc.forEach(a=>{if(a.k==='b'){const s=cl(l9/.35);a.g.visible=s>0;a.g.position.y=4+(1-ease(s))*4}else if(a.k==='f'){const s=cl((l9-.3)/.35);a.g.visible=s>0;a.g.position.x=-.25-(1-ease(s))*4}else{a.g.visible=l9>.65}});
+// 海面
+const filled=T>=start[8]+ST[8].d*.33;waterB.visible=wtop.visible=!filled;wtop2.visible=filled;
+for(let k=0;k<wpos.count;k++){const x=wpos.getX(k),z=wpos.getZ(k);wpos.setY(k,Math.sin(x*.35+time*1.3)*.08+Math.cos(z*.4+time)*.06)}wpos.needsUpdate=true;
+}
+// UI
+const steps=$('#steps');steps.innerHTML=ST.map((s,k)=>`<li><button data-k="${k}"><b>${k+1}</b><span>${s.t}</span></button></li>`).join('');
+const sbtn=[...steps.querySelectorAll('button')];
+let shown=-1;
+function caption(i){if(i===shown)return;shown=i;const s=ST[i];$('#sn').textContent=`工序 ${i+1} / ${ST.length}`;$('#st').textContent=s.t;$('#sd').textContent=s.p;const ul=$('#ss');ul.innerHTML='';for(const t of s.s){const li=document.createElement('li');li.textContent=t;ul.appendChild(li)}const q=s.q,qg=$('#qg');$('#qt').textContent=`監造計畫抽查重點｜工序 ${i+1} ${s.t}`;qg.innerHTML='';
+if(q){$('#qtb').textContent='依據：'+q.tb;for(const [h,arr] of [['施工前',q.pre],['施工中',q.mid],['施工後',q.post]]){if(!arr.length)continue;const d=document.createElement('div'),h4=document.createElement('h4'),u=document.createElement('ul');h4.textContent=h;for(const t of arr){const li=document.createElement('li');li.textContent=t;u.appendChild(li)}d.append(h4,u);qg.appendChild(d)}$('#qhz').textContent='★ 安衛查驗：'+q.hz;$('#qn').textContent=q.n?'注意：'+q.n:''}
+else{$('#qtb').textContent='本工序依指示未對照監造計畫，內容取自設計圖說。';$('#qhz').textContent='';$('#qn').textContent=''}
+sbtn.forEach((b,k)=>{b.classList.toggle('on',k===i);b.classList.toggle('done',k<i);if(k===i)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')})}
+const fmt=s=>`${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+const setPlay=p=>{playing=p;$('#play').textContent=p?'暫停':(T>=tot?'重播':'播放')};
+const go=k=>{k=Math.max(0,Math.min(ST.length-1,k));T=start[k]+.01;follow=true;$('#follow').setAttribute('aria-pressed','true');setPlay(true)};
+$('#play').onclick=()=>{if(T>=tot)T=0;setPlay(!playing)};
+$('#prev').onclick=()=>go(cur()-(T-start[cur()]<1?1:0));
+$('#next').onclick=()=>go(cur()+1);
+$('#scrub').oninput=e=>{T=e.target.value/1000*tot};
+$('#speed').onchange=e=>{speed=+e.target.value};
+$('#follow').onclick=e=>{follow=!follow;e.currentTarget.setAttribute('aria-pressed',follow)};
+$('#lab').onclick=e=>{showLab=!showLab;e.currentTarget.setAttribute('aria-pressed',showLab)};
+sbtn.forEach(b=>b.onclick=()=>go(+b.dataset.k));
+addEventListener('keydown',e=>{if(e.target.closest('input,select'))return;if(e.code==='Space'){e.preventDefault();$('#play').click()}else if(e.key==='ArrowRight')go(cur()+1);else if(e.key==='ArrowLeft')go(cur()-1)});
+const ro=new ResizeObserver(()=>{const w=view.clientWidth,h=view.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()});ro.observe(view);
+const tv=new THREE.Vector3(),tp=new THREE.Vector3(),pv=new THREE.Vector3();
+let last=performance.now();
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+if(playing){T+=dt*speed;if(T>=tot){T=tot;setPlay(false)}}
+const i=cur();update(now/1000);caption(i);
+if(follow){const c=ST[i].c,f=1-Math.exp(-dt*1.4);cam.position.lerp(tp.set(...c[0]),f);ctl.target.lerp(tv.set(...c[1]),f)}
+ctl.update();R.render(scene,cam);
+$('#scrub').value=Math.round(T/tot*1000);$('#time').textContent=`${fmt(T)} / ${fmt(tot)}`;
+const W=view.clientWidth,H=view.clientHeight;
+for(const l of LB){const on=showLab&&T>=start[l.s]+(l.s?ST[l.s].d*.4:0);pv.copy(l.v).project(cam);const vis=on&&pv.z<1&&Math.abs(pv.x)<1&&Math.abs(pv.y)<1;l.e.style.opacity=vis?1:0;if(vis){l.e.style.left=((pv.x+1)/2*W)+'px';l.e.style.top=((1-pv.y)/2*H-6)+'px'}}
+requestAnimationFrame(frame)}
+setPlay(playing);requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
