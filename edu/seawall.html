@@ -93,6 +93,8 @@ input[type=range]{flex:1;accent-color:var(--sea);height:44px}
 <li>斷面：第四次變更設計「第一部份：永久護岸」AE-08～AE-10 斷面圖、AE-06 立面圖、AI-07 地質改良擠壓砂樁平面圖。</li>
 <li>抽查重點：監造計畫修訂七版第七章，表 7-3-5、7-3-7、7-3-8、7-3-14、7-3-16、7-3-18、7-3-28、7-3-29 及各抽查作業流程圖；冠牆與舖面兩工序未對照。</li>
 <li>模型取標準斷面沿法線 30m 一段剖切展示；方塊分層高度與寬度、背填坡度、海床與硬層高程為示意，實際以設計圖及現場測量為準。箱涵段、階梯段與 F0k+000～040m 銜接段未建模。</li>
+<li>船機依現場配置：11,000T 方塊吊排作業平台船、PC1600 油壓抓斗浚挖平台 3 艘、受泥船 6 艘、無動力受泥船 4 艘、拖船 4 艘、交通測量船 2 艘；模型中各類以一艘代表，尺寸為示意。</li>
+<li>船機僅於海側作業，不進入回填區；背填石料由海側抓斗平台跨越方塊／冠牆拋放。</li>
 <li>背填順序：先填卵塊石及濾料至方塊頂 → 施作冠牆 → 續填至設計高程 → 鋪濾布 → 回填砂。</li>
 </ul>
 </section>
@@ -104,20 +106,20 @@ const $=s=>document.querySelector(s);
 const cl=v=>Math.max(0,Math.min(1,v)), lerp=(a,b,t)=>a+(b-a)*t, ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2;
 const L=30;
 const ST=[
-{d:5,t:'施工前測量放樣及警示浮燈標',p:'引測控制點、放樣法線，佈設警示浮燈標，並以測量船進行浚前水深測量。',s:['現有海床 EL.−2.00～−3.00m；硬層或岩盤 EL.−4.50～−8.20m（鑽探成果，僅供參考）','浚前水深測量成果作為浚挖及計量依據'],c:[[-38,16,40],[2,-3,0]],
+{d:5,t:'施工前測量放樣及警示浮燈標',p:'引測控制點、放樣法線，佈設警示浮燈標，並以交通測量船進行浚前水深測量。',s:['現有海床 EL.−2.00～−3.00m；硬層或岩盤 EL.−4.50～−8.20m（鑽探成果，僅供參考）','浚前水深測量成果作為浚挖及計量依據'],c:[[-38,16,40],[2,-3,0]],
 q:{tb:'表 7-3-5 施工測量（紀錄表 7-5-5）；表 7-3-8 槽溝浚前測量（紀錄表 7-5-8）',pre:['儀器 1 年內經合格廠商校正','☆ 確認引測控制點無誤；平面、高程控制點不得誤認','現場測量樁、臨時水準基點未移動或毀損；導線點間通視'],mid:['☆★ 放樣：經緯儀角度誤差 ≦±10″、距離誤差 ≦±10mm；水準儀高程誤差 ≦±10mm','☆ 水準測量最長視距不超過 60m；扶尺保持垂直穩定','☆ 浚前測量成果、範圍確認（錘測）'],post:['☆ 放樣成果位置及高程依施工圖，無遺漏錯誤或超過許可差'],hz:'墜落、被撞、溺水',n:'警示浮燈標佈設在監造計畫列於表 7-3-15（沉箱基礎浚挖），拋石段表 7-3-8 未列，動畫中保留作示意。'}},
-{d:6,t:'護岸基槽（槽溝）浚挖',p:'抓斗船沿法線浚挖基槽至硬層，移除軟弱海床土。',s:['基槽開挖至硬層，基底約 EL.−7.70m（示意）'],c:[[-30,10,34],[5,-5,0]],
+{d:6,t:'護岸基槽（槽溝）浚挖',p:'PC1600 油壓抓斗浚挖平台沿法線浚挖基槽至硬層，浚挖土方裝入受泥船，由拖船拖離。',s:['基槽開挖至硬層，基底約 EL.−7.70m（示意）'],c:[[-30,10,34],[5,-5,0]],
 q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 槽溝浚挖：浚前測量成果、範圍確認、船機進場、填區確認及迴水設施（含污染防治），錘測','☆★ 浚後水深測量（錘測或聲納）：拋石範圍及浚挖深度確認'],mid:[],post:['基槽開挖 +0cm／−30cm；不符合者不得進行拋石'],hz:'溺水；浚後測量含潛水及溺水',n:''}},
-{d:6,t:'基礎拋石及整平',p:'拋放 5～100kg 卵塊石基礎，水下整平作為方塊座面。',s:['5～100kg 卵塊石，頂面 EL.−6.50m','頂寬約 9.5m（1.0＋7.5＋1.0m）'],c:[[-15,5,31],[3,-6.5,5]],
+{d:6,t:'基礎拋石及整平',p:'無動力受泥船載運石料，PC1600 抓斗平台拋放 5～100kg 卵塊石基礎並水下整平，作為方塊座面。',s:['5～100kg 卵塊石，頂面 EL.−6.50m','頂寬約 9.5m（1.0＋7.5＋1.0m）'],c:[[-15,5,31],[3,-6.5,5]],
 q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示堆置'],mid:['☆★ 石料拋放整平：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、卵石粒料符合、拋石面整平'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','不同級石料界面 ±50cm；非構造物下整坡整平 ±30cm','護基方塊底面拋石基礎面整平 ±5cm','拋石堤面寬度：+ 不規定，−10cm'],hz:'墜落、物體飛落、溺水、被撞',n:'表 7-3-8 寫護基方塊拋石整平 ±5cm，但同章拋石段抽查作業流程圖寫 ±10cm（沉箱段剛好相反），建議釐清。'}},
-{d:12,t:'預鑄方塊製作及吊放',p:'預鑄方塊由起重船依 A→B→C→D 分層由下而上吊放，上下層錯縫交叉排列（接縫錯開半塊），形成護岸直立壁體。',s:['A、B、C、D 四型預鑄方塊','上下層錯縫交叉排列'],c:[[-24,11,30],[3,-3,0]],
+{d:12,t:'預鑄方塊製作及吊放',p:'11,000T 方塊吊排作業平台船載運預鑄方塊，以履帶式起重機依 A→B→C→D 分層由下而上吊放，上下層錯縫交叉排列（接縫錯開半塊），形成護岸直立壁體。',s:['A、B、C、D 四型預鑄方塊','上下層錯縫交叉排列'],c:[[0,24,50],[-8,-1,0]],
 q:{tb:'表 7-3-14 預鑄方塊、預鑄板製作及吊放（紀錄表 7-5-14；鋼模 7-5-2）',pre:['☆ 鋼模製作及進場預組立符合模板計算書','☆ 吊放區整平合格後始得吊放'],mid:['☆★ 鋼模組立及吊件安裝：模板面清潔、斷面尺寸垂直度及接合精度、繫結材、開口尺寸、吊筋吊件預埋（每塊）','☆ 混凝土澆置：坍度及氯離子檢驗、試體製作、完成面刮平、成品許可差 +2／−1cm','☆ 拆模養護及編號'],post:['☆★ 吊放完成面（每區攝影）：方塊間距 ≦3cm','法線方向偏差 ≦5cm；相鄰方塊高低差 ≦5cm'],hz:'製作：墜落、跌倒、物體飛落、被撞；吊放：墜落、物體飛落、被撞、潛水及溺水',n:''}},
-{d:7,t:'背填卵塊石及濾料（至方塊頂）',p:'方塊背側先拋填卵塊石、10～20cm 卵石及 2～5cm 濾料，填至方塊頂高程，作為冠牆施工面。',s:['背填 5～30kg 卵塊石、10～20cm 卵石、2～5cm 濾料','先填至方塊頂（約 EL.−0.50m，示意）','冠牆完成後再續填至設計高程'],c:[[26,12,32],[9,-3,0]],
+{d:7,t:'背填卵塊石及濾料（至方塊頂）',p:'PC1600 抓斗平台停於海側，以抓斗跨越方塊，自無動力受泥船取料，在方塊背側先拋填卵塊石、10～20cm 卵石及 2～5cm 濾料，填至方塊頂高程，作為冠牆施工面。',s:['背填 5～30kg 卵塊石、10～20cm 卵石、2～5cm 濾料','先填至方塊頂（約 EL.−0.50m，示意）','冠牆完成後再續填至設計高程'],c:[[26,12,32],[9,-3,0]],
 q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示'],mid:['☆★ 石料拋放：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、粒料符合、拋石面整平'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','不同級石料界面 ±50cm；非構造物下整坡 ±30cm'],hz:'墜落、物體飛落、溺水、被撞',n:''}},
-{d:5,t:'前趾護腳拋石',p:'於方塊前趾拋放 5～100kg 卵塊石護腳，保護基礎免受淘刷。',s:['5～100kg 卵塊石，坡度約 1:1','計畫水深 EL.−6.00m'],c:[[-17,0,26],[-2,-6,5]],
+{d:5,t:'前趾護腳拋石',p:'PC1600 抓斗平台於方塊前趾拋放 5～100kg 卵塊石護腳，保護基礎免受淘刷。',s:['5～100kg 卵塊石，坡度約 1:1','計畫水深 EL.−6.00m'],c:[[-17,0,26],[-2,-6,5]],
 q:{tb:'表 7-3-8 卵塊石拋放及整平(坡)拋石段（紀錄表 7-5-8）',pre:['☆ 進場卵、塊石分類標示'],mid:['☆★ 石料拋放整平：船機及拋石設備、施工區域標幟、禁止板車直接傾倒、粒料符合'],post:['☆★ 拋石面檢驗（錘測或聲納＋水下照片）：厚度符合','非構造物下水下整坡整平 ±30cm；不同級界面 ±50cm','堤面寬度：+ 不規定，−10cm'],hz:'墜落、物體飛落、溺水、被撞',n:''}},
 {d:7,t:'冠牆場鑄混凝土',p:'於方塊頂組立模板、排紮鋼筋，澆置 280kgf/cm² 場鑄混凝土冠牆。',s:['冠牆頂 EL.+4.00m','冠牆伸縮縫約 21m 一處（立面圖 2100 TYP.）','澆置前查鋼筋根數間距與模板尺寸；澆置中製作試體；拆模後濕治或噴養護劑'],c:[[-13,10,23],[1.5,1.5,5]]},
-{d:8,t:'續填濾料至設計高程及鋪濾布',p:'冠牆完成後，背側續填卵塊石及濾料至設計高程，再於濾料坡面鋪設雙層濾布，防止回填砂流失。',s:['續填卵塊石、卵石、濾料至設計高程 EL.+2.10m','濾料坡度約 1:1.5','鋪設濾布（雙層）'],c:[[24,13,30],[8,0,0]],
+{d:8,t:'續填濾料至設計高程及鋪濾布',p:'冠牆完成後，PC1600 抓斗平台於海側跨越冠牆，續填背側卵塊石及濾料至設計高程，再於濾料坡面鋪設雙層濾布，防止回填砂流失。',s:['續填卵塊石、卵石、濾料至設計高程 EL.+2.10m','濾料坡度約 1:1.5','鋪設濾布（雙層）'],c:[[24,13,30],[8,0,0]],
 q:{tb:'表 7-3-8 石料拋放（紀錄表 7-5-8）；表 7-3-7 襯墊／濾布鋪設（紀錄表 7-5-7）',pre:['☆★ 濾布材料：符合 CNS 11228，第四類不織布，作濾布時厚度 ≧4.2mm','施工計畫核定','☆ 進場石料分類標示'],mid:['☆★ 續填石料：禁止板車直接傾倒、拋石面整平','☆★ 濾布鋪設前場地整理，清除會損壞濾布之外露物','☆ 搭接至少 100cm 以上（水中攝影）','☆ 縫接：同質縫線、至少四線、縫線距離 ≧10cm；出水處縫接或熱銲接重疊 ≧10cm'],post:['☆ 石料：不同級界面 ±50cm；非構造物下整坡 ±30cm','☆★ 濾布表面平整、避免皺褶；水上及水下照片紀錄'],hz:'墜落、物體飛落、潛水及溺水',n:''}},
 {d:10,t:'回填砂及擠壓砂樁地質改良',p:'護岸後線回填砂後，以擠壓砂樁進行地質改良（模型中回填砂暫時半透明以顯示砂樁）。',s:['擠壓砂樁 ∅80cm（預鑽 ∅50cm 再擠壓），@2.7m','施作範圍 EL.+3.50～−6.50m（L=10m）','改良區平均 N 值 ≧15'],c:[[30,22,36],[14,-1,0]],
 q:{tb:'表 7-3-16 浚挖及回填（紀錄表 7-5-16）；表 7-3-18 擠壓砂樁（紀錄表 7-5-18）',pre:['☆ 回填前圍堤背填側濾層須施作完成，否則不得回填','☆ 污濁防治設施及沉澱池迴水口','☆ 砂源篩分析；地下物套繪；施工計畫審查'],mid:['☆ 回填：出水面覆蓋灑水防揚塵、不可污濁水域','☆ 機具：振動式機具（套管 40cm）、電力自動記錄器（KW 計）、投入砂量紀錄計（BM 計）、管理高程紀錄器（GL 計）','☆★ 樁位放樣 @2.7m×2.7m','☆ 投入砂量及拔（壓）管深度；打樁自動記錄紙收查'],post:['☆ 回填面高程 −0.0cm／+50.0cm','☆ 標準貫入試驗：每 500 根一組，每組 2 孔，每 1.5m 一次'],hz:'監造計畫抽查作業流程未標示此項之安衛查驗內容',n:'監造計畫寫「振動式機具（套管 40cm）」及「現地砂源篩分析」；AI-07 圖說寫預鑽 ∅50cm 擠壓至 ∅80cm、砂源採新購砂，兩者描述不同，建議以核定之施工計畫確認。'}},
@@ -213,14 +215,36 @@ const water=new THREE.Mesh(new THREE.BoxGeometry(80,9.2,L-.2),wm);water.position
 const waterB=new THREE.Mesh(new THREE.BoxGeometry(24,9.2,L-.2),wm);waterB.position.set(12,-3.1,0);scene.add(waterB);
 const wg=new THREE.PlaneGeometry(104,L-.2,52,15);wg.rotateX(-Math.PI/2);wg.translate(-28,0,0);const wtop=new THREE.Mesh(wg,tm);wtop.position.y=1.5;scene.add(wtop);const wpos=wg.attributes.position;
 const wg2=new THREE.PlaneGeometry(80,L-.2,40,15);wg2.rotateX(-Math.PI/2);wg2.translate(-40,0,0);const wtop2=new THREE.Mesh(wg2,tm);wtop2.position.y=1.5;scene.add(wtop2);
-// 機具：起重/抓斗船
-const barge=new THREE.Group();const hl=new THREE.Mesh(new THREE.BoxGeometry(9,2.4,14),mat.hull);hl.position.y=1.5;const dk=new THREE.Mesh(new THREE.BoxGeometry(9,.2,14),mat.deck);dk.position.y=2.8;const cab=new THREE.Mesh(new THREE.BoxGeometry(3.4,2.6,3.4),mat.yel);cab.position.set(2,4.2,0);barge.add(hl,dk,cab);barge.traverse(o=>o.castShadow=true);scene.add(barge);
-const boom=new THREE.Mesh(new THREE.CylinderGeometry(.22,.32,1,8),mat.yel);boom.castShadow=true;scene.add(boom);
-const cable=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineBasicMaterial({color:0x222222}));scene.add(cable);
-const grab=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.1,1.4),mat.dark);grab.castShadow=true;scene.add(grab);
+// 船機（依現場配置，各以一艘代表）
+Object.assign(mat,{rust:M({color:0x6b3a26}),teal:M({color:0x1f9e93,roughness:.5}),green:M({color:0x2e4a3c}),blue:M({color:0x1f4fa0,roughness:.6}),mud:M({color:0x4a4237})});
+const box=(w,h,d,m,x,y,z,g)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;g.add(o);return o};
+const tire=(g,x,y,z)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(.42,.18,6,12),mat.blk);t.position.set(x,y,z);t.rotation.y=Math.PI/2;g.add(t)};
 function seg(m,a,b){const d=new THREE.Vector3().subVectors(b,a);m.position.copy(a).addScaledVector(d,.5);m.scale.set(1,d.length(),1);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize())}
-// 測量船、浮燈標
-const boat=new THREE.Group();const bh=new THREE.Mesh(new THREE.BoxGeometry(2,1,5),mat.white);bh.position.y=1.8;const bc=new THREE.Mesh(new THREE.BoxGeometry(1.6,1,1.8),mat.sub);bc.position.set(0,2.8,-.6);boat.add(bh,bc);scene.add(boat);
+const line=c=>{const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]),new THREE.LineBasicMaterial({color:c}));scene.add(l);return l};
+// 11,000T 方塊吊排作業平台船＋履帶式起重機
+const crB=new THREE.Group();crB.position.set(-21,0,0);scene.add(crB);
+box(16,3,50,mat.rust,0,1.6,0,crB);box(16,.15,50,mat.deck,0,3.15,0,crB);
+const crT=box(5,1.2,6,mat.dark,5.5,3.8,0,crB);
+const crH=new THREE.Group();crH.position.set(5.5,4.4,0);crB.add(crH);box(5.6,2.6,4,mat.teal,-1,1.3,0,crH);box(1.8,2,1.8,mat.white,1.6,1.6,1.3,crH);box(1.6,3.2,3,mat.dark,-3.4,1.6,0,crH);
+const lboom=new THREE.Mesh(new THREE.CylinderGeometry(.55,.75,1,4,24,true),new THREE.MeshBasicMaterial({color:0x1f9e93,wireframe:true}));scene.add(lboom);
+const lcore=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,1,6),mat.teal);scene.add(lcore);
+const cable=line(0x222222),pend=line(0x335555);
+const hookM=box(.6,.8,.6,mat.dark,0,0,0,scene);
+// PC1600 油壓抓斗浚挖平台
+const exP=new THREE.Group();scene.add(exP);box(10,2,24,mat.green,0,1.5,0,exP);box(10,.12,24,mat.deck,0,2.56,0,exP);
+for(let z=-10;z<=10;z+=4){tire(exP,-5.15,1.7,z);tire(exP,5.15,1.7,z)}
+box(4.5,1.2,5.4,mat.dark,0,3.2,0,exP);
+const exH=new THREE.Group();exH.position.y=3.8;exP.add(exH);box(4.6,2.2,3.6,mat.yel,-.7,1.1,0,exH);box(1.6,1.9,1.6,mat.yel,1.3,1.1,1.2,exH);box(1.5,.8,1.62,mat.dark,1.35,1.5,1.2,exH);
+const exB1=new THREE.Mesh(new THREE.CylinderGeometry(.3,.42,1,8),mat.yel),exB2=new THREE.Mesh(new THREE.CylinderGeometry(.22,.3,1,8),mat.yel);[exB1,exB2].forEach(o=>{o.castShadow=true;scene.add(o)});
+const bucket=box(1.6,1.3,1.6,mat.dark,0,0,0,scene);
+// 受泥船／無動力受泥船
+const hb=new THREE.Group();scene.add(hb);box(7,2.2,18,mat.blk,0,1.5,0,hb);box(7.2,.35,.4,mat.hull,0,2.75,9,hb);box(7.2,.35,.4,mat.hull,0,2.75,-9,hb);
+const cargo=box(6.2,1,16.4,mat.mud,0,2.6,0,hb);
+// 拖船
+const tug=new THREE.Group();scene.add(tug);box(4,1.8,9,mat.blue,0,1.4,0,tug);box(3.2,1.8,3.6,mat.white,0,3.2,-.8,tug);box(2.6,1.1,2.4,mat.white,0,4.6,-.4,tug);box(2.62,.4,2.42,mat.dark,0,4.7,-.4,tug);box(.15,2.4,.15,mat.dark,0,6.3,-.4,tug);
+for(let z=-3;z<=3;z+=2){tire(tug,-2.05,1.4,z);tire(tug,2.05,1.4,z)}
+// 交通測量船
+const boat=new THREE.Group();box(2.4,1.1,6.4,mat.blue,0,1.7,0,boat);box(2,1.3,3,mat.white,0,2.9,-.4,boat);box(2.02,.45,3.02,mat.dark,0,3.1,-.4,boat);scene.add(boat);
 const sonar=new THREE.Mesh(new THREE.ConeGeometry(2.6,4,24,1,true),new THREE.MeshBasicMaterial({color:0xf2b705,transparent:true,opacity:.25,side:THREE.DoubleSide,depthWrite:false}));sonar.position.y=-.8;boat.add(sonar);
 const buoys=[];for(const [x,z] of[[-14,-14],[-14,14],[-24,-6],[-24,6]]){const g=new THREE.Group();const p=new THREE.Mesh(new THREE.CylinderGeometry(.5,.6,1.6,12),mat.yel);const l=new THREE.Mesh(new THREE.SphereGeometry(.28,10,8),new THREE.MeshBasicMaterial({color:0xffe066}));l.position.y=1.1;g.add(p,l);g.position.set(x,1.6,z);scene.add(g);buoys.push({g,l})}
 // 陸上機具
@@ -232,24 +256,31 @@ const LB=[['現有海床 約EL.−2.5m',[-30,-2.5,15.2],0],['硬層或岩盤',[-
 function update(time){
 const i=cur();
 for(const l of layers){const q=prog(l.st,l.a,l.b);let c;if(l.sp){const q2=prog(l.sp.st,l.sp.a,l.sp.b);c=q2>0?lerp(l.sp.y,l.v1,q2):lerp(l.v0,l.sp.y,q)}else c=lerp(l.v0,l.v1,l.rev?1-q:q);l.me.visible=c>l.v0+.001;l.P.constant=c}
-// 方塊
+// 方塊：由吊排平台船甲板吊起、迴轉、沉放
 const bp=prog(3,0,.95),N=blocks.length;let hook=null;
-blocks.forEach((b,k)=>{const s=bp*N-k;b.m.visible=s>0;const drop=s<.7?1-ease(cl(s/.7)):0;b.m.position.set(b.x,b.y+drop*11,b.z);if(i===3&&s>0&&s<=1.0001)hook={x:b.x,y:b.y+.75+drop*11+(s>.7?(s-.7)/.3*5:0),z:b.z}});
-// 起重船
-barge.visible=boom.visible=cable.visible=grab.visible=i>=1&&i<=7;
-let h={x:-6,y:9,z:0},showGrab=false;
-const cyc=(l,n,x0,x1,yt,yb)=>{const c=(l*n)%1;return{x:lerp(x0,x1,.5-.5*Math.cos(l*Math.PI*3)),z:11*Math.sin(l*Math.PI*5),y:c<.5?lerp(yt,yb,ease(c*2)):lerp(yb,yt,ease((c-.5)*2))}};
-if(i===1){h=cyc(prog(1),14,-7,15,6,-6.5);showGrab=true}
-else if(i===2){h=cyc(prog(2),14,-1,8.5,6,-5);showGrab=true}
-else if(i===3&&hook)h=hook;
-else if(i===4){h=cyc(prog(4),14,4,15,6,-2.5);showGrab=true}
-else if(i===5){h=cyc(prog(5),10,-3,-1,6,-5);showGrab=true}
-else if(i===7&&prog(7)<.75){h=cyc(prog(7),12,4,10,6,0);showGrab=true}
-grab.visible=grab.visible&&showGrab;
-barge.position.set(-17,0,h.z*.6);
-const piv=new THREE.Vector3(-15,4.6,h.z*.6),tip=new THREE.Vector3(h.x,Math.max(h.y+5,12),h.z);
-seg(boom,piv,tip);grab.position.set(h.x,h.y-.55,h.z);
-cable.geometry.setFromPoints([tip,new THREE.Vector3(h.x,h.y,h.z)]);
+crB.visible=lboom.visible=lcore.visible=cable.visible=pend.visible=hookM.visible=i===3;
+blocks.forEach((b,k)=>{const s=bp*N-k,idx=Math.floor(k/2),sg=k%2?1:-1,Dx=-24,Dy=4.05+(3-Math.floor(idx/4))*1.5,Dz=sg*(7+(idx%4)*5),Y=11;let x=b.x,y=b.y,z=b.z;
+if(s<=0){b.m.visible=i===3;x=Dx;y=Dy;z=Dz}else{b.m.visible=true;if(s<.2){x=Dx;z=Dz;y=lerp(Dy,Y,ease(s/.2))}else if(s<.55){const e=ease((s-.2)/.35);x=lerp(Dx,b.x,e);z=lerp(Dz,b.z,e);y=Y}else if(s<.85)y=lerp(Y,b.y,ease((s-.55)/.3))}
+b.m.position.set(x,y,z);if(i===3&&s>0&&s<=1.0001)hook={x,y:y+.75+(s>.85?(s-.85)/.15*4:0),z}});
+if(i===3&&hook){const P=new THREE.Vector3(-15.5,7.2,0),tip=new THREE.Vector3(hook.x,Math.max(hook.y+7,17),hook.z);crH.rotation.y=Math.atan2(-(tip.z-P.z),tip.x-P.x);
+const yw=crH.rotation.y,Pb=new THREE.Vector3(-15.5+Math.cos(yw)*1.6,7.2,-Math.sin(yw)*1.6);seg(lboom,Pb,tip);seg(lcore,Pb,tip);
+cable.geometry.setFromPoints([tip,new THREE.Vector3(hook.x,hook.y+.4,hook.z)]);pend.geometry.setFromPoints([new THREE.Vector3(-15.5-Math.cos(yw)*3,9.5,Math.sin(yw)*3),tip]);hookM.position.set(hook.x,hook.y+.4,hook.z)}
+// PC1600 抓斗平台：浚挖／拋石
+let ex=null;
+if(i===1)ex={l:prog(1),n:12,x0:-8,x1:9,yb:-6.8,sea:1,load:1};
+else if(i===2)ex={l:prog(2),n:12,x0:-1,x1:8,yb:-5.2,sea:1};
+else if(i===4)ex={l:prog(4),n:12,x0:3.5,x1:10,yb:-3,sea:1,px:-10};
+else if(i===5)ex={l:prog(5),n:8,x0:-3.5,x1:-1,yb:-5.5,sea:1};
+else if(i===7&&prog(7)<.75)ex={l:prog(7)/.75,n:10,x0:4,x1:9,yb:.5,sea:1,px:-10,th:8};
+exP.visible=exB1.visible=exB2.visible=bucket.visible=!!ex;hb.visible=tug.visible=!!(ex&&ex.sea);
+if(ex){const l=ex.l,Wx=lerp(ex.x0,ex.x1,.5-.5*Math.cos(l*Math.PI*3)),Wz=11*Math.sin(l*Math.PI*4),pz=Wz*.5,px=ex.px||-15;exP.position.set(px,0,pz);
+const B=ex.sea?new THREE.Vector3(px-10,5.5,pz):new THREE.Vector3(26.5,6,pz);if(ex.sea){hb.position.set(px-10,0,pz);tug.position.set(px-17.5,0,pz+5);cargo.material=ex.load?mat.mud:mat.rock2;const f=ex.load?.2+l*1.3:1.5-l*1.3;cargo.scale.y=f;cargo.position.y=2.1+f/2}
+const th=ex.th||5,c=(l*ex.n)%1,W5=new THREE.Vector3(Wx,th,Wz);let Q;if(ex.th)B.y=th;
+if(c<.4)Q=new THREE.Vector3(Wx,lerp(th,ex.yb,Math.sin(c/.4*Math.PI)),Wz);else if(c<.7)Q=W5.clone().lerp(B,ease((c-.4)/.3));else Q=B.clone().lerp(W5,ease((c-.7)/.3));
+const yw=Math.atan2(-(Q.z-pz),Q.x-px);exH.rotation.y=yw;const P=new THREE.Vector3(px+Math.cos(yw)*1.6,6.4,pz-Math.sin(yw)*1.6);
+const l1=14,l2=11,v=new THREE.Vector3().subVectors(Q,P);let D=v.length();D=Math.min(l1+l2-.05,Math.max(Math.abs(l1-l2)+.05,D));const u=v.normalize();Q=P.clone().addScaledVector(u,D);
+const ca=(l1*l1+D*D-l2*l2)/(2*l1*D),sa=Math.sqrt(Math.max(0,1-ca*ca)),w=new THREE.Vector3(0,1,0).addScaledVector(u,-u.y).normalize(),E=P.clone().addScaledVector(u,l1*ca).addScaledVector(w,l1*sa);
+seg(exB1,P,E);seg(exB2,E,Q);bucket.position.copy(Q).add(new THREE.Vector3(0,-.6,0));bucket.rotation.y=yw}
 // 測量船、浮燈標
 boat.visible=i===0;const sl=prog(0);boat.position.set(-5+Math.sin(sl*Math.PI)*-3,0,-13+26*(.5-.5*Math.cos(sl*Math.PI*2)));
 buoys.forEach((b,k)=>{b.g.visible=i<=5;b.l.material.color.setHex(Math.sin(time*4+k)>0?0xffe066:0x6b5a1c);b.g.position.y=1.6+Math.sin(time*1.5+k)*.12});
